@@ -16,15 +16,45 @@ function decadeColor(startYear){
   return WIDGET_PALETTE[((idx % WIDGET_PALETTE.length) + WIDGET_PALETTE.length) % WIDGET_PALETTE.length];
 }
 
+// Volume-knob dial: numbered 1 (bottom-left) through 11 (bottom-right), a
+// Spinal Tap reference. Reading the dial art, 0% points at "1" (-150° from
+// 12 o'clock), 50% points straight up at "6" (0°), 100% points at "11"
+// (+150°) — a 300° sweep leaving a 60° dead zone at the bottom, matching the
+// small dot marker printed on the knob face between "1" and "11".
+function progressAngle(pct){
+  return -150 + (pct / 100) * 300;
+}
+
+// The knob turn (CSS transition on .knob-line) and the "%" count-up share
+// one duration/easing so they finish together — duration lives in the
+// --progress-duration CSS custom property (single source of truth) and the
+// easing here is a JS approximation of the CSS transition's `ease-out`.
+let lastAnimatedPct = null;
+function animatePercent(el, to){
+  if(lastAnimatedPct === to) return; // value hasn't changed — a re-render
+                                      // from an unrelated filter click
+                                      // shouldn't replay the count-up.
+  const from = lastAnimatedPct == null ? 0 : lastAnimatedPct;
+  lastAnimatedPct = to;
+  const durationMs = parseFloat(getComputedStyle(document.querySelector(".knob")).getPropertyValue("--progress-duration")) || 1800;
+  const start = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now - start) / durationMs);
+    const eased = 1 - Math.pow(1 - t, 3); // cubic ease-out, matches the CSS
+    el.textContent = Math.round(from + (to - from) * eased) + "%";
+    if(t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
 // `onChange` is called after any chart-driven filter mutation so the caller
 // (app.js) can re-render the list/chips without this module importing app.js.
 export function renderDashboard(onChange){
   const total = state.albums.length;
   const pct = Math.min(100, Math.round((total / 1001) * 100));
-  const circumference = 238.76;
-  const offset = circumference - (circumference * pct / 100);
-  document.getElementById("progressRing").setAttribute("stroke-dashoffset", offset);
-  document.getElementById("progressLabel").textContent = pct + "%";
+  document.getElementById("progressLine").style.transform =
+    `translateX(-50%) rotate(${progressAngle(pct)}deg)`;
+  animatePercent(document.getElementById("progressLabel"), pct);
   document.getElementById("doneCount").textContent = total;
 
   renderDecadeChart(onChange);

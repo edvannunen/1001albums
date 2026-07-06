@@ -26,16 +26,14 @@
 <div class="dashboard">
   <div class="dash-panel">
     <div class="dash-label"><span class="disc"></span>Voortgang</div>
-    <div class="ring-wrap">
-      <div class="ring">
-        <svg width="88" height="88" viewBox="0 0 88 88">
-          <circle class="ring-track" cx="44" cy="44" r="38"></circle>
-          <circle class="ring-fill" id="progressRing" cx="44" cy="44" r="38"
-            stroke-dasharray="238.76" stroke-dashoffset="238.76"></circle>
-        </svg>
-        <div class="ring-center mono" id="progressLabel">0%</div>
+    <div class="knob-wrap">
+      <div class="knob">
+        <img class="knob-face" src="img/volumeknob.png" alt="">
+        <img class="knob-line" id="progressLine" src="img/volumeknob_line.png" alt="">
       </div>
-      <div class="ring-caption"><b id="doneCount">0</b> van 1001<br>gehoord &amp; besproken</div>
+      <div class="knob-caption">
+        <b class="mono" id="progressLabel">0%</b> — <b id="doneCount">0</b> van 1001 albums beluisterd en besproken
+      </div>
     </div>
   </div>
   <div class="dash-panel">

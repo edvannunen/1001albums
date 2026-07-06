@@ -121,21 +121,53 @@ header .sub{
 .dash-panel .dash-label .disc{box-shadow:0 0 0 2px rgba(0,0,0,0.08);}
 .dash-panel .dash-back{color:#a8631f;}
 
-/* vinyl progress ring — the signature element */
-.ring-wrap{display:flex;align-items:center;gap:14px;}
-.ring{position:relative;width:88px;height:88px;flex-shrink:0;}
-.ring svg{transform:rotate(-90deg);}
-.ring-track{fill:none;stroke:#e3d5bd;stroke-width:6;}
-.ring-fill{fill:none;stroke:#6e4c7b;stroke-width:6;stroke-linecap:round;
-  transition:stroke-dashoffset 0.6s ease;}
-.ring-center{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;font-size:0.78rem;font-weight:700;
-  color:#2a2620;
+/* volume-knob progress dial — Spinal Tap reference (dial runs 1-11, not
+   0-10; the pointer's position IS the readout, no needle-vs-number math
+   needed by the viewer). Static knob-face photo + a separately rotated
+   pointer line, since the face art has no built-in indicator. */
+.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.knob{
+  --progress-duration:1800ms;
+  position:relative;width:180px;height:180px;flex-shrink:0;
+  border-radius:50%;overflow:hidden;
 }
-.ring-caption{font-size:0.78rem;color:#7a6f5c;line-height:1.5;}
-.ring-caption b{color:#2a2620;font-weight:600;}
+/* volumeknob.png is the full mood-board mockup (knob + number ring on its
+   own gray studio background) — cropped live via oversized image + negative
+   offset, rather than shipping a pre-cropped derived PNG. The source knob's
+   visual center sits at (769,444)px; the knob+numbers content reaches out
+   to ~355px radius at its farthest (the "10"/"11" labels stick out further
+   than the rest — an earlier, tighter mask radius faded them). Scaling
+   355px to this button's 90px radius (scale 0.2535) gives the image's
+   displayed size and offset. A radial-gradient mask (not just the
+   container's round overflow:hidden, which would still show the source
+   image's gray background *inside* the circle) fades the gray studio
+   background to transparent so the knob floats on the cream card. */
+.knob-face{
+  position:absolute;
+  width:389px;
+  height:260px;
+  left:-105px;
+  top:-23px;
+  max-width:none;
+  -webkit-mask-image:radial-gradient(circle at 195px 113px, #000 82px, transparent 90px);
+  mask-image:radial-gradient(circle at 195px 113px, #000 82px, transparent 90px);
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+}
+.knob-line{
+  position:absolute;
+  left:50%;
+  bottom:50%;
+  width:8px;
+  height:47px;
+  transform-origin:50% 100%;
+  transform:translateX(-50%) rotate(-150deg);
+  transition:transform var(--progress-duration) ease-out;
+  pointer-events:none;
+}
+.knob-caption{font-size:0.78rem;color:#7a6f5c;line-height:1.5;text-align:center;}
+.knob-caption b{color:#2a2620;font-weight:600;}
+.knob-caption b#progressLabel{color:#6e4c7b;}
 
 canvas{max-height:140px;}
 .chart-wrap{position:relative;height:140px;}
