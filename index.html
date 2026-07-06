@@ -6,234 +6,26 @@
 <title>1001 Albums</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<style>
-  :root{
-    --bg:#1a1815;
-    --sleeve:#242019;
-    --sleeve-hover:#2c2720;
-    --ink:#ece5d6;
-    --ink-dim:#948b79;
-    --mustard:#d1a02c;
-    --teal:#3b7a70;
-    --rule:#3a352c;
-    --radius:2px;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Work Sans',sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,.display{
-    font-family:'Instrument Serif',serif;
-    font-weight:400;
-  }
-  .mono{font-family:'Space Mono',monospace;}
-
-  header{
-    padding:28px 32px 20px;
-    border-bottom:1px solid var(--rule);
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:16px;
-  }
-  header h1{
-    font-size:2.4rem;
-    margin:0;
-    letter-spacing:0.5px;
-  }
-  header h1 em{
-    color:var(--mustard);
-    font-style:italic;
-  }
-  header .sub{
-    color:var(--ink-dim);
-    font-size:0.85rem;
-    margin-top:4px;
-    letter-spacing:0.04em;
-  }
-  .search{
-    background:var(--sleeve);
-    border:1px solid var(--rule);
-    color:var(--ink);
-    padding:10px 14px;
-    font-family:'Space Mono',monospace;
-    font-size:0.85rem;
-    width:260px;
-    border-radius:var(--radius);
-  }
-  .search:focus{outline:1px solid var(--mustard);}
-
-  /* --- Dashboard strip --- */
-  .dashboard{
-    display:grid;
-    grid-template-columns: 220px 1fr 1fr;
-    gap:0;
-    border-bottom:1px solid var(--rule);
-  }
-  .dash-panel{
-    padding:20px 24px;
-    border-right:1px solid var(--rule);
-  }
-  .dash-panel:last-child{border-right:none;}
-  .dash-label{
-    font-family:'Space Mono',monospace;
-    font-size:0.7rem;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:var(--ink-dim);
-    margin-bottom:10px;
-  }
-  /* vinyl progress ring — the signature element */
-  .ring-wrap{display:flex;align-items:center;gap:14px;}
-  .ring{position:relative;width:88px;height:88px;flex-shrink:0;}
-  .ring svg{transform:rotate(-90deg);}
-  .ring-track{fill:none;stroke:var(--rule);stroke-width:6;}
-  .ring-fill{fill:none;stroke:var(--mustard);stroke-width:6;stroke-linecap:round;
-    transition:stroke-dashoffset 0.6s ease;}
-  .ring-center{
-    position:absolute;top:0;left:0;width:100%;height:100%;
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Space Mono',monospace;font-size:0.78rem;font-weight:700;
-  }
-  .ring-caption{font-size:0.78rem;color:var(--ink-dim);line-height:1.5;}
-  .ring-caption b{color:var(--ink);font-weight:600;}
-
-  canvas{max-height:120px;}
-
-  /* --- Controls row --- */
-  .controls{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:16px 32px;
-    flex-wrap:wrap;
-    gap:12px;
-  }
-  .toggle-group{display:flex;gap:6px;}
-  .toggle-group button{
-    background:transparent;
-    border:1px solid var(--rule);
-    color:var(--ink-dim);
-    padding:6px 14px;
-    font-family:'Space Mono',monospace;
-    font-size:0.72rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    cursor:pointer;
-    border-radius:var(--radius);
-  }
-  .toggle-group button.active{
-    color:var(--bg);
-    background:var(--mustard);
-    border-color:var(--mustard);
-  }
-  select{
-    background:var(--sleeve);
-    border:1px solid var(--rule);
-    color:var(--ink);
-    padding:6px 10px;
-    font-family:'Space Mono',monospace;
-    font-size:0.75rem;
-    border-radius:var(--radius);
-  }
-
-  /* --- Grid view --- */
-  #grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-    gap:18px;
-    padding:8px 32px 40px;
-  }
-  .card{
-    background:var(--sleeve);
-    border:1px solid var(--rule);
-    border-radius:var(--radius);
-    overflow:hidden;
-    cursor:pointer;
-    transition:background 0.15s;
-    position:relative;
-  }
-  .card:hover{background:var(--sleeve-hover);}
-  .card .cover{
-    width:100%;aspect-ratio:1/1;
-    background:#111 center/cover no-repeat;
-    display:flex;align-items:flex-end;
-  }
-  .card .catalog{
-    font-family:'Space Mono',monospace;
-    font-size:0.65rem;
-    color:var(--mustard);
-    background:rgba(0,0,0,0.55);
-    padding:2px 6px;
-    margin:6px;
-    border-radius:var(--radius);
-  }
-  .card .meta{padding:10px 12px 14px;}
-  .card .artist{font-weight:600;font-size:0.82rem;}
-  .card .album{color:var(--ink-dim);font-size:0.78rem;font-style:italic;}
-  .card .year{
-    font-family:'Space Mono',monospace;
-    font-size:0.68rem;color:var(--ink-dim);margin-top:4px;
-  }
-
-  /* --- Table view --- */
-  table{
-    width:100%;
-    border-collapse:collapse;
-    margin:8px 32px 40px;
-    width:calc(100% - 64px);
-    font-size:0.85rem;
-  }
-  th{
-    text-align:left;
-    font-family:'Space Mono',monospace;
-    font-size:0.7rem;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:var(--ink-dim);
-    padding:8px 10px;
-    border-bottom:1px solid var(--rule);
-    cursor:pointer;
-    user-select:none;
-  }
-  th:hover{color:var(--mustard);}
-  td{padding:8px 10px;border-bottom:1px solid var(--rule);}
-  tr:hover td{background:var(--sleeve);}
-  .hidden{display:none !important;}
-
-  .empty-state{
-    padding:60px 32px;
-    text-align:center;
-    color:var(--ink-dim);
-    font-family:'Space Mono',monospace;
-    font-size:0.85rem;
-  }
-
-  @media (max-width:720px){
-    .dashboard{grid-template-columns:1fr;}
-    .dash-panel{border-right:none;border-bottom:1px solid var(--rule);}
-  }
-</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>De Snob <em>— 1001 Albums</em></h1>
-    <div class="sub">EEN PERSOONLIJKE LUISTERTOCHT · 2018 EDITION</div>
+    <h1>1001 Albums</h1>
+    <div class="sub">EEN PERSOONLIJKE LUISTERTOCHT</div>
   </div>
-  <input class="search" id="searchInput" type="text" placeholder="zoek artiest, album, jaar, genre...">
+  <div class="header-right">
+    <input class="search" id="searchInput" type="text" placeholder="zoek artiest, album, jaar, genre...">
+    <img class="avatar" src="img/Platenspeler_klein.png" alt="Ed van Nunen">
+  </div>
 </header>
 
 <div class="dashboard">
   <div class="dash-panel">
-    <div class="dash-label">Voortgang</div>
+    <div class="dash-label"><span class="disc"></span>Voortgang</div>
     <div class="ring-wrap">
       <div class="ring">
         <svg width="88" height="88" viewBox="0 0 88 88">
@@ -247,12 +39,16 @@
     </div>
   </div>
   <div class="dash-panel">
-    <div class="dash-label">Albums per decennium</div>
-    <canvas id="decadeChart"></canvas>
+    <div class="dash-label" id="decadeLabel"><span class="disc"></span>Albums per decennium</div>
+    <div class="chart-wrap"><canvas id="decadeChart"></canvas></div>
   </div>
   <div class="dash-panel">
-    <div class="dash-label">Top genres</div>
-    <canvas id="genreChart"></canvas>
+    <div class="dash-label" id="genreLabel"><span class="disc"></span>Genres</div>
+    <div class="bubble-wrap" id="genreBubbles"></div>
+  </div>
+  <div class="dash-panel">
+    <div class="dash-label" id="countryLabel"><span class="disc"></span>Landen</div>
+    <div class="chart-wrap chart-wrap-tall"><canvas id="countryChart"></canvas></div>
   </div>
 </div>
 
@@ -272,6 +68,12 @@
   </div>
 </div>
 
+<div class="filter-bar" id="filterBar">
+  <span class="filter-label">FILTERS:</span>
+  <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  <button class="clear-filters" id="clearFilters">Alles wissen</button>
+</div>
+
 <div id="grid"></div>
 <table id="table" class="hidden">
   <thead>
@@ -287,200 +89,31 @@
   <tbody id="tableBody"></tbody>
 </table>
 <div id="emptyState" class="empty-state hidden">Geen albums gevonden voor deze zoekopdracht.</div>
+<div class="pagination" id="pagination"></div>
 
-<script>
-/*
-  Data contract (from enrich_1001_albums.py output, albums_enriched.json):
-  {
-    number, artist, album, year, text,
-    media: {type: "youtube"|"spotify"|"image"|"other", url},
-    spotify: {spotify_url, spotify_embed_url, cover_art_url, matched_release_year, exact_year_match} | null,
-    musicbrainz: {country, genres: [...], cover_art_archive_url} | null
-  }
-*/
-
-let ALBUMS = [];
-let currentView = "grid";
-let currentSort = "number";
-
-const SAMPLE_DATA = [
-  {number:"615", artist:"Everything But The Girl", album:"Idlewild", year:"1988",
-   text:"Sample tekst — vervang met echte data uit albums_enriched.json.",
-   spotify:{cover_art_url:"", spotify_embed_url:"#"}, musicbrainz:{country:"United Kingdom", genres:["Sophisti-Pop","Jazz Pop"]}},
-  {number:"616", artist:"Talk Talk", album:"Spirit of Eden", year:"1988",
-   text:"Sample tekst.", spotify:{cover_art_url:"", spotify_embed_url:"#"},
-   musicbrainz:{country:"United Kingdom", genres:["Post-Rock","Art Rock"]}},
-  {number:"617", artist:"Voice of the Beehive", album:"Let It Bee", year:"1988",
-   text:"Sample tekst.", spotify:{cover_art_url:"", spotify_embed_url:"#"},
-   musicbrainz:{country:"United States", genres:["Pop Rock"]}},
-];
-
-async function loadData(){
-  try{
-    const res = await fetch("albums_enriched.json");
-    if(!res.ok) throw new Error("not found");
-    ALBUMS = await res.json();
-  }catch(e){
-    console.warn("albums_enriched.json not found — showing sample data. Place the real file next to index.html.");
-    ALBUMS = SAMPLE_DATA;
-  }
-  render();
-}
-
-function coverUrl(a){
-  return (a.spotify && a.spotify.cover_art_url)
-    || (a.musicbrainz && a.musicbrainz.cover_art_archive_url)
-    || "";
-}
-
-function genreList(a){
-  return (a.musicbrainz && a.musicbrainz.genres) ? a.musicbrainz.genres : [];
-}
-
-function matchesSearch(a, q){
-  if(!q) return true;
-  q = q.toLowerCase();
-  const haystack = [
-    a.artist, a.album, a.year,
-    a.musicbrainz && a.musicbrainz.country,
-    ...genreList(a)
-  ].filter(Boolean).join(" ").toLowerCase();
-  return haystack.includes(q);
-}
-
-function sortAlbums(list){
-  const copy = [...list];
-  copy.sort((a,b)=>{
-    if(currentSort === "number") return parseInt(a.number) - parseInt(b.number);
-    if(currentSort === "year") return parseInt(a.year) - parseInt(b.year);
-    if(currentSort === "artist") return a.artist.localeCompare(b.artist);
-    if(currentSort === "album") return a.album.localeCompare(b.album);
-    return 0;
-  });
-  return copy;
-}
-
-function render(){
-  const q = document.getElementById("searchInput").value;
-  const filtered = sortAlbums(ALBUMS.filter(a => matchesSearch(a, q)));
-
-  document.getElementById("emptyState").classList.toggle("hidden", filtered.length > 0);
-  document.getElementById("grid").classList.toggle("hidden", currentView !== "grid" || filtered.length === 0);
-  document.getElementById("table").classList.toggle("hidden", currentView !== "table" || filtered.length === 0);
-
-  if(currentView === "grid") renderGrid(filtered);
-  else renderTable(filtered);
-
-  renderDashboard();
-}
-
-function renderGrid(list){
-  const grid = document.getElementById("grid");
-  grid.innerHTML = list.map(a => `
-    <div class="card">
-      <div class="cover" style="background-image:url('${coverUrl(a)}')">
-        <div class="catalog mono">${a.number}</div>
-      </div>
-      <div class="meta">
-        <div class="artist">${a.artist}</div>
-        <div class="album">${a.album}</div>
-        <div class="year">${a.year}${a.musicbrainz && a.musicbrainz.country ? " · " + a.musicbrainz.country : ""}</div>
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-header">
+      <div class="modal-cover" id="modalCover"></div>
+      <div class="modal-title-block">
+        <div class="catalog mono" id="modalCatalog"></div>
+        <h2 id="modalArtist"></h2>
+        <div class="modal-album" id="modalAlbum"></div>
+        <div class="modal-badges" id="modalBadges"></div>
       </div>
     </div>
-  `).join("");
-}
+    <div class="modal-body">
+      <div class="review-text" id="modalText"></div>
+      <div class="media-list" id="modalMedia"></div>
+      <div class="more-by-artist hidden" id="modalMoreByArtist">
+        <div class="dash-label">Meer van deze artiest</div>
+        <ul id="modalMoreByArtistList"></ul>
+      </div>
+    </div>
+  </div>
+</div>
 
-function renderTable(list){
-  const body = document.getElementById("tableBody");
-  body.innerHTML = list.map(a => `
-    <tr>
-      <td class="mono">${a.number}</td>
-      <td>${a.artist}</td>
-      <td><em>${a.album}</em></td>
-      <td class="mono">${a.year}</td>
-      <td>${(a.musicbrainz && a.musicbrainz.country) || "—"}</td>
-      <td>${genreList(a).join(", ") || "—"}</td>
-    </tr>
-  `).join("");
-}
-
-let decadeChartInstance, genreChartInstance;
-
-function renderDashboard(){
-  const total = ALBUMS.length;
-  const pct = Math.min(100, Math.round((total / 1001) * 100));
-  const circumference = 238.76;
-  const offset = circumference - (circumference * pct / 100);
-  document.getElementById("progressRing").setAttribute("stroke-dashoffset", offset);
-  document.getElementById("progressLabel").textContent = pct + "%";
-  document.getElementById("doneCount").textContent = total;
-
-  // decades
-  const decadeCounts = {};
-  ALBUMS.forEach(a=>{
-    const y = parseInt(a.year);
-    if(!y) return;
-    const d = Math.floor(y/10)*10 + "s";
-    decadeCounts[d] = (decadeCounts[d]||0) + 1;
-  });
-  const decadeLabels = Object.keys(decadeCounts).sort();
-  const decadeValues = decadeLabels.map(d => decadeCounts[d]);
-
-  if(decadeChartInstance) decadeChartInstance.destroy();
-  decadeChartInstance = new Chart(document.getElementById("decadeChart"), {
-    type:"bar",
-    data:{labels:decadeLabels, datasets:[{data:decadeValues, backgroundColor:"#3b7a70", borderRadius:2}]},
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{display:false}},
-        y:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{color:"#3a352c"}}
-      }
-    }
-  });
-
-  // genres
-  const genreCounts = {};
-  ALBUMS.forEach(a=> genreList(a).forEach(g=> genreCounts[g] = (genreCounts[g]||0)+1));
-  const topGenres = Object.entries(genreCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
-
-  if(genreChartInstance) genreChartInstance.destroy();
-  genreChartInstance = new Chart(document.getElementById("genreChart"), {
-    type:"bar",
-    data:{
-      labels:topGenres.map(g=>g[0]),
-      datasets:[{data:topGenres.map(g=>g[1]), backgroundColor:"#d1a02c", borderRadius:2}]
-    },
-    options:{
-      indexAxis:"y",
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{color:"#3a352c"}},
-        y:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{display:false}}
-      }
-    }
-  });
-}
-
-document.getElementById("searchInput").addEventListener("input", render);
-document.getElementById("sortSelect").addEventListener("change", e=>{ currentSort = e.target.value; render(); });
-document.getElementById("viewGrid").addEventListener("click", ()=>{
-  currentView = "grid";
-  document.getElementById("viewGrid").classList.add("active");
-  document.getElementById("viewTable").classList.remove("active");
-  render();
-});
-document.getElementById("viewTable").addEventListener("click", ()=>{
-  currentView = "table";
-  document.getElementById("viewTable").classList.add("active");
-  document.getElementById("viewGrid").classList.remove("active");
-  render();
-});
-document.querySelectorAll("th[data-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{ currentSort = th.dataset.key; render(); });
-});
-
-loadData();
-</script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>
