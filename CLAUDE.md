@@ -67,6 +67,8 @@ Output: `albums_enriched.json`, one record per album:
     "spotify_url": "...",
     "spotify_embed_url": "...",
     "cover_art_url": "...",
+    "matched_artist_name": "...",
+    "matched_album_name": "...",
     "matched_release_year": 1988,
     "exact_year_match": true
   },
@@ -106,9 +108,54 @@ live on the site, no need to duplicate it in the data.
     hyphen** — artist names with hyphens (e.g. "The Go-Betweens") were
     being mis-split at the wrong dash when a plain hyphen was allowed in
     the separator character class.
+  - **The number prefix isn't always followed by a plain space** — post
+    #11 uses a period (`"84. The Beau Brummels – Triangle (1967)"`),
+    post #10 uses a colon (`"76: Astrud Gilberto – Beach Samba (1967)"`).
+    The regex allows an optional `.` or `:` before the whitespace. Given
+    three variants found across a handful of posts, assume more exist;
+    a suspiciously-low or zero entry count for any post is worth
+    checking against the raw paragraph text before assuming the post
+    genuinely has no albums.
   - Caption handling was right: the embed's own `text` field is the
     caption (confirmed on real `type: 11` paragraphs), not a separate
     paragraph.
+- **Spotify search had to be redesigned — the field-filtered `artist:X
+  album:Y` query syntax proved unreliable in three separate ways**,
+  found by testing the full 77-post run:
+  - The `limit` param is capped at 10 for this app (Development Mode,
+    not yet through Extended Quota review) — anything above 10 returns
+    a 400 "Invalid limit" despite the docs describing up to 50. This
+    silently produced a 0% match rate the first time (every query
+    failed, including obvious ones like Miles Davis' Birth of the Cool).
+  - Field-filtered queries return **zero results** for names containing
+    an apostrophe (e.g. "Cosmo's Factory") even when the value is
+    quoted — no workaround found other than abandoning the field syntax.
+  - Spotify's own metadata inconsistently **drops a leading "The"** from
+    some artist names (e.g. "The Sisters of Mercy" is indexed as just
+    "Sisters of Mercy"), which an exact field match can't tolerate.
+  - Fixed by switching to a **plain free-text query** (`f"{artist}
+    {album}"`, no field prefixes) plus client-side scoring of results by
+    name similarity (`difflib.SequenceMatcher` over both artist and
+    album name — already imported in the original script but never
+    actually wired in, suggesting this was the intended design all
+    along). Reissue-marked names ("... (Expanded Edition)", "...
+    (Remastered)") are deprioritized versus a plain-titled candidate at
+    the same similarity, since a reissue often carries the *original*
+    release year in its own metadata and would otherwise look like an
+    "exact year match" despite being the wrong pressing.
+  - This does **not** fix cases where Spotify's catalog only has the
+    reissue indexed at all (confirmed for The Pogues' "Rum, Sodomy and
+    the Lash", which only exists on Spotify as "Rum Sodomy & The Lash
+    (Expanded Edition)") — there's no better candidate to prefer. The
+    result now includes `matched_artist_name` / `matched_album_name` (the
+    actual Spotify title matched) specifically so these remain visible
+    for manual spot-checking rather than silently trusted.
+- **MusicBrainz artist lookup crashed on artists with no known area** —
+  `artist.area` is `null` (present, not absent) in MusicBrainz's own
+  JSON for such artists, and `.get("area", {})` only falls back to `{}`
+  when the key is *absent*, not when it's `None` — crashed with
+  `AttributeError: 'NoneType' object has no attribute 'get'` partway
+  through the first full run. Fixed with `(data.get("area") or {})`.
 - **Embed source URLs are frequently unrecoverable from `?format=json`
   for older posts.** `iframe.thumbnailUrl` / `iframe.externalSrc` are
   only populated for recently-created posts (confirmed working on

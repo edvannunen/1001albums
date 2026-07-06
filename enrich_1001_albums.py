@@ -92,9 +92,12 @@ TYPE_MIXTAPE = 14
 
 # Separator must be an actual dash character (– or —), not a plain hyphen —
 # band/album names routinely contain hyphens (e.g. "The Go-Betweens"), which
-# would otherwise be mistaken for the artist/album separator.
+# would otherwise be mistaken for the artist/album separator. The number is
+# sometimes followed by a period or colon instead of just whitespace, e.g.
+# post #11's "84. The Beau Brummels – Triangle (1967)." or post #10's
+# "76: Astrud Gilberto – Beach Samba (1967)."
 HEADER_RE = re.compile(
-    r"^\s*(\d{1,4})\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
+    r"^\s*(\d{1,4})[.:]?\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
 )
 
 YOUTUBE_THUMBNAIL_RE = re.compile(r"ytimg\.com/vi/([^/]+)/")
@@ -218,6 +221,17 @@ def scrape_medium_posts(post_urls: list) -> list:
 # STAGE 2 — Spotify enrichment
 # ---------------------------------------------------------------------------
 
+REISSUE_MARKERS = (
+    "deluxe",
+    "expanded",
+    "remaster",
+    "anniversary",
+    "special edition",
+    "bonus track",
+    "legacy edition",
+)
+
+
 def get_spotify_token() -> str:
     auth = base64.b64encode(
         f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}".encode()
@@ -233,26 +247,34 @@ def get_spotify_token() -> str:
 
 
 def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict | None:
-    """Search Spotify, pick the candidate closest to the book's release year."""
+    """Search Spotify and pick the best-matching candidate by name similarity,
+    tie-broken by release-year proximity to the book's edition.
+
+    Uses a plain free-text query rather than Spotify's `artist:X album:Y`
+    field-filtered syntax, which proved unreliable in several ways: it
+    silently returns zero results for names containing an apostrophe (e.g.
+    "Cosmo's Factory") even when quoted, and Spotify inconsistently strips a
+    leading "The" from some artist names in its own metadata (e.g. "The
+    Sisters of Mercy" is indexed as just "Sisters of Mercy"), which an exact
+    field match can't tolerate. A free-text query plus our own similarity
+    scoring handles both cases, since fuzzy matching doesn't care about exact
+    field equality.
+    """
     headers = {"Authorization": f"Bearer {token}"}
-    query = f"album:{album} artist:{artist}"
     resp = requests.get(
         "https://api.spotify.com/v1/search",
         headers=headers,
         # Spotify caps `limit` at 10 for apps in Development Mode (confirmed
         # empirically: 15+ returns 400 "Invalid limit") even though the docs
         # say up to 50 — this app hasn't been through Extended Quota review.
-        params={"q": query, "type": "album", "limit": 10},
+        params={"q": f"{artist} {album}", "type": "album", "limit": 10},
         timeout=15,
     )
     if resp.status_code != 200:
         return None
 
     items = resp.json().get("albums", {}).get("items", [])
-    candidates = [a for a in items if a.get("album_type") == "album"]
-    if not candidates:
-        candidates = items
-    if not candidates:
+    if not items:
         return None
 
     target_year = int(year)
@@ -263,13 +285,45 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         except (ValueError, KeyError):
             return 9999
 
-    candidates.sort(key=lambda a: abs(year_of(a) - target_year))
-    best = candidates[0]
+    def name_similarity(a):
+        album_sim = difflib.SequenceMatcher(
+            None, a.get("name", "").lower(), album.lower()
+        ).ratio()
+        candidate_artists = " ".join(ar.get("name", "") for ar in a.get("artists", []))
+        artist_sim = difflib.SequenceMatcher(
+            None, candidate_artists.lower(), artist.lower()
+        ).ratio()
+        return (album_sim + artist_sim) / 2
+
+    def score(a):
+        # Name similarity dominates: with results capped at 10 candidates
+        # (Development Mode), year-proximity alone was picking wrong-but-
+        # close-year albums over the real target, especially for self-titled
+        # albums (many different self-titled records by the same artist).
+        # Reissue-marked names ("... (Expanded Edition)") are deprioritized
+        # in favor of a plain original pressing when both are candidates —
+        # reissues often carry the original release year in their own
+        # metadata, so year-proximity alone can't tell them apart.
+        is_reissue = any(m in a.get("name", "").lower() for m in REISSUE_MARKERS)
+        is_studio_album = a.get("album_type") == "album"
+        return (
+            -name_similarity(a),
+            not is_studio_album,
+            is_reissue,
+            abs(year_of(a) - target_year),
+        )
+
+    items.sort(key=score)
+    best = items[0]
 
     return {
         "spotify_url": best["external_urls"]["spotify"],
         "spotify_embed_url": f"https://open.spotify.com/embed/album/{best['id']}",
         "cover_art_url": best["images"][0]["url"] if best.get("images") else None,
+        "matched_artist_name": ", ".join(
+            ar.get("name", "") for ar in best.get("artists", [])
+        ),
+        "matched_album_name": best.get("name"),
         "matched_release_year": year_of(best),
         "exact_year_match": year_of(best) == target_year,
     }
@@ -333,7 +387,10 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
             timeout=15,
         )
         if a_resp.status_code == 200:
-            country = a_resp.json().get("area", {}).get("name")
+            # .get("area", {}) only falls back to {} when the key is absent -
+            # MusicBrainz returns "area": null (present, but None) for artists
+            # with no known area, which then crashes .get("name") on None.
+            country = (a_resp.json().get("area") or {}).get("name")
 
     genres = [t["name"] for t in rg.get("tags", [])] if rg.get("tags") else []
 
