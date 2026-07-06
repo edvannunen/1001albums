@@ -360,7 +360,9 @@ def main():
         return
 
     post_urls = [
-        line.strip() for line in post_urls_path.read_text().splitlines() if line.strip()
+        line.strip()
+        for line in post_urls_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
     ]
 
     print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
@@ -373,7 +375,9 @@ def main():
     print("=== Stage 3: MusicBrainz enrichment ===")
     entries = enrich_with_musicbrainz(entries)
 
-    Path(OUTPUT_FILE).write_text(json.dumps(entries, indent=2, ensure_ascii=False))
+    Path(OUTPUT_FILE).write_text(
+        json.dumps(entries, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     print(f"Done. Wrote {len(entries)} entries to {OUTPUT_FILE}")
 
 
