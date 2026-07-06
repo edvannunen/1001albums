@@ -8,6 +8,7 @@
   --teal:#3b7a70;
   --rule:#3a352c;
   --radius:2px;
+  --cream:#f3e9db;
 
   /* Validated categorical palette (dark surface #242019) — see CLAUDE.md.
      6 hues + neutral "Other"; worst all-pairs CVD ΔE 10.3 (WARN band, legal
@@ -46,7 +47,7 @@ header{
   gap:16px;
 }
 header h1{
-  font-size:2.4rem;
+  font-size:3.6rem;
   margin:0;
   letter-spacing:0.5px;
 }
@@ -73,26 +74,29 @@ header .sub{
 }
 .search:focus{outline:1px solid var(--mustard);}
 .avatar{
-  height:58px;
+  height:104px;
   width:auto;
   flex-shrink:0;
 }
 
 /* --- Dashboard strip --- */
+/* Cream, rounded-corner cards on the dark page — the shared "widget" look
+   across all four panels, per the KPI/gauge mood-board reference. */
 .dashboard{
   display:grid;
   grid-template-columns: 220px repeat(auto-fit, minmax(260px, 1fr));
-  gap:0;
+  gap:16px;
+  padding:20px 32px;
   border-bottom:1px solid var(--rule);
 }
 .dash-panel{
-  padding:20px 24px;
-  border-right:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);
+  background:var(--cream);
+  border-radius:12px;
+  padding:20px 22px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.3);
   position:relative;
   min-width:0;
 }
-.dash-panel:last-child{border-right:none;}
 .dash-label{
   font-family:'Space Mono',monospace;
   font-size:0.7rem;
@@ -122,20 +126,27 @@ header .sub{
 }
 .dash-back:hover{text-decoration:underline;}
 
+/* dash-label/dash-back are shared with the dark modal's "more by artist"
+   block, so the cream-card text treatment is scoped to .dash-panel only. */
+.dash-panel .dash-label{color:#8a7f68;}
+.dash-panel .dash-label .disc{box-shadow:0 0 0 2px rgba(0,0,0,0.08);}
+.dash-panel .dash-back{color:#a8631f;}
+
 /* vinyl progress ring — the signature element */
 .ring-wrap{display:flex;align-items:center;gap:14px;}
 .ring{position:relative;width:88px;height:88px;flex-shrink:0;}
 .ring svg{transform:rotate(-90deg);}
-.ring-track{fill:none;stroke:var(--rule);stroke-width:6;}
-.ring-fill{fill:none;stroke:var(--mustard);stroke-width:6;stroke-linecap:round;
+.ring-track{fill:none;stroke:#e3d5bd;stroke-width:6;}
+.ring-fill{fill:none;stroke:#6e4c7b;stroke-width:6;stroke-linecap:round;
   transition:stroke-dashoffset 0.6s ease;}
 .ring-center{
   position:absolute;top:0;left:0;width:100%;height:100%;
   display:flex;align-items:center;justify-content:center;
   font-family:'Space Mono',monospace;font-size:0.78rem;font-weight:700;
+  color:#2a2620;
 }
-.ring-caption{font-size:0.78rem;color:var(--ink-dim);line-height:1.5;}
-.ring-caption b{color:var(--ink);font-weight:600;}
+.ring-caption{font-size:0.78rem;color:#7a6f5c;line-height:1.5;}
+.ring-caption b{color:#2a2620;font-weight:600;}
 
 canvas{max-height:140px;}
 .chart-wrap{position:relative;height:140px;}
@@ -172,6 +183,12 @@ canvas{max-height:140px;}
   padding:16px 32px;
   flex-wrap:wrap;
   gap:12px;
+}
+.controls-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
 }
 .toggle-group{display:flex;gap:6px;}
 .toggle-group button{
@@ -432,6 +449,5 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 
 @media (max-width:720px){
   .dashboard{grid-template-columns:1fr;}
-  .dash-panel{border-right:none;}
   .modal-header{flex-direction:column;}
 }

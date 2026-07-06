@@ -7,6 +7,15 @@ import { escapeHtml } from "./grid.js";
 
 let decadeChartInstance, countryChartInstance;
 
+// Fixed hue per decade (by absolute decade, not by rank) so a decade keeps
+// its color as new decades get added over time. Drawn from the mood-board's
+// "COLOR PALETTE (FROM CHARTS)" swatch set.
+const WIDGET_PALETTE = ["#c0392b","#2e6a71","#d4a62a","#5f7f4f","#6e4c7b","#c8b08a","#3e6b4a","#d97a2b","#3f8ca2","#8e3b3b"];
+function decadeColor(startYear){
+  const idx = Math.floor((startYear - 1950) / 10);
+  return WIDGET_PALETTE[((idx % WIDGET_PALETTE.length) + WIDGET_PALETTE.length) % WIDGET_PALETTE.length];
+}
+
 // `onChange` is called after any chart-driven filter mutation so the caller
 // (app.js) can re-render the list/chips without this module importing app.js.
 export function renderDashboard(onChange){
@@ -44,13 +53,14 @@ function renderDecadeChart(onChange){
     });
     const yearLabels = Object.keys(counts);
     const yearValues = Object.values(counts);
+    const color = decadeColor(startYear);
 
     if(decadeChartInstance) decadeChartInstance.destroy();
     decadeChartInstance = new Chart(canvas, {
       type:"bar",
       data:{labels:yearLabels, datasets:[{
         data:yearValues,
-        backgroundColor:yearLabels.map(y=> state.filters.year===parseInt(y) ? "#ffffff" : "#d1a02c"),
+        backgroundColor:yearLabels.map(y=> state.filters.year===parseInt(y) ? "#2a2620" : color),
         borderRadius:2,
       }]},
       options:{
@@ -61,8 +71,8 @@ function renderDecadeChart(onChange){
         },
         plugins:{legend:{display:false}},
         scales:{
-          x:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{display:false}},
-          y:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{color:"#3a352c"}}
+          x:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{display:false}},
+          y:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{color:"rgba(0,0,0,0.08)"}}
         },
         onHover:(evt, elements)=>{ evt.native.target.style.cursor = elements.length ? "pointer" : "default"; }
       }
@@ -83,7 +93,11 @@ function renderDecadeChart(onChange){
   if(decadeChartInstance) decadeChartInstance.destroy();
   decadeChartInstance = new Chart(canvas, {
     type:"bar",
-    data:{labels:decadeLabels, datasets:[{data:decadeValues, backgroundColor:"#3b7a70", borderRadius:2}]},
+    data:{labels:decadeLabels, datasets:[{
+      data:decadeValues,
+      backgroundColor:decadeLabels.map(d=> state.filters.decade===d ? "#2a2620" : decadeColor(parseInt(d))),
+      borderRadius:2,
+    }]},
     options:{
       onClick:(evt, elements)=>{
         if(!elements.length) return;
@@ -94,8 +108,8 @@ function renderDecadeChart(onChange){
       },
       plugins:{legend:{display:false}},
       scales:{
-        x:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{display:false}},
-        y:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{color:"#3a352c"}}
+        x:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{display:false}},
+        y:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{color:"rgba(0,0,0,0.08)"}}
       },
       onHover:(evt, elements)=>{ evt.native.target.style.cursor = elements.length ? "pointer" : "default"; }
     }
@@ -207,7 +221,7 @@ function renderCountryChart(onChange){
     type:"bar",
     data:{labels, datasets:[{
       data:values,
-      backgroundColor:labels.map(c=> state.filters.country===c ? "#ffffff" : "#8b6bb5"),
+      backgroundColor:labels.map(c=> state.filters.country===c ? "#2a2620" : "#2e6a71"),
       borderRadius:2,
     }]},
     options:{
@@ -220,11 +234,11 @@ function renderCountryChart(onChange){
       },
       plugins:{legend:{display:false}},
       scales:{
-        x:{ticks:{color:"#948b79",font:{family:"Space Mono",size:10}},grid:{color:"#3a352c"}},
+        x:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{color:"rgba(0,0,0,0.08)"}},
         // autoSkip defaults to true and was silently dropping every other
         // country label to avoid overlap — force every label to render since
         // there are only 12 and the panel now has the height to fit them.
-        y:{ticks:{color:"#948b79",font:{family:"Space Mono",size:9},autoSkip:false},grid:{display:false}}
+        y:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:9},autoSkip:false},grid:{display:false}}
       },
       onHover:(evt, elements)=>{ evt.native.target.style.cursor = elements.length ? "pointer" : "default"; }
     }

@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+<link rel="icon" type="image/png" href="img/fav-record-32.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
@@ -18,7 +19,6 @@
     <div class="sub">EEN PERSOONLIJKE LUISTERTOCHT</div>
   </div>
   <div class="header-right">
-    <input class="search" id="searchInput" type="text" placeholder="zoek artiest, album, jaar, genre...">
     <img class="avatar" src="img/Platenspeler_klein.png" alt="Ed van Nunen">
   </div>
 </header>
@@ -53,9 +53,12 @@
 </div>
 
 <div class="controls">
-  <div class="toggle-group">
-    <button id="viewGrid" class="active">Grid</button>
-    <button id="viewTable">Tabel</button>
+  <div class="controls-left">
+    <div class="toggle-group">
+      <button id="viewGrid" class="active">Grid</button>
+      <button id="viewTable">Tabel</button>
+    </div>
+    <input class="search" id="searchInput" type="text" placeholder="zoek artiest, album, jaar, genre...">
   </div>
   <div>
     <label class="mono" style="font-size:0.72rem;color:var(--ink-dim);margin-right:8px;">SORTEER</label>
