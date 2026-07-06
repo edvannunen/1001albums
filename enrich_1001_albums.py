@@ -270,6 +270,17 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         params={"q": f"{artist} {album}", "type": "album", "limit": 10},
         timeout=15,
     )
+    if resp.status_code == 429:
+        # Fail loudly and stop immediately rather than silently returning
+        # None for every remaining album in the batch (a 23-hour Retry-After
+        # was observed once, from too many calls across repeated test runs
+        # in a short window) - a quiet per-entry failure here would produce
+        # hundreds of bogus "no match" results before anyone noticed.
+        retry_after = resp.headers.get("Retry-After", "unknown")
+        raise RuntimeError(
+            f"Spotify rate limit hit (429). Retry-After: {retry_after}s. "
+            "Stopping here instead of burning through the rest of the batch."
+        )
     if resp.status_code != 200:
         return None
 
