@@ -9,17 +9,6 @@
   --rule:#3a352c;
   --radius:2px;
   --cream:#f3e9db;
-
-  /* Validated categorical palette (dark surface #242019) — see CLAUDE.md.
-     6 hues + neutral "Other"; worst all-pairs CVD ΔE 10.3 (WARN band, legal
-     with direct labels, which every bubble/bar carries). */
-  --genre-rock:#c1502e;
-  --genre-pop:#b8871f;
-  --genre-jazz:#0f9080;
-  --genre-electronic:#8b6bb5;
-  --genre-folk:#5f8a3a;
-  --genre-world:#c14570;
-  --genre-other:#6b6a63;
 }
 *{box-sizing:border-box;}
 body{
@@ -154,7 +143,7 @@ canvas{max-height:140px;}
 .chart-wrap-tall canvas{max-height:230px;}
 
 /* bubble chart (D3 circle-pack) */
-.bubble-wrap{position:relative;height:230px;}
+.bubble-wrap{position:relative;height:260px;}
 .bubble{
   position:absolute;
   border-radius:50%;
@@ -172,8 +161,6 @@ canvas{max-height:140px;}
 .bubble .bubble-name{font-weight:700;word-break:break-word;}
 .bubble .bubble-count{opacity:0.85;}
 .bubble.active-filter{box-shadow:0 0 0 3px var(--mustard);}
-.bubble.bubble-overige{cursor:default;opacity:0.55;}
-.bubble.bubble-overige:hover{transform:none;filter:none;}
 
 /* --- Controls row --- */
 .controls{

@@ -120,7 +120,10 @@ function renderGenreBubbles(onChange){
   const labelEl = document.getElementById("genreLabel");
   const container = document.getElementById("genreBubbles");
   const width = container.clientWidth || 260;
-  const height = 180;
+  // Was hardcoded to 180 while the box (.bubble-wrap) is 260px tall — the
+  // pack layout only ever filled the top ~70% of the visible box. Read the
+  // real box height so the circles pack out to the space that's there.
+  const height = container.clientHeight || 260;
 
   let data, colorFor, onBubbleClick, isActive;
 
@@ -143,14 +146,14 @@ function renderGenreBubbles(onChange){
     onBubbleClick = (d)=>{ setFilter("genre", d.name); onChange(); };
     isActive = (d)=> state.filters.genre === d.name;
   } else {
-    labelEl.innerHTML = `<span class="disc"></span>Genres`;
+    labelEl.innerHTML = `<span class="disc"></span>Top genres`;
     const macroCounts = {};
     state.albums.forEach(a=>{
       const macros = new Set(genreList(a).map(classifyGenre).filter(Boolean));
       macros.forEach(m => macroCounts[m] = (macroCounts[m]||0) + 1);
     });
     data = Object.entries(macroCounts).map(([name, value])=>({name, value}));
-    colorFor = (d)=> GENRE_COLORS[d.name] || GENRE_COLORS["Other"];
+    colorFor = (d)=> GENRE_COLORS[d.name];
     onBubbleClick = (d)=>{
       state.genreDrill = d.name;
       setFilter("genreMacro", d.name);
@@ -162,9 +165,10 @@ function renderGenreBubbles(onChange){
   container.innerHTML = "";
   if(!data.length) return;
 
-  // RYM-style "bold genres only": cap to the 8 most common bubbles per level
-  // (both macro and sub-genre) and fold the long tail into one "Overige"
-  // bubble, rather than dumping dozens of tiny, unreadable micro-tags.
+  // RYM-style "bold genres only": show at most the 12 most common bubbles
+  // per level, dropping the long tail rather than dumping dozens of tiny,
+  // unreadable micro-tags — no "Overige" fold-in bucket, same "just don't
+  // show it" rule as the top-level taxonomy's dropped "Other" catch-all.
   data = capBubbles(data);
 
   // Size floor so the smallest bubble is never illegibly tiny relative to
@@ -178,30 +182,23 @@ function renderGenreBubbles(onChange){
 
   root.leaves().forEach(leaf=>{
     const el = document.createElement("div");
-    const overige = !!leaf.data.isOverige;
-    el.className = "bubble" + (isActive(leaf.data) ? " active-filter" : "") + (overige ? " bubble-overige" : "");
+    el.className = "bubble" + (isActive(leaf.data) ? " active-filter" : "");
     el.style.width = (leaf.r*2) + "px";
     el.style.height = (leaf.r*2) + "px";
     el.style.left = (leaf.x - leaf.r) + "px";
     el.style.top = (leaf.y - leaf.r) + "px";
-    el.style.background = overige ? "var(--genre-other)" : colorFor(leaf.data);
+    el.style.background = colorFor(leaf.data);
     el.style.fontSize = Math.max(10, Math.min(14, leaf.r/2.8)) + "px";
     el.innerHTML = `<div><div class="bubble-name">${escapeHtml(leaf.data.name)}</div><div class="bubble-count">${leaf.data.value}</div></div>`;
-    if(!overige) el.addEventListener("click", ()=> onBubbleClick(leaf.data));
+    el.addEventListener("click", ()=> onBubbleClick(leaf.data));
     container.appendChild(el);
   });
 }
 
-const MAX_BUBBLES = 8;
+const MAX_BUBBLES = 12;
 
 function capBubbles(entries){
-  const sorted = entries.slice().sort((a,b)=> b.value - a.value);
-  if(sorted.length <= MAX_BUBBLES) return sorted;
-  const top = sorted.slice(0, MAX_BUBBLES - 1);
-  const rest = sorted.slice(MAX_BUBBLES - 1);
-  const restValue = rest.reduce((sum,e)=> sum + e.value, 0);
-  top.push({ name: `Overige (${rest.length})`, value: restValue, isOverige: true });
-  return top;
+  return entries.slice().sort((a,b)=> b.value - a.value).slice(0, MAX_BUBBLES);
 }
 
 function renderCountryChart(onChange){
