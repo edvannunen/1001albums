@@ -83,38 +83,54 @@ live on the site, no need to duplicate it in the data.
 
 ## Known open items / things to verify
 
-- **Media captions**: initially assumed captions were separate italic
-  body paragraphs following each embed — wrong. Ed confirmed the caption
-  text (e.g. "Op Pinkpop, met veel van Green. Goed hoor.") renders in a
-  distinct smaller/grey style, not italic body text, which points to it
-  being the embed paragraph's own native `text` field (Medium's
-  `MIXTAPE_EMBED` card style: thumbnail, title, channel, "Bekijken op
-  YouTube" button, optional caption) rather than a following paragraph.
-  Parser now reads the caption directly off the embed paragraph itself.
-  Most entries have several YouTube clips, some captioned, some not —
-  `media` is a list to support this. **Still unverified against real
-  post JSON** (only reasoned from Medium's known data model and the
-  screenshots Ed shared) — confirm actual paragraph `type` values
-  (`IFRAME` vs `MIXTAPE_EMBED`) and the `mixtapeMetadata` field names on
-  2-3 real posts before trusting this at scale, especially since the
-  post history spans many years and Medium's embed format may have
-  changed over that time.
-
-- **Header regex reliability**: only tested conceptually, not against
-  real post JSON yet. Older posts have a different embed style (Spotify
-  links instead of YouTube) — worth test-running on 2-3 posts spanning
-  old and new before doing all 621+.
-- **`medium_post_urls.txt` doesn't exist yet.** Confirmed source: all
-  entries live at `https://edvannunen.medium.com` (this subdomain, not
-  `medium.com/@edvannunen` directly — though both may resolve to the
-  same account). All posts have "1001 Albums #" in the title, but that's
-  just a convenience marker, not required for the scraper — every post
-  on that profile is part of the series, so the simplest approach is to
-  paginate the full profile archive rather than filter by title.
-  Medium profile archives are typically reachable at
-  `edvannunen.medium.com/archive` — confirm this loads the full post
-  list (possibly paginated by year/month) and extract every post URL
-  from it, rather than relying on title matching.
+- **Header regex and paragraph types — verified against 3 real posts**
+  (2026-era #74, ~2019-era #2, ~2021-era #20), and the original
+  assumptions were wrong in ways worth remembering:
+  - Medium's `?format=json` paragraph `type` is an **integer code**, not
+    the string names (`H3`/`P`/`IMG`/`IFRAME`) other Medium write-ups
+    describe: `3`=post title, `1`=plain paragraph, `4`=image,
+    `11`=native iframe embed, `14`=Medium's auto-generated link-preview
+    card (`mixtapeMetadata.href`, seen for plain hyperlinks like a news
+    article — not observed for the album embeds themselves).
+  - **Per-album headers are type `1`, same as body paragraphs** — there
+    is no distinct heading type to filter on. The parser now applies the
+    header regex to every type-1 paragraph's text instead of gating on
+    an `H3`/`H4` type that doesn't exist in this data.
+  - **Older posts (pre-~2020) fuse the header into the same paragraph as
+    the start of the review**, e.g. `"7 Frank Sinatra – Songs for
+    Swingin' Lovers (1956). Daar is Frank weer..."` — one paragraph, not
+    two. The regex now captures a trailing group for this case and
+    seeds the entry's `text` with it, rather than assuming the header
+    paragraph is standalone.
+  - **Dash separator must be en/em dash (`–`/`—`) only, not a plain
+    hyphen** — artist names with hyphens (e.g. "The Go-Betweens") were
+    being mis-split at the wrong dash when a plain hyphen was allowed in
+    the separator character class.
+  - Caption handling was right: the embed's own `text` field is the
+    caption (confirmed on real `type: 11` paragraphs), not a separate
+    paragraph.
+- **Embed source URLs are frequently unrecoverable from `?format=json`
+  for older posts.** `iframe.thumbnailUrl` / `iframe.externalSrc` are
+  only populated for recently-created posts (confirmed working on
+  #74/2026 — the YouTube ID can be extracted from an embed.ly thumbnail
+  URL); for older posts (confirmed on #2 and #20) both fields are empty
+  strings with no fallback anywhere else in the payload, and
+  `medium.com/media/{mediaResourceId}` (Medium's normal redirect-to-
+  source mechanism) returns 403 to a plain HTTP client. Practical
+  impact is small: the `media` list is a supplementary "clips shown in
+  the post" field, not the source of truth — Spotify enrichment (stage
+  2) independently searches by artist/album/year regardless of whether
+  the original embed was resolvable, so cover art and the playable embed
+  are unaffected. Unresolvable `type: 11` embeds are simply omitted from
+  `media` rather than stored with a null URL.
+- **`medium_post_urls.txt` — done, 77 URLs.** The profile page only
+  server-renders its most recent 10 posts (confirmed via embedded
+  `__APOLLO_STATE__` — Medium paginates further posts client-side via
+  GraphQL on scroll); a year-based static archive
+  (`edvannunen.medium.com/archive/<year>`) does not exist for this
+  account (404). Full list was collected by scrolling the profile page
+  to the bottom, then running a one-line `document.querySelectorAll`
+  snippet in the browser console to extract clean post URLs.
 - **MusicBrainz rate limit** is ~1 req/sec — budget ~10-15 min for a full
   621-album run (2 lookups per album: release-group + artist).
 - **RYM was deliberately dropped** as a data source (aggressive

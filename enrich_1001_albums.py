@@ -67,50 +67,84 @@ def fetch_medium_post_json(post_url: str) -> dict:
     return json.loads(payload)
 
 
+# Medium's ?format=json endpoint represents paragraph `type` as an integer
+# code, not the string names (H3/P/IMG/IFRAME) other Medium docs describe.
+# Verified against real posts spanning 2019-2026:
+#   3  = section/post title — appears once, never a per-album header.
+#   1  = plain paragraph. Per-album headers are ALSO type 1, not a distinct
+#        heading type — there is no way to tell them apart from paragraph
+#        type alone. Older posts (pre-~2020) even fuse the header into the
+#        start of the review as one paragraph, e.g. "7 Frank Sinatra –
+#        Songs for Swingin' Lovers (1956). Daar is Frank weer...".
+#   4  = image.
+#   11 = native iframe embed (YouTube/Spotify), caption in its own `text`.
+#        `iframe.thumbnailUrl` / `iframe.externalSrc` are only populated for
+#        recently-created posts — for older posts both are empty strings,
+#        so the embed's source URL usually cannot be recovered at all.
+#   14 = Medium's auto-generated link-preview card (`mixtapeMetadata.href`).
+#        Observed for plain hyperlinks (e.g. a linked news article), not for
+#        the album embeds themselves, but its href is directly usable.
+TYPE_TITLE = 3
+TYPE_P = 1
+TYPE_IMG = 4
+TYPE_IFRAME = 11
+TYPE_MIXTAPE = 14
+
+# Separator must be an actual dash character (– or —), not a plain hyphen —
+# band/album names routinely contain hyphens (e.g. "The Go-Betweens"), which
+# would otherwise be mistaken for the artist/album separator.
+HEADER_RE = re.compile(
+    r"^\s*(\d{1,4})\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
+)
+
+YOUTUBE_THUMBNAIL_RE = re.compile(r"ytimg\.com/vi/([^/]+)/")
+
+
+def resolve_iframe_url(iframe: dict) -> str | None:
+    """Best-effort resolution of a native iframe embed's source URL. Medium
+    only retains thumbnailUrl/externalSrc for recently-created posts; for
+    older ones both are empty and the source can't be recovered here."""
+    external_src = iframe.get("externalSrc")
+    if external_src:
+        return external_src
+    match = YOUTUBE_THUMBNAIL_RE.search(iframe.get("thumbnailUrl", ""))
+    if match:
+        return f"https://www.youtube.com/watch?v={match.group(1)}"
+    return None
+
+
+def classify_media_url(url: str) -> str:
+    if "youtube" in url or "youtu.be" in url:
+        return "youtube"
+    if "spotify" in url or "scdn.co" in url:
+        return "spotify"
+    return "other"
+
+
 def parse_medium_post(data: dict) -> list:
     """
     Walk a Medium post's paragraph list and group into album entries.
     Returns a list of dicts: {number, artist, album, year, text, media}
     where media is a LIST of {type, url, caption} — an entry can have more
     than one embed (typically several YouTube clips).
-
-    Caption handling: Medium's card-style embeds (thumbnail, title, channel
-    name, "Bekijken op YouTube" button) are MIXTAPE_EMBED paragraphs. The
-    caption shown beneath the card is that paragraph's OWN `text` field —
-    it's not a separate italic body paragraph. So the caption is read
-    directly off the embed paragraph itself, not inferred from formatting
-    on a neighboring paragraph. Some embeds have no caption (empty text),
-    which is expected — not every clip was captioned.
-
-    Heuristic: a new entry starts at each H3/H4 paragraph matching
-    "NNN Artist — Album (Year)".
-
-    NOTE: this is based on Medium's known internal data model, not yet
-    verified against this project's actual post JSON (only tested
-    conceptually) — confirm paragraph `type` values on 2-3 real posts
-    before trusting this at scale, since Medium has used both raw IFRAME
-    and MIXTAPE_EMBED paragraph types for embeds over the years and this
-    post history spans many years.
     """
     try:
         paragraphs = data["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
-        iframes = data["payload"]["value"]["content"]["bodyModel"].get("iframes", {})
     except KeyError:
         return []
 
-    header_re = re.compile(r"^\s*(\d{1,4})\s+(.*?)\s*[—-]\s*(.*?)\s*\((\d{4})\)\s*$")
-
     entries = []
     current = None
-
-    EMBED_TYPES = ("IFRAME", "MIXTAPE_EMBED")
 
     for p in paragraphs:
         ptype = p.get("type")
         text = p.get("text", "")
 
-        if ptype in ("H3", "H4"):
-            match = header_re.match(text)
+        if ptype == TYPE_TITLE:
+            continue
+
+        if ptype == TYPE_P:
+            match = HEADER_RE.match(text)
             if match:
                 if current:
                     entries.append(current)
@@ -119,18 +153,17 @@ def parse_medium_post(data: dict) -> list:
                     "artist": match.group(2),
                     "album": match.group(3),
                     "year": match.group(4),
-                    "text": "",
+                    "text": match.group(5).strip(),
                     "media": [],
                 }
-                continue
-
-        if current is None:
+            elif current is not None:
+                current["text"] = (current["text"] + " " + text).strip()
             continue
 
-        if ptype == "P":
-            current["text"] = (current["text"] + " " + text).strip()
+        if current is None:
+            continue  # embeds/images before the first recognized album header
 
-        elif ptype == "IMG":
+        if ptype == TYPE_IMG:
             image_id = p.get("metadata", {}).get("id")
             if image_id:
                 current["media"].append({
@@ -139,31 +172,24 @@ def parse_medium_post(data: dict) -> list:
                     "caption": text or None,
                 })
 
-        elif ptype in EMBED_TYPES:
-            mixtape = p.get("mixtapeMetadata") or {}
-            iframe_ref = p.get("iframe", {})
-            media_id = (
-                iframe_ref.get("mediaResourceId")
-                or mixtape.get("mediaResourceId")
-            )
-            original_url = mixtape.get("href", "")
-            if not original_url and media_id:
-                original_url = iframes.get(media_id, {}).get("originalUrl", "")
-
-            if "youtube" in original_url or "youtu.be" in original_url:
-                mtype = "youtube"
-            elif "spotify" in original_url:
-                mtype = "spotify"
-            elif original_url:
-                mtype = "other"
-            else:
-                mtype = None
-
-            if mtype:
+        elif ptype == TYPE_IFRAME:
+            url = resolve_iframe_url(p.get("iframe", {}))
+            if url:
                 current["media"].append({
-                    "type": mtype,
-                    "url": original_url,
-                    "caption": text or None,  # the embed's own text IS the caption
+                    "type": classify_media_url(url),
+                    "url": url,
+                    "caption": text or None,
+                })
+            # else: Medium didn't retain enough data to resolve this embed's
+            # source (common for older posts) — nothing usable to store.
+
+        elif ptype == TYPE_MIXTAPE:
+            url = (p.get("mixtapeMetadata") or {}).get("href")
+            if url:
+                current["media"].append({
+                    "type": classify_media_url(url),
+                    "url": url,
+                    "caption": text or None,
                 })
 
     if current:
