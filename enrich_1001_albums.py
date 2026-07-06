@@ -239,7 +239,10 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
     resp = requests.get(
         "https://api.spotify.com/v1/search",
         headers=headers,
-        params={"q": query, "type": "album", "limit": 20},
+        # Spotify caps `limit` at 10 for apps in Development Mode (confirmed
+        # empirically: 15+ returns 400 "Invalid limit") even though the docs
+        # say up to 50 — this app hasn't been through Extended Quota review.
+        params={"q": query, "type": "album", "limit": 10},
         timeout=15,
     )
     if resp.status_code != 200:
