@@ -85,6 +85,28 @@ def insert_album(conn: sqlite3.Connection, e: dict) -> int:
     return album_id
 
 
+def update_album_spotify(conn: sqlite3.Connection, album_id: int, spotify: dict):
+    """Backfill a previously-unmatched album's Spotify columns. Used by the
+    one-off gap backfill, not the main incremental sync (which sets these at
+    insert_album time for genuinely new albums)."""
+    conn.execute(
+        """
+        UPDATE albums SET
+            spotify_url=?, spotify_embed_url=?, spotify_cover_art_url=?,
+            spotify_matched_artist_name=?, spotify_matched_album_name=?,
+            spotify_matched_release_year=?, spotify_exact_year_match=?,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE id=?
+        """,
+        (
+            spotify.get("spotify_url"), spotify.get("spotify_embed_url"),
+            spotify.get("cover_art_url"), spotify.get("matched_artist_name"),
+            spotify.get("matched_album_name"), spotify.get("matched_release_year"),
+            int(spotify["exact_year_match"]), album_id,
+        ),
+    )
+
+
 def update_album_text_media(conn: sqlite3.Connection, album_id: int, e: dict):
     """Refresh an existing album's header/text/media/source-url from a fresh
     scrape, WITHOUT touching its already-fetched spotify/musicbrainz data —

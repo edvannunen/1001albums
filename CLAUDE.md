@@ -18,14 +18,20 @@ entries, so the pipeline should be easy to re-run incrementally.
 
 - `enrich_1001_albums.py` — the enrichment pipeline (3 stages, see below).
   Spotify/MusicBrainz credentials live in `.env` (see `.env.example`).
+- Storage is SQLite (`data/1001albums.db`, schema in `schema.sql`, helpers
+  in `db.py`) — migrated from flat-JSON 2026-07 (`migrate_json_to_sqlite.py`
+  is the one-off migration script, safe to re-run but shouldn't need to be).
+  `albums_enriched.json` is regenerated from the DB on every pipeline run
+  (`db.export_from_db`) so the static frontend keeps working unchanged.
 - `index.html` — the frontend (modular components under `js/`, no build
   step), wired to the real `albums_enriched.json` and actively developed
   (dashboard, grid/table, search/sort/filter, album modal all working
   against real data).
 - `medium_post_urls.txt` — done, 77 URLs, one per "De Snob" post.
-- `albums_enriched.json` — generated, 619 album entries. Re-running
-  `enrich_1001_albums.py` is safe and incremental (see "Known open
-  items").
+- `albums_enriched.json` — generated, 621 album entries, 619 with a
+  Spotify link (2 confirmed not on Spotify at all — see
+  `spotify_manual_review.md`). Re-running `enrich_1001_albums.py` is safe
+  and incremental (see "Known open items").
 
 ## Pipeline stages (enrich_1001_albums.py)
 
@@ -159,6 +165,32 @@ live on the site, no need to duplicate it in the data.
     result now includes `matched_artist_name` / `matched_album_name` (the
     actual Spotify title matched) specifically so these remain visible
     for manual spot-checking rather than silently trusted.
+- **Spotify gap backfill, done 2026-07-07** — 243 albums (no Medium-embedded
+  Spotify link) had never actually been enriched at all; a rate limit hit
+  during testing had blocked every attempt and it was never revisited. The
+  block had cleared by the time this was investigated.
+  - **Found a real false positive while testing**: Fats Domino's "This is
+    Fats" (1956) confidently matched "Fats Is Back" (1968) — same artist
+    (artist_sim=1.0) masking a wrong album (album_sim=0.583) behind the
+    combined average. Fixed with `ALBUM_SIM_THRESHOLD` (0.65): below this,
+    `spotify_search_album()` reports `"confident": False` and callers treat
+    it as no match instead of trusting a "best of 10 bad options."
+  - **That floor initially over-flagged correct matches**: a lot of older
+    catalog is only indexed on Spotify as the remaster/anniversary/deluxe
+    pressing, and the qualifier text alone (e.g. "(Remastered)") tanked the
+    similarity score for an otherwise-correct match (e.g. "War (Remastered)"
+    scored 0.316 for U2's "War"). Fixed with `strip_reissue_suffix()` —
+    strips a trailing `(...)` qualifier before scoring, but only if it
+    actually contains a `REISSUE_MARKERS` keyword, so a genuinely different
+    release (e.g. "Document (R.E.M. No. 5)") isn't masked the same way.
+  - `backfill_spotify.py` (one-off, run against just the gap albums) commits
+    **after every album**, unlike `enrich_with_spotify()`'s callers which
+    only `insert_album()` once a whole new-entries batch finishes — a 429
+    mid-run here can't lose already-confirmed matches, and re-running only
+    ever re-tries whatever's still missing `spotify_url`.
+  - Result: 230/243 auto-confirmed, 13 needed a manual look, resolved by
+    hand — see `spotify_manual_review.md`. Final: 619/621 albums have a
+    Spotify link; #5 and #137 confirmed genuinely absent from Spotify.
 - **MusicBrainz artist lookup crashed on artists with no known area** —
   `artist.area` is `null` (present, not absent) in MusicBrainz's own
   JSON for such artists, and `.get("area", {})` only falls back to `{}`
@@ -240,12 +272,14 @@ Done: `medium_post_urls.txt` built (77 URLs); scrape stage tested against
 Spotify/MusicBrainz credentials; `index.html` wired to real
 `albums_enriched.json` with working grid/table/search/sort/dashboard;
 incremental re-run implemented (re-running `enrich_1001_albums.py` only
-touches genuinely new entries, see "Known open items").
+touches genuinely new entries, see "Known open items"); storage migrated
+to SQLite; Spotify gap backfill done — 619/621 albums now have a Spotify
+link (see "Known open items").
 
-1. Spot-check the Spotify year-matching and MusicBrainz country/genre
-   results for obviously wrong matches (compilations, self-titled
-   albums, and common band names are the likely failure points) — not
-   yet done.
+1. ~~Spot-check the Spotify year-matching~~ — done 2026-07-07 (see "Known
+   open items"). MusicBrainz country/genre spot-check for obviously wrong
+   matches (compilations, self-titled albums, common band names) still
+   not done.
 2. Decide on hosting — Ed hosts projects on Hetzner + Coolify, connected
    to GitHub, and will use that same setup for this project.
 3. Decide how to handle the 3 duplicate-catalog-number typos and 4

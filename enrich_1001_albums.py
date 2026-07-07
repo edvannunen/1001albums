@@ -330,7 +330,37 @@ REISSUE_MARKERS = (
     "special edition",
     "bonus track",
     "legacy edition",
+    "collector",
 )
+
+def strip_reissue_suffix(name: str) -> str:
+    """Strip a trailing parenthetical qualifier from a candidate album name,
+    but only if it actually names a reissue (contains a REISSUE_MARKERS
+    keyword) — e.g. "Van Halen (Remastered)" -> "Van Halen", but "Document
+    (R.E.M. No. 5)" is left alone since that parenthetical isn't a reissue
+    marker and might signal a genuinely different release worth a manual
+    check. Needed because for a lot of older catalog, Spotify's *only*
+    indexed pressing is the remaster/anniversary/deluxe edition — the
+    qualifier text alone was tanking the similarity score for otherwise
+    correct matches (e.g. "War (Remastered)" scored 0.316 for U2's "War")."""
+    result = name
+    while True:
+        m = re.search(r"\s*\(([^)]*)\)\s*$", result)
+        if not m or not any(marker in m.group(1).lower() for marker in REISSUE_MARKERS):
+            return result
+        result = result[:m.start()]
+
+
+# Floor on album-title similarity (not the combined artist+album score) below
+# which a "best of 10 candidates" result is treated as no match rather than
+# trusted. Found necessary after a live test: Fats Domino's "This is Fats"
+# (1956) had no real candidate in the API's 10-result cap, but the combined
+# score still picked "Fats Is Back" (1968) with high confidence because the
+# artist matched exactly (artist_sim=1.0) even though the album title didn't
+# (album_sim=0.583) — the combined average masked a wrong album behind a
+# right artist. Gating on album_sim alone catches this case (0.583 < 0.65)
+# without needing a hand-labeled dataset to calibrate against.
+ALBUM_SIM_THRESHOLD = 0.65
 
 
 def get_spotify_token() -> str:
@@ -397,15 +427,16 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         except (ValueError, KeyError):
             return 9999
 
-    def name_similarity(a):
+    def similarities(a):
+        candidate_name = strip_reissue_suffix(a.get("name", ""))
         album_sim = difflib.SequenceMatcher(
-            None, a.get("name", "").lower(), album.lower()
+            None, candidate_name.lower(), album.lower()
         ).ratio()
         candidate_artists = " ".join(ar.get("name", "") for ar in a.get("artists", []))
         artist_sim = difflib.SequenceMatcher(
             None, candidate_artists.lower(), artist.lower()
         ).ratio()
-        return (album_sim + artist_sim) / 2
+        return album_sim, artist_sim
 
     def score(a):
         # Name similarity dominates: with results capped at 10 candidates
@@ -416,10 +447,11 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         # in favor of a plain original pressing when both are candidates —
         # reissues often carry the original release year in their own
         # metadata, so year-proximity alone can't tell them apart.
+        album_sim, artist_sim = similarities(a)
         is_reissue = any(m in a.get("name", "").lower() for m in REISSUE_MARKERS)
         is_studio_album = a.get("album_type") == "album"
         return (
-            -name_similarity(a),
+            -(album_sim + artist_sim) / 2,
             not is_studio_album,
             is_reissue,
             abs(year_of(a) - target_year),
@@ -427,6 +459,7 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
 
     items.sort(key=score)
     best = items[0]
+    best_album_sim, best_artist_sim = similarities(best)
 
     return {
         "spotify_url": best["external_urls"]["spotify"],
@@ -438,6 +471,8 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         "matched_album_name": best.get("name"),
         "matched_release_year": year_of(best),
         "exact_year_match": year_of(best) == target_year,
+        "album_similarity": round(best_album_sim, 3),
+        "confident": best_album_sim >= ALBUM_SIM_THRESHOLD,
     }
 
 
@@ -447,6 +482,13 @@ def enrich_with_spotify(entries: list) -> list:
         if any(m["type"] == "spotify" for m in e.get("media", [])):
             continue  # already has a Spotify embed from Medium, skip lookup
         result = spotify_search_album(token, e["artist"], e["album"], e["year"])
+        if result and not result["confident"]:
+            print(
+                f"  ! low-confidence Spotify match, treating as no match: "
+                f"{e['artist']} - {e['album']} -> {result['matched_artist_name']} - "
+                f"{result['matched_album_name']} (album_similarity={result['album_similarity']})"
+            )
+            result = None
         e["spotify"] = result
         if not result:
             print(f"  ! no Spotify match: {e['artist']} - {e['album']}")
