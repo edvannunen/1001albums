@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 .claude/
 .venv/
+
+# SQLite database files — schema.sql + migrate_json_to_sqlite.py are the
+# source of truth in git; the actual .db is runtime data (production's
+# lives on a Coolify persistent volume, not in the repo)
+*.db
+*.db-shm
+*.db-wal
