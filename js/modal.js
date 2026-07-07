@@ -1,12 +1,42 @@
 import { state } from "./state.js";
 import { coverUrl, genreList } from "./data.js";
+import { getFiltered, sortAlbums } from "./filters.js";
 
 function extractYouTubeId(url){
   const m = (url||"").match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
   return m ? m[1] : null;
 }
 
+// The navigable list for the </> buttons — the current search/sort/filter
+// result, so paging through the modal matches what's on screen. Falls back
+// to the full sorted list when the opened album isn't in that result (e.g.
+// "More by artist" jumping to an album excluded by an active filter) so
+// navigation still has something sensible to do instead of just disabling.
+let modalList = [];
+let modalIndex = -1;
+
+function updateNav(a){
+  const q = document.getElementById("searchInput").value;
+  modalList = getFiltered(q);
+  modalIndex = modalList.indexOf(a);
+  if(modalIndex === -1){
+    modalList = sortAlbums(state.albums);
+    modalIndex = modalList.indexOf(a);
+  }
+  document.getElementById("modalNavPrev").disabled = modalIndex <= 0;
+  document.getElementById("modalNavNext").disabled = modalIndex === -1 || modalIndex >= modalList.length - 1;
+}
+
+export function showModalPrev(){
+  if(modalIndex > 0) openModal(modalList[modalIndex - 1]);
+}
+
+export function showModalNext(){
+  if(modalIndex !== -1 && modalIndex < modalList.length - 1) openModal(modalList[modalIndex + 1]);
+}
+
 export function openModal(a){
+  updateNav(a);
   document.getElementById("modalCatalog").textContent = "#" + a.number;
   document.getElementById("modalArtist").textContent = a.artist;
   document.getElementById("modalAlbum").textContent = `${a.album} (${a.year})`;
