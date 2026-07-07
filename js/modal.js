@@ -31,57 +31,77 @@ export function openModal(a){
 
   const mediaEl = document.getElementById("modalMedia");
   mediaEl.innerHTML = "";
-  if(a.spotify && a.spotify.spotify_embed_url){
+
+  // Grouped by type rather than the post's original interleaved order:
+  // images, then all YouTube clips (each with its caption if it has one),
+  // then all Spotify embeds (the enrichment stage's whole-album match, if
+  // any, followed by any Spotify links Ed embedded directly in the post),
+  // then any other link-preview cards.
+  function appendMedia(build, caption){
     const wrap = document.createElement("div");
     wrap.className = "media-item";
-    const iframe = document.createElement("iframe");
-    iframe.height = "152";
-    iframe.src = a.spotify.spotify_embed_url;
-    iframe.allow = "encrypted-media";
-    wrap.appendChild(iframe);
+    build(wrap);
+    if(caption){
+      const cap = document.createElement("div");
+      cap.className = "caption";
+      cap.textContent = caption;
+      wrap.appendChild(cap);
+    }
     mediaEl.appendChild(wrap);
   }
-  (a.media || []).forEach(m=>{
-    const wrap = document.createElement("div");
-    wrap.className = "media-item";
-    if(m.type === "youtube"){
-      const videoId = extractYouTubeId(m.url);
-      if(videoId){
-        const iframe = document.createElement("iframe");
-        iframe.height = "220";
-        iframe.src = `https://www.youtube.com/embed/${videoId}`;
-        iframe.allowFullscreen = true;
-        wrap.appendChild(iframe);
-      } else {
-        const link = document.createElement("a");
-        link.href = m.url; link.target = "_blank"; link.rel = "noopener";
-        link.textContent = m.url;
-        wrap.appendChild(link);
-      }
-    } else if(m.type === "spotify"){
+
+  const media = a.media || [];
+  const images = media.filter(m => m.type === "image");
+  const youtubes = media.filter(m => m.type === "youtube");
+  const spotifyLinks = media.filter(m => m.type === "spotify");
+  const otherLinks = media.filter(m => !["image", "youtube", "spotify"].includes(m.type));
+
+  images.forEach(m => appendMedia(wrap => {
+    const img = document.createElement("img");
+    img.src = m.url; img.alt = "";
+    wrap.appendChild(img);
+  }, m.caption));
+
+  youtubes.forEach(m => appendMedia(wrap => {
+    const videoId = extractYouTubeId(m.url);
+    if(videoId){
       const iframe = document.createElement("iframe");
-      iframe.height = "152";
-      iframe.src = m.url.replace("open.spotify.com/", "open.spotify.com/embed/");
-      iframe.allow = "encrypted-media";
+      iframe.height = "440";
+      iframe.src = `https://www.youtube.com/embed/${videoId}`;
+      iframe.allowFullscreen = true;
       wrap.appendChild(iframe);
-    } else if(m.type === "image"){
-      const img = document.createElement("img");
-      img.src = m.url; img.alt = "";
-      wrap.appendChild(img);
     } else {
       const link = document.createElement("a");
       link.href = m.url; link.target = "_blank"; link.rel = "noopener";
       link.textContent = m.url;
       wrap.appendChild(link);
     }
-    if(m.caption){
-      const cap = document.createElement("div");
-      cap.className = "caption";
-      cap.textContent = m.caption;
-      wrap.appendChild(cap);
-    }
-    mediaEl.appendChild(wrap);
-  });
+  }, m.caption));
+
+  if(a.spotify && a.spotify.spotify_embed_url){
+    appendMedia(wrap => {
+      const iframe = document.createElement("iframe");
+      iframe.height = "152";
+      iframe.src = a.spotify.spotify_embed_url;
+      iframe.allow = "encrypted-media";
+      wrap.appendChild(iframe);
+    });
+  }
+
+  spotifyLinks.forEach(m => appendMedia(wrap => {
+    const iframe = document.createElement("iframe");
+    iframe.height = "152";
+    iframe.src = m.url.replace("open.spotify.com/", "open.spotify.com/embed/");
+    iframe.allow = "encrypted-media";
+    wrap.appendChild(iframe);
+  }, m.caption));
+
+  otherLinks.forEach(m => appendMedia(wrap => {
+    const link = document.createElement("a");
+    link.href = m.url; link.target = "_blank"; link.rel = "noopener";
+    link.textContent = m.url;
+    wrap.appendChild(link);
+  }, m.caption));
 
   const others = state.albums.filter(x => x.artist === a.artist && x !== a);
   const moreBlock = document.getElementById("modalMoreByArtist");
