@@ -1,18 +1,27 @@
 """
-1001 Albums admin backend — FastAPI app.
+1001 Albums backend — FastAPI app. This is the one process meant to run in
+production (Coolify) and locally: it serves the static frontend, the live
+data route, and the admin page, so local testing matches production
+exactly instead of the old two-piece "static file server + separate API"
+setup.
 
-Two things live here:
+  - GET / and /css, /js, /img — the existing static frontend (index.html +
+    js/*.js + css/styles.css + img assets), unchanged from the pure-static
+    version.
   - GET /albums_enriched.json — live export straight from the DB
-    (db.export_from_db), same shape the pipeline has always produced, so
-    js/data.js's fetch() keeps working unchanged once pointed at this route
-    instead of the static file.
+    (db.export_from_db), same shape the pipeline has always produced.
+    js/data.js's fetch("albums_enriched.json") is a *relative* URL, so once
+    the page itself is served from here it resolves to this route
+    automatically — no frontend code changes needed.
   - /admin — a single authenticated page: paste a new Medium post URL, it
     runs sync_posts() (from enrich_1001_albums.py) for just that one URL —
     scrape, merge into the DB, Spotify/MusicBrainz enrichment only for
     genuinely new albums. Same incremental logic the bulk pipeline run uses,
     just scoped to one URL instead of the whole medium_post_urls.txt list.
 
-Run locally: uvicorn server:app --reload
+Run locally: uvicorn server:app --reload --port 8000
+  (replaces the old `python -m http.server` — this one process now serves
+  everything the static server did, plus live data and /admin)
 Auth: HTTP Basic, single shared username/password from .env
 (ADMIN_USERNAME/ADMIN_PASSWORD) — single-user tool, no per-user accounts.
 """
@@ -22,8 +31,9 @@ import secrets
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.staticfiles import StaticFiles
 
 from db import export_from_db, get_connection
 from enrich_1001_albums import sync_posts
@@ -92,3 +102,16 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
     return ADMIN_PAGE.format(result=result)
+
+
+@app.get("/")
+def index():
+    return FileResponse("index.html")
+
+
+# Mounted by name, not the whole project root — the repo root also has
+# .env, the DB file, and the pipeline scripts, none of which should be
+# web-servable.
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/js", StaticFiles(directory="js"), name="js")
+app.mount("/img", StaticFiles(directory="img"), name="img")
