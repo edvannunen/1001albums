@@ -432,16 +432,11 @@
     "artist": "Jack Elliott",
     "album": "Jack Takes the Floor",
     "year": "1958",
-    "text": "Een folk singer a la Woody Guthrie. Woody doet ook nog even mee. Jack leidt elk nr ook even in met een praatje. Af en toe een lekkere jodel erbij. Wel een mooie pre-popmuziek plaat. 18 Sarah Vaughan at Mister Kelly’s (1958). Een live plaat dus. Wat minder uitbundig dan bijv Ella FItzgerald, maar juist daardoor ook wel erg goed. Geen orkest of gladde productie, maar heel basic met een jazz trio, live in een club in Chicago. Heerlijke, eerlijke opnames. Tijdens een rustige pianosolo in Willow Weep for Me valt er iets om (er klinkt een flinke klonk), wordt er gelachen en maakt Sarah er in haar zang nog een grap over. How High The Moon heeft compleet andere tekst: ’I don’t know the words of the this song but going to sing them any way. Ella Fitzgerald sings this song real real crazy’ (al zingend dus). Ik kende Sarah nauwelijks en altijd beetje in de schaduw gestaan van Billie & Ella dacht ik, maar daar moet ik toch wel van terugkomen.",
+    "text": "Een folk singer a la Woody Guthrie. Woody doet ook nog even mee. Jack leidt elk nr ook even in met een praatje. Af en toe een lekkere jodel erbij. Wel een mooie pre-popmuziek plaat.",
     "media": [
       {
         "type": "spotify",
         "url": "https://open.spotify.com/album/0NjGpEebiBfwAjDzyArInT",
-        "caption": null
-      },
-      {
-        "type": "spotify",
-        "url": "https://open.spotify.com/album/1Gtq3swNqCftSAffwXdjum",
         "caption": null
       }
     ],
@@ -453,6 +448,33 @@
       "cover_art_archive_url": "https://coverartarchive.org/release-group/962e0e61-0566-331c-9b9c-515256ae1a89/front"
     },
     "spotify": null
+  },
+  {
+    "number": "18",
+    "artist": "Sarah Vaughan",
+    "album": "at Mister Kelly’s",
+    "year": "1958",
+    "text": "Een live plaat dus. Wat minder uitbundig dan bijv Ella FItzgerald, maar juist daardoor ook wel erg goed. Geen orkest of gladde productie, maar heel basic met een jazz trio, live in een club in Chicago. Heerlijke, eerlijke opnames. Tijdens een rustige pianosolo in Willow Weep for Me valt er iets om (er klinkt een flinke klonk), wordt er gelachen en maakt Sarah er in haar zang nog een grap over. How High The Moon heeft compleet andere tekst: ’I don’t know the words of the this song but going to sing them any way. Ella Fitzgerald sings this song real real crazy’ (al zingend dus). Ik kende Sarah nauwelijks en altijd beetje in de schaduw gestaan van Billie & Ella dacht ik, maar daar moet ik toch wel van terugkomen.",
+    "media": [
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/album/1Gtq3swNqCftSAffwXdjum",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "jazz",
+        "vocal",
+        "vocal jazz",
+        "standards",
+        "traditional pop",
+        "jazz instrument",
+        "american popular song"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/24e9df56-9799-3ebe-9e15-696403803781/front"
+    }
   },
   {
     "number": "19",
@@ -9019,6 +9041,31 @@
     "spotify": null
   },
   {
+    "number": "287",
+    "artist": "Mike Oldfield",
+    "album": "Tubular Bells",
+    "year": "1973",
+    "text": "Het enorm ambitieuze debuutalbum van een pas 19-jarige Mike Oldfield. Twee lange instrumentale nummers en Mike speelt alle tig instrumenten zelf. Hij kreeg het vertrouwen van John Peel en Richard Branson: “als niemand het uitbrengt dan starten we wel zoiets als Virgin Records”. Aldus geschiede. Het frappante aan het album is dat het raakvlakken heeft met zowel lift-muzak als progrock, en in het tweede deel nog best wat rare stukken bevat. De opening is ook wel bekend van The Exorcist film, dat zorgde ook voor een flinke naamsbekendheid toen. Al tig jaar niet meer gedraaid en wel leuk om weer eens te horen. Vooral het tweede deel kende ik nauwelijks, meestal was ik na deel 1 wel klaar. Heel raar dat het aan het einde ineens in steeds snellere folky Sailer’s Hornpipe overgaat (ook wel bekend als de tune van Popeye). Wat ik heel interessant vind is dat componist Doug “Hey y’all” de eerste helft luistert en doorneemt met de partituur erbij. Dan hoor en zie je wat er toch allemaal gebeurt.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=mcfFwj8QoG4",
+        "caption": null
+      },
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/album/0a3YQpBnRzJzNktOjb6Dum",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United Kingdom",
+      "genres": [],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/1082b88c-a2c4-36a3-834f-126405c20dc3/front"
+    },
+    "spotify": null
+  },
+  {
     "number": "288",
     "artist": "Todd Rundgren",
     "album": "A Wizard, A True Star",
@@ -9049,31 +9096,6 @@
         "male vocalists"
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/d6263c37-09b4-35f3-80db-3ffff1cf4252/front"
-    },
-    "spotify": null
-  },
-  {
-    "number": "289",
-    "artist": "Mike Oldfield",
-    "album": "Tubular Bells",
-    "year": "1973",
-    "text": "Het enorm ambitieuze debuutalbum van een pas 19-jarige Mike Oldfield. Twee lange instrumentale nummers en Mike speelt alle tig instrumenten zelf. Hij kreeg het vertrouwen van John Peel en Richard Branson: “als niemand het uitbrengt dan starten we wel zoiets als Virgin Records”. Aldus geschiede. Het frappante aan het album is dat het raakvlakken heeft met zowel lift-muzak als progrock, en in het tweede deel nog best wat rare stukken bevat. De opening is ook wel bekend van The Exorcist film, dat zorgde ook voor een flinke naamsbekendheid toen. Al tig jaar niet meer gedraaid en wel leuk om weer eens te horen. Vooral het tweede deel kende ik nauwelijks, meestal was ik na deel 1 wel klaar. Heel raar dat het aan het einde ineens in steeds snellere folky Sailer’s Hornpipe overgaat (ook wel bekend als de tune van Popeye). Wat ik heel interessant vind is dat componist Doug “Hey y’all” de eerste helft luistert en doorneemt met de partituur erbij. Dan hoor en zie je wat er toch allemaal gebeurt.",
-    "media": [
-      {
-        "type": "youtube",
-        "url": "https://www.youtube.com/watch?v=mcfFwj8QoG4",
-        "caption": null
-      },
-      {
-        "type": "spotify",
-        "url": "https://open.spotify.com/album/0a3YQpBnRzJzNktOjb6Dum",
-        "caption": null
-      }
-    ],
-    "musicbrainz": {
-      "country": "United Kingdom",
-      "genres": [],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/1082b88c-a2c4-36a3-834f-126405c20dc3/front"
     },
     "spotify": null
   },
@@ -10386,7 +10408,7 @@
     "spotify": null
   },
   {
-    "number": "328",
+    "number": "329",
     "artist": "NEU!",
     "album": "NEU! ’75",
     "year": "1975",
@@ -12103,6 +12125,33 @@
     "spotify": null
   },
   {
+    "number": "380",
+    "artist": "Wire",
+    "album": "Pink Flag",
+    "year": "1977",
+    "text": "Ik ben blij dat dat de gladde yacht rock vervangen wordt door schurende punk. Sowieso best veel Wire aan het draaien de laatste tijd. In de Oor Postpunk Album Top 100 staat hun derde album “154” op nummer 1. Die staat dan weer niet in deze lijst, alleen deze plaat, hun debuut, en die staat dan juist weer niet in de Oor Postpunk lijst. Het is dus allemaal maar een mening. Het 1001 Albums kiest wel vaker alleen het debuut en negeert dan de betere opvolgers, zie The Strangles. Afijn. This is punk, Jim, but not as we know it. 21 nummers in 35 minuten, een soort Ramones die wel de universiteit hebben gedaan. Daar zitten een aantal geweldige nummers tussen, zoals Lowdown, Mannequin of Strange. Invloedrijke plaat ook.",
+    "media": [
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/album/4WXqZZ28geJSPtqLcCF56L",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United Kingdom",
+      "genres": [
+        "rock",
+        "punk",
+        "punk rock",
+        "post-punk",
+        "new wave",
+        "art punk"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/9facb8b5-4b02-3f28-9f4a-61cb9b8fd7aa/front"
+    },
+    "spotify": null
+  },
+  {
     "number": "381",
     "artist": "John Martyn",
     "album": "One World",
@@ -12455,33 +12504,6 @@
     "spotify": null
   },
   {
-    "number": "389",
-    "artist": "Wire",
-    "album": "Pink Flag",
-    "year": "1977",
-    "text": "Ik ben blij dat dat de gladde yacht rock vervangen wordt door schurende punk. Sowieso best veel Wire aan het draaien de laatste tijd. In de Oor Postpunk Album Top 100 staat hun derde album “154” op nummer 1. Die staat dan weer niet in deze lijst, alleen deze plaat, hun debuut, en die staat dan juist weer niet in de Oor Postpunk lijst. Het is dus allemaal maar een mening. Het 1001 Albums kiest wel vaker alleen het debuut en negeert dan de betere opvolgers, zie The Strangles. Afijn. This is punk, Jim, but not as we know it. 21 nummers in 35 minuten, een soort Ramones die wel de universiteit hebben gedaan. Daar zitten een aantal geweldige nummers tussen, zoals Lowdown, Mannequin of Strange. Invloedrijke plaat ook.",
-    "media": [
-      {
-        "type": "spotify",
-        "url": "https://open.spotify.com/album/4WXqZZ28geJSPtqLcCF56L",
-        "caption": null
-      }
-    ],
-    "musicbrainz": {
-      "country": "United Kingdom",
-      "genres": [
-        "rock",
-        "punk",
-        "punk rock",
-        "post-punk",
-        "new wave",
-        "art punk"
-      ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/9facb8b5-4b02-3f28-9f4a-61cb9b8fd7aa/front"
-    },
-    "spotify": null
-  },
-  {
     "number": "390",
     "artist": "Meat Loaf",
     "album": "Bat Out of Hell",
@@ -12759,26 +12781,11 @@
     "artist": "Elis Regina",
     "album": "Vento De Maio",
     "year": "1978",
-    "text": "Nu kom ik wel op onontgonnen terrein voor me. Elis Regina is blijkbaar een Braziliaanse superster, uit de jaren 70. Begonnen in vooral Bossa Nova stijl, maar o.a. met dit album Vento De Maio (meiwind) wordt het wat extraverter, hoewel de Bossa nooit ver weg is. Het is an sich wel verfrissend na de vorige bijdrages, maar het klinkt ook wel wat gedateerd allemaal. O Trem Azul (blauwe trein) is wel een mooie, met koor. Ze is maar 36 geworden. In 1982 stierf ze aan een overdosis vermouth, cocaïne en kalmerende middelen. Dat klinkt niet alsof het allemaal koek en ei (bolo e ovo) was. 399 Pere Ubu - Dub Housing (1978) Tsjonge. Vier albums geleden hadden we ook al Pere Ubu. Actief bandje. Deze is nog vreemder, en donkerder, dan The Modern Dance. Behoorlijk arty farty allemaal. David Thomas zingt als een madman muppet on speed. Daar moet ik toch wel beetje aan wennen. Maar een dance party waar je een nummer als (Pa) Ubu Dance Party kan draaien zonder dat helft van de gasten meteen naar huis gaat of boos op de DJ wordt, zijn dan wel weer de leukere, eigenaardige feestjes. Dit is wel een album dat ik vaker zou moeten draaien om het een beetje te doorgronden. Ben er nog niet helemaal over uit of ik dat wel wil, maar dat durf ik wel aan. Misschien is de Trout Mask Replica vergelijking bij de vorige plaat toch niet zo heel gek.",
+    "text": "Nu kom ik wel op onontgonnen terrein voor me. Elis Regina is blijkbaar een Braziliaanse superster, uit de jaren 70. Begonnen in vooral Bossa Nova stijl, maar o.a. met dit album Vento De Maio (meiwind) wordt het wat extraverter, hoewel de Bossa nooit ver weg is. Het is an sich wel verfrissend na de vorige bijdrages, maar het klinkt ook wel wat gedateerd allemaal. O Trem Azul (blauwe trein) is wel een mooie, met koor. Ze is maar 36 geworden. In 1982 stierf ze aan een overdosis vermouth, cocaïne en kalmerende middelen. Dat klinkt niet alsof het allemaal koek en ei (bolo e ovo) was.",
     "media": [
       {
         "type": "spotify",
         "url": "https://open.spotify.com/track/6WLOyKNN9aXfoHR4T31ryG",
-        "caption": null
-      },
-      {
-        "type": "youtube",
-        "url": "https://www.youtube.com/watch?v=Mn-rwQgk6vE",
-        "caption": "Pere Ubu in hetzelfde programma als hierboven. Nu met Debbie Harry"
-      },
-      {
-        "type": "image",
-        "url": "https://miro.medium.com/v2/resize:fit:1400/0*_-00Cf_yuXvTCDbi",
-        "caption": "Pere Ubu in 1978, met in het prominent in het midden David Thomas"
-      },
-      {
-        "type": "spotify",
-        "url": "https://open.spotify.com/album/64CW8fAAWtgoVkbQ1MyWrS",
         "caption": null
       }
     ],
@@ -12797,6 +12804,44 @@
       "cover_art_archive_url": "https://coverartarchive.org/release-group/e3f00603-c147-3810-ae0d-29cb2cc60992/front"
     },
     "spotify": null
+  },
+  {
+    "number": "399",
+    "artist": "Pere Ubu",
+    "album": "Dub Housing",
+    "year": "1978",
+    "text": "Tsjonge. Vier albums geleden hadden we ook al Pere Ubu. Actief bandje. Deze is nog vreemder, en donkerder, dan The Modern Dance. Behoorlijk arty farty allemaal. David Thomas zingt als een madman muppet on speed. Daar moet ik toch wel beetje aan wennen. Maar een dance party waar je een nummer als (Pa) Ubu Dance Party kan draaien zonder dat helft van de gasten meteen naar huis gaat of boos op de DJ wordt, zijn dan wel weer de leukere, eigenaardige feestjes. Dit is wel een album dat ik vaker zou moeten draaien om het een beetje te doorgronden. Ben er nog niet helemaal over uit of ik dat wel wil, maar dat durf ik wel aan. Misschien is de Trout Mask Replica vergelijking bij de vorige plaat toch niet zo heel gek.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=Mn-rwQgk6vE",
+        "caption": "Pere Ubu in hetzelfde programma als hierboven. Nu met Debbie Harry"
+      },
+      {
+        "type": "image",
+        "url": "https://miro.medium.com/v2/resize:fit:1400/0*_-00Cf_yuXvTCDbi",
+        "caption": "Pere Ubu in 1978, met in het prominent in het midden David Thomas"
+      },
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/album/64CW8fAAWtgoVkbQ1MyWrS",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "punk",
+        "post-punk",
+        "new wave",
+        "art rock",
+        "experimental rock",
+        "art punk",
+        "avantgarde"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/e6cf6f53-43a8-3d00-9913-991cd8ae8f53/front"
+    }
   },
   {
     "number": "400",
