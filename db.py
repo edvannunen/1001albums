@@ -9,16 +9,24 @@ route all stay consistent.
 import sqlite3
 from pathlib import Path
 
-DB_FILE = "1001albums.db"
+# Lives under data/, not the project root — in Coolify a persistent volume
+# is mounted at /app/data (same convention as the De Sprong project), so the
+# DB survives redeploys instead of being wiped along with the rest of the
+# container's filesystem. schema.sql itself stays in the repo root: it's
+# static reference data rebuilt fresh from git on every deploy, not runtime
+# state.
+DB_FILE = "data/1001albums.db"
 SCHEMA_FILE = "schema.sql"
 
 
 def get_connection() -> sqlite3.Connection:
-    """Open the DB, creating the schema on first use."""
+    """Open the DB, creating the data/ dir and schema on first use."""
+    Path(DB_FILE).parent.mkdir(parents=True, exist_ok=True)
     is_new = not Path(DB_FILE).exists()
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
     if is_new:
         conn.executescript(Path(SCHEMA_FILE).read_text(encoding="utf-8"))
     return conn
