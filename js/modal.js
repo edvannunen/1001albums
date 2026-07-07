@@ -22,7 +22,7 @@ export function openModal(a){
     b.textContent = country;
     badges.appendChild(b);
   }
-  genreList(a).forEach(g=>{
+  genreList(a).slice(0, 10).forEach(g=>{
     const b = document.createElement("span");
     b.className = "badge";
     b.textContent = g;

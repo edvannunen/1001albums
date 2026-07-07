@@ -45,7 +45,7 @@ export function renderTable(list, { onOpen, onArtistClick }){
       <td><em>${escapeHtml(a.album)}</em></td>
       <td class="mono">${a.year}</td>
       <td>${(a.musicbrainz && a.musicbrainz.country) ? escapeHtml(a.musicbrainz.country) : "—"}</td>
-      <td>${genreList(a).join(", ") || "—"}</td>
+      <td>${genreList(a).slice(0, 10).join(", ") || "—"}</td>
     `;
     tr.addEventListener("click", ()=> onOpen(a));
     tr.querySelector(".artist-cell").addEventListener("click", (e)=>{
