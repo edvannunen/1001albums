@@ -7,35 +7,45 @@ setup.
 
 Deployed at https://bier-en-brood.nl/1001albums — a literal subpath, not a
 subdomain, shared with other projects on the same domain (De Sprong is the
-other one, at /de-sprong). Every route below is registered under BASE_PATH
-for that reason: unlike a subdomain, Traefik/Coolify forwards the full
-"/1001albums/..." path to this container rather than stripping the prefix
-(confirmed by De Sprong needing the equivalent `paths.base` config), so the
-app has to know its own mount point. index.html's asset paths stay plain
-relative ("css/styles.css", not "/css/styles.css") and resolve correctly
-regardless of BASE_PATH, AS LONG AS the browser's URL for the page itself
-ends in a trailing slash — Starlette's default redirect_slashes behavior
-handles a bare "/1001albums" (no trailing slash) by redirecting to
-"/1001albums/" before any relative asset path gets resolved.
+other one, at /de-sprong). Confirmed empirically (first deploy 404'd)
+that Traefik/Coolify STRIPS the "/1001albums" prefix before forwarding to
+this container — the opposite of what De Sprong's need for `paths.base`
+suggested. So, unlike an earlier version of this file, routes here are
+registered at plain root paths ("/", "/admin", ...), NOT under a
+"/1001albums" prefix — the app never sees that prefix at all.
 
-  - GET {BASE_PATH}/ and /css, /js, /img — the existing static frontend
-    (index.html + js/*.js + css/styles.css + img assets), unchanged from
-    the pure-static version.
-  - GET {BASE_PATH}/albums_enriched.json — live export straight from the DB
+index.html's asset paths are plain relative ("css/styles.css", not
+"/css/styles.css"), so they resolve correctly against whatever URL the
+BROWSER actually shows (bier-en-brood.nl/1001albums/...) regardless of what
+Traefik forwards internally — no BASE_PATH-awareness needed in the app for
+those. The one place this needed care: /admin's HTML form action. Written
+as a plain relative "add-post" rather than an absolute path (an absolute
+"/admin/add-post" would resolve against the browser's actual origin,
+missing the external "/1001albums" prefix Traefik expects on the way in) —
+correct as long as /admin is registered WITH a trailing slash, so
+Starlette's default redirect_slashes turns a bare "/admin" request into
+"/admin/" before the relative form action gets resolved. Same trick the
+root path "/" already relied on for its own asset references.
+
+  - GET / and /css, /js, /img — the existing static frontend (index.html +
+    js/*.js + css/styles.css + img assets), unchanged from the pure-static
+    version.
+  - GET /albums_enriched.json — live export straight from the DB
     (db.export_from_db), same shape the pipeline has always produced.
     js/data.js's fetch("albums_enriched.json") is a *relative* URL, so once
     the page itself is served from here it resolves to this route
     automatically — no frontend code changes needed.
-  - {BASE_PATH}/admin — a single authenticated page: paste a new Medium
-    post URL, it runs sync_posts() (from enrich_1001_albums.py) for just
-    that one URL — scrape, merge into the DB, Spotify/MusicBrainz
-    enrichment only for genuinely new albums. Same incremental logic the
-    bulk pipeline run uses, just scoped to one URL instead of the whole
-    medium_post_urls.txt list.
+  - /admin/ — a single authenticated page: paste a new Medium post URL, it
+    runs sync_posts() (from enrich_1001_albums.py) for just that one URL —
+    scrape, merge into the DB, Spotify/MusicBrainz enrichment only for
+    genuinely new albums. Same incremental logic the bulk pipeline run uses,
+    just scoped to one URL instead of the whole medium_post_urls.txt list.
 
-Run locally: uvicorn server:app --reload --port 8000
-  then browse http://localhost:8000/1001albums/ — same BASE_PATH locally
-  and in production, so local testing is representative.
+Run locally: uvicorn server:app --reload --port 8000, then browse
+http://localhost:8000/ — no subpath locally, since there's no Traefik here
+to add one; the app's own routing is identical to what it sees in
+production either way (root-relative), only the browser-facing external
+URL differs.
 Auth: HTTP Basic, single shared username/password from .env
 (ADMIN_USERNAME/ADMIN_PASSWORD) — single-user tool, no per-user accounts.
 """
@@ -44,7 +54,7 @@ import os
 import secrets
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException
+from fastapi import Depends, FastAPI, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
@@ -56,10 +66,8 @@ load_dotenv()
 
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
-BASE_PATH = "/1001albums"
 
 app = FastAPI()
-router = APIRouter(prefix=BASE_PATH)
 security = HTTPBasic()
 
 
@@ -76,37 +84,32 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     return credentials.username
 
 
-@router.get("/albums_enriched.json")
+@app.get("/albums_enriched.json")
 def albums_json():
     return JSONResponse(export_from_db())
 
 
-# Form action is a fully-qualified path (including BASE_PATH) rather than a
-# relative one — this HTML is served at BASE_PATH/admin (no trailing
-# slash), where a plain relative "add-post" would resolve one level too
-# high (against BASE_PATH/, not BASE_PATH/admin/). Absolute-with-prefix
-# sidesteps that ambiguity entirely.
-ADMIN_PAGE = f"""<!doctype html>
+ADMIN_PAGE = """<!doctype html>
 <html>
 <head><title>1001 Albums admin</title></head>
 <body style="font-family: sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem;">
   <h1>Add a Medium post</h1>
-  <form method="post" action="{BASE_PATH}/admin/add-post">
+  <form method="post" action="add-post">
     <input name="url" type="url" placeholder="https://edvannunen.medium.com/..."
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
     <button type="submit" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>
   </form>
-  {{result}}
+  {result}
 </body>
 </html>"""
 
 
-@router.get("/admin", response_class=HTMLResponse)
+@app.get("/admin/", response_class=HTMLResponse)
 def admin_page(_: str = Depends(require_admin)):
     return ADMIN_PAGE.format(result="")
 
 
-@router.post("/admin/add-post", response_class=HTMLResponse)
+@app.post("/admin/add-post", response_class=HTMLResponse)
 def add_post(url: str = Form(...), _: str = Depends(require_admin)):
     conn = get_connection()
     try:
@@ -125,16 +128,14 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
     return ADMIN_PAGE.format(result=result)
 
 
-@router.get("/")
+@app.get("/")
 def index():
     return FileResponse("index.html")
 
 
-app.include_router(router)
-
 # Mounted by name, not the whole project root — the repo root also has
 # .env, the DB file, and the pipeline scripts, none of which should be
 # web-servable.
-app.mount(f"{BASE_PATH}/css", StaticFiles(directory="css"), name="css")
-app.mount(f"{BASE_PATH}/js", StaticFiles(directory="js"), name="js")
-app.mount(f"{BASE_PATH}/img", StaticFiles(directory="img"), name="img")
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/js", StaticFiles(directory="js"), name="js")
+app.mount("/img", StaticFiles(directory="img"), name="img")
