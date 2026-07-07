@@ -2,23 +2,23 @@
 One-time migration: albums_enriched.json -> 1001albums.db (SQLite).
 
 Creates the schema (schema.sql), inserts every album + its media + genre
-tags, seeds medium_posts from medium_post_urls.txt (all marked "processed",
-since these are the posts already behind the current JSON), then re-exports
-the DB back into the same JSON shape and diffs it against the original
-field-for-field to prove the round-trip is lossless before anything else
-touches this data.
+tags via db.py's shared insert_album(), seeds medium_posts from
+medium_post_urls.txt (all marked "processed", since these are the posts
+already behind the current JSON), then re-exports the DB back into the
+same JSON shape (db.py's export_from_db()) and diffs it against the
+original field-for-field to prove the round-trip is lossless before
+anything else touches this data.
 
 Safe to re-run: deletes and recreates the DB file each time.
 """
 
 import json
-import sqlite3
 from pathlib import Path
+
+from db import DB_FILE, get_connection, insert_album, export_from_db, mark_post_processed
 
 JSON_FILE = "albums_enriched.json"
 POST_URLS_FILE = "medium_post_urls.txt"
-SCHEMA_FILE = "schema.sql"
-DB_FILE = "1001albums.db"
 
 
 def build_db():
@@ -26,46 +26,11 @@ def build_db():
     if db_path.exists():
         db_path.unlink()
 
-    conn = sqlite3.connect(DB_FILE)
-    conn.executescript(Path(SCHEMA_FILE).read_text(encoding="utf-8"))
+    conn = get_connection()  # creates schema, since the file didn't exist
 
     albums = json.loads(Path(JSON_FILE).read_text(encoding="utf-8"))
-
     for e in albums:
-        spotify = e.get("spotify") or {}
-        mb = e.get("musicbrainz") or {}
-
-        cur = conn.execute(
-            """
-            INSERT INTO albums (
-                catalog_number, artist, album, year, text,
-                spotify_url, spotify_embed_url, spotify_cover_art_url,
-                spotify_matched_artist_name, spotify_matched_album_name,
-                spotify_matched_release_year, spotify_exact_year_match,
-                mb_country, mb_cover_art_url
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                int(e["number"]), e["artist"], e["album"], int(e["year"]), e["text"],
-                spotify.get("spotify_url"), spotify.get("spotify_embed_url"),
-                spotify.get("cover_art_url"), spotify.get("matched_artist_name"),
-                spotify.get("matched_album_name"), spotify.get("matched_release_year"),
-                None if "exact_year_match" not in spotify else int(spotify["exact_year_match"]),
-                mb.get("country"), mb.get("cover_art_archive_url"),
-            ),
-        )
-        album_id = cur.lastrowid
-
-        for pos, m in enumerate(e.get("media") or []):
-            conn.execute(
-                "INSERT INTO media (album_id, type, url, caption, position) VALUES (?, ?, ?, ?, ?)",
-                (album_id, m["type"], m["url"], m.get("caption"), pos),
-            )
-
-        for tag in mb.get("genres") or []:
-            conn.execute(
-                "INSERT INTO genres (album_id, tag) VALUES (?, ?)", (album_id, tag)
-            )
+        insert_album(conn, e)
 
     post_urls_path = Path(POST_URLS_FILE)
     if post_urls_path.exists():
@@ -74,78 +39,12 @@ def build_db():
             for line in post_urls_path.read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
-        conn.executemany(
-            "INSERT INTO medium_posts (url, status, last_scraped_at) "
-            "VALUES (?, 'processed', CURRENT_TIMESTAMP)",
-            [(u,) for u in urls],
-        )
+        for url in urls:
+            mark_post_processed(conn, url)
 
     conn.commit()
     conn.close()
     print(f"Migrated {len(albums)} albums into {DB_FILE}")
-
-
-def export_from_db() -> list:
-    """Reconstruct the albums_enriched.json shape from the DB, for
-    round-trip verification (and later reused as the live /albums_enriched.json
-    export route)."""
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-
-    albums = conn.execute("SELECT * FROM albums ORDER BY id").fetchall()
-    media_rows = conn.execute("SELECT * FROM media ORDER BY album_id, position").fetchall()
-    genre_rows = conn.execute("SELECT * FROM genres ORDER BY album_id").fetchall()
-    conn.close()
-
-    media_by_album = {}
-    for m in media_rows:
-        media_by_album.setdefault(m["album_id"], []).append(
-            {"type": m["type"], "url": m["url"], "caption": m["caption"]}
-        )
-    genres_by_album = {}
-    for g in genre_rows:
-        genres_by_album.setdefault(g["album_id"], []).append(g["tag"])
-
-    result = []
-    for a in albums:
-        has_spotify = a["spotify_url"] is not None
-        spotify = None
-        if has_spotify:
-            spotify = {
-                "spotify_url": a["spotify_url"],
-                "spotify_embed_url": a["spotify_embed_url"],
-                "cover_art_url": a["spotify_cover_art_url"],
-                "matched_artist_name": a["spotify_matched_artist_name"],
-                "matched_album_name": a["spotify_matched_album_name"],
-                "matched_release_year": a["spotify_matched_release_year"],
-                "exact_year_match": bool(a["spotify_exact_year_match"]),
-            }
-
-        # musicbrainz_lookup() returns {} (not a fully-keyed dict) when no
-        # release-group matched at all — cover_art_archive_url is the only
-        # field that's unconditionally set whenever a release-group WAS
-        # found, so its absence is the exact signal for "no match" (verified
-        # against the pre-migration JSON: the two sets coincide exactly).
-        if a["mb_cover_art_url"] is None:
-            musicbrainz = {}
-        else:
-            musicbrainz = {
-                "country": a["mb_country"],
-                "genres": genres_by_album.get(a["id"], []),
-                "cover_art_archive_url": a["mb_cover_art_url"],
-            }
-
-        result.append({
-            "number": str(a["catalog_number"]),
-            "artist": a["artist"],
-            "album": a["album"],
-            "year": str(a["year"]),
-            "text": a["text"],
-            "media": media_by_album.get(a["id"], []),
-            "musicbrainz": musicbrainz,
-            "spotify": spotify,
-        })
-    return result
 
 
 def verify():

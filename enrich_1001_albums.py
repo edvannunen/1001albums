@@ -16,13 +16,17 @@ Three stages, run independently or all together:
   3. enrich_with_musicbrainz() -> artist country of origin + genre tags,
                                    cover art fallback via Cover Art Archive
 
-Re-running main() is incremental: existing entries (matched by "number") keep
-their already-fetched Spotify/MusicBrainz data and only get their text/media
-refreshed from a fresh Medium scrape; only genuinely new entries go through
-stages 2 and 3.
+Storage is SQLite (1001albums.db, schema in schema.sql, helpers in db.py) —
+re-running main() is incremental: existing albums (matched by composite key
+catalog_number+artist+album) keep their already-fetched Spotify/MusicBrainz
+data and only get their text/media refreshed from a fresh Medium scrape;
+only genuinely new albums go through stages 2 and 3. sync_posts() holds this
+logic so a future admin "add by URL" endpoint can call it with a single-URL
+list instead of the full medium_post_urls.txt.
 
-Output: a single JSON file, one record per album, ready to feed your
-searchable/sortable site + dashboard.
+main() also regenerates albums_enriched.json from the DB on every run (via
+db.export_from_db) so the current static frontend keeps working unchanged
+until it's wired up to a live DB-backed route.
 
 SETUP
 -----
@@ -43,6 +47,9 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 import requests
 from dotenv import load_dotenv
+
+from db import get_connection, find_album_id, insert_album, update_album_text_media, \
+    mark_post_processed, mark_post_failed, export_from_db
 
 load_dotenv()
 
@@ -287,20 +294,28 @@ def parse_medium_post(state: dict) -> list:
     return entries
 
 
-def scrape_medium_posts(post_urls: list) -> list:
-    """Scrape a list of Medium post URLs, return flat list of album entries."""
+def scrape_medium_posts(post_urls: list) -> tuple[list, list]:
+    """Scrape a list of Medium post URLs. Returns (entries, failures) — each
+    entry is tagged with its source post ("medium_post_url") so it can be
+    stored on the album row, and failures is a list of (url, error_message)
+    so the caller can mark those posts accordingly rather than silently
+    treating them as skipped."""
     all_entries = []
+    failures = []
     for url in post_urls:
         print(f"Scraping {url} ...")
         try:
             state = fetch_medium_post_state(url)
             entries = parse_medium_post(state)
+            for e in entries:
+                e["medium_post_url"] = url
             all_entries.extend(entries)
             print(f"  -> {len(entries)} entries")
         except Exception as e:
             print(f"  ! failed: {e}")
+            failures.append((url, str(e)))
         time.sleep(REQUEST_DELAY)
-    return all_entries
+    return all_entries, failures
 
 
 # ---------------------------------------------------------------------------
@@ -507,6 +522,70 @@ def enrich_with_musicbrainz(entries: list) -> list:
 
 
 # ---------------------------------------------------------------------------
+# SYNC — scrape a set of posts and merge into the DB
+# ---------------------------------------------------------------------------
+
+def sync_posts(post_urls: list, conn) -> dict:
+    """Scrape post_urls, merge into the DB, and run Spotify/MusicBrainz
+    enrichment only for genuinely new albums. Shared by main() (the full
+    medium_post_urls.txt list) and, later, an admin endpoint that calls this
+    with a single newly-added URL — the incremental behavior is identical
+    either way, it's just a matter of how many URLs are in the list.
+
+    An album already in the DB (matched by catalog_number+artist+album —
+    NOT catalog_number alone, since a handful of posts reuse the same
+    catalog number for two different albums) keeps its existing
+    spotify/musicbrainz enrichment and only has its header/text/media
+    refreshed from the fresh scrape — avoids re-hitting the rate-limited
+    MusicBrainz/Spotify APIs for the whole dataset on every run.
+
+    Returns a small stats dict: {"scraped", "new", "updated", "failed_urls"}.
+    """
+    print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
+    scraped, failures = scrape_medium_posts(post_urls)
+    print(f"Total album entries scraped: {len(scraped)}")
+
+    new_entries = []
+    updated = 0
+    for e in scraped:
+        album_id = find_album_id(conn, e["number"], e["artist"], e["album"])
+        if album_id is not None:
+            update_album_text_media(conn, album_id, e)
+            updated += 1
+        else:
+            new_entries.append(e)
+
+    if new_entries:
+        print(f"=== Stage 2: Spotify enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_spotify(new_entries)
+
+        print(f"=== Stage 3: MusicBrainz enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_musicbrainz(new_entries)
+
+        for e in new_entries:
+            insert_album(conn, e)
+    else:
+        print("No new entries — skipping Spotify/MusicBrainz stages.")
+
+    failed_urls = {url for url, _ in failures}
+    for url in post_urls:
+        if url in failed_urls:
+            continue
+        mark_post_processed(conn, url)
+    for url, error in failures:
+        mark_post_failed(conn, url, error)
+
+    conn.commit()
+
+    return {
+        "scraped": len(scraped),
+        "new": len(new_entries),
+        "updated": updated,
+        "failed_urls": sorted(failed_urls),
+    }
+
+
+# ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
 
@@ -522,60 +601,20 @@ def main():
         if line.strip()
     ]
 
-    print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
-    scraped = scrape_medium_posts(post_urls)
-    print(f"Total album entries scraped: {len(scraped)}")
+    conn = get_connection()
+    stats = sync_posts(post_urls, conn)
 
-    # Incremental merge: an entry already in OUTPUT_FILE (matched by
-    # number+artist+album — NOT number alone, since a handful of posts reuse
-    # the same catalog number for two different albums, e.g. "389" for both
-    # Television and Wire; a number-only key would silently collapse those
-    # pairs into one) keeps its existing spotify/musicbrainz enrichment and
-    # only has its header/text/media refreshed from the fresh scrape —
-    # avoids re-hitting the rate-limited MusicBrainz/Spotify APIs for the
-    # whole dataset on every run. Only entries not seen before go through
-    # stages 2 and 3.
-    def merge_key(e):
-        return (e["number"], e["artist"], e["album"])
+    albums = export_from_db(conn)
+    conn.close()
 
-    output_path = Path(OUTPUT_FILE)
-    existing_by_key = {}
-    if output_path.exists():
-        existing_by_key = {
-            merge_key(e): e
-            for e in json.loads(output_path.read_text(encoding="utf-8"))
-        }
-
-    new_entries = []
-    for e in scraped:
-        existing = existing_by_key.get(merge_key(e))
-        if existing:
-            existing.update({
-                "artist": e["artist"],
-                "album": e["album"],
-                "year": e["year"],
-                "text": e["text"],
-                "media": e["media"],
-            })
-        else:
-            new_entries.append(e)
-
-    if new_entries:
-        print(f"=== Stage 2: Spotify enrichment ({len(new_entries)} new entries) ===")
-        enrich_with_spotify(new_entries)
-
-        print(f"=== Stage 3: MusicBrainz enrichment ({len(new_entries)} new entries) ===")
-        enrich_with_musicbrainz(new_entries)
-    else:
-        print("No new entries — skipping Spotify/MusicBrainz stages.")
-
-    merged = list(existing_by_key.values()) + new_entries
-    merged.sort(key=lambda e: int(e["number"]))
-
-    output_path.write_text(
-        json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8"
+    Path(OUTPUT_FILE).write_text(
+        json.dumps(albums, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    print(f"Done. Wrote {len(merged)} entries to {OUTPUT_FILE}")
+    print(
+        f"Done. {stats['new']} new, {stats['updated']} updated"
+        + (f", {len(stats['failed_urls'])} posts failed" if stats["failed_urls"] else "")
+        + f". Wrote {len(albums)} entries to {OUTPUT_FILE}."
+    )
 
 
 if __name__ == "__main__":
