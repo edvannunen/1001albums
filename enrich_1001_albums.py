@@ -5,12 +5,21 @@
 Three stages, run independently or all together:
 
   1. scrape_medium_posts()   -> pulls header/text/media (YouTube/Spotify/image)
-                                 from your Medium posts via the ?format=json trick
+                                 from your Medium posts by parsing the
+                                 rendered page's embedded Apollo GraphQL
+                                 cache (window.__APOLLO_STATE__) — the old
+                                 ?format=json trick stopped working (Medium's
+                                 edge cache now ignores that query param)
   2. enrich_with_spotify()   -> finds best-matching Spotify album (handles
                                  remasters/expanded editions by year proximity),
                                  gets embed link + cover art
   3. enrich_with_musicbrainz() -> artist country of origin + genre tags,
                                    cover art fallback via Cover Art Archive
+
+Re-running main() is incremental: existing entries (matched by "number") keep
+their already-fetched Spotify/MusicBrainz data and only get their text/media
+refreshed from a fresh Medium scrape; only genuinely new entries go through
+stages 2 and 3.
 
 Output: a single JSON file, one record per album, ready to feed your
 searchable/sortable site + dashboard.
@@ -31,6 +40,7 @@ import time
 import base64
 import difflib
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 import requests
 from dotenv import load_dotenv
 
@@ -55,40 +65,112 @@ REQUEST_DELAY = 0.3  # seconds between API calls, be a good citizen
 # STAGE 1 — Medium scraping
 # ---------------------------------------------------------------------------
 
-def fetch_medium_post_json(post_url: str) -> dict:
-    """Fetch a Medium post's raw JSON via the ?format=json trick."""
-    sep = "&" if "?" in post_url else "?"
-    url = f"{post_url}{sep}format=json"
-    resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=15)
+def extract_js_object(html: str, marker: str) -> str | None:
+    """Extract a JS object literal assigned via `marker` (e.g.
+    "window.__APOLLO_STATE__ = ") by brace-matching from the first '{' after
+    the marker, respecting quoted strings so braces inside string values
+    don't throw off the depth count."""
+    start = html.find(marker)
+    if start == -1:
+        return None
+    start += len(marker)
+    depth = 0
+    in_str = False
+    str_char = ""
+    escape = False
+    for i in range(start, len(html)):
+        c = html[i]
+        if in_str:
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == str_char:
+                in_str = False
+        else:
+            if c in "\"'":
+                in_str = True
+                str_char = c
+            elif c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    return html[start:i + 1]
+    return None
+
+
+def fetch_medium_post_state(post_url: str) -> dict:
+    """Fetch a Medium post's rendered page and return its embedded Apollo
+    GraphQL cache (`window.__APOLLO_STATE__`).
+
+    Replaces the old `?format=json` trick — as of 2026-07 Medium/Cloudflare's
+    edge cache ignores that query param entirely (confirmed via
+    `CF-Cache-Status: HIT` on every request regardless of cache-busting
+    params) and always serves the plain server-rendered HTML page instead of
+    the raw JSON payload. The embedded Apollo cache turns out to be a
+    strictly better source anyway: it resolves iframe embeds (YouTube/
+    Spotify) to their real, playable URL for every post regardless of age —
+    unlike the old `thumbnailUrl`/`externalSrc` fields, which only worked for
+    recently-created posts and left older posts' embeds unresolvable.
+    """
+    resp = requests.get(post_url, headers={"User-Agent": USER_AGENT}, timeout=15)
     resp.raise_for_status()
-    raw = resp.text
-    # strip Medium's anti-hijacking prefix: '])}while(1);</x>'
-    payload = raw.split("</x>", 1)[1]
-    return json.loads(payload)
+    resp.encoding = "utf-8"  # Content-Type declares utf-8; pin it rather than
+    # trust requests' encoding sniffing, which mangled apostrophes/quotes in
+    # review text in an earlier run.
+    blob = extract_js_object(resp.text, "window.__APOLLO_STATE__ = ")
+    if blob is None:
+        raise ValueError(f"could not find window.__APOLLO_STATE__ in {post_url}")
+    return json.loads(blob)
 
 
-# Medium's ?format=json endpoint represents paragraph `type` as an integer
-# code, not the string names (H3/P/IMG/IFRAME) other Medium docs describe.
-# Verified against real posts spanning 2019-2026:
-#   3  = section/post title — appears once, never a per-album header.
-#   1  = plain paragraph. Per-album headers are ALSO type 1, not a distinct
-#        heading type — there is no way to tell them apart from paragraph
-#        type alone. Older posts (pre-~2020) even fuse the header into the
-#        start of the review as one paragraph, e.g. "7 Frank Sinatra –
-#        Songs for Swingin' Lovers (1956). Daar is Frank weer...".
-#   4  = image.
-#   11 = native iframe embed (YouTube/Spotify), caption in its own `text`.
-#        `iframe.thumbnailUrl` / `iframe.externalSrc` are only populated for
-#        recently-created posts — for older posts both are empty strings,
-#        so the embed's source URL usually cannot be recovered at all.
-#   14 = Medium's auto-generated link-preview card (`mixtapeMetadata.href`).
-#        Observed for plain hyperlinks (e.g. a linked news article), not for
-#        the album embeds themselves, but its href is directly usable.
-TYPE_TITLE = 3
-TYPE_P = 1
-TYPE_IMG = 4
-TYPE_IFRAME = 11
-TYPE_MIXTAPE = 14
+def _resolve_ref(state: dict, ref):
+    """Apollo cache normalizes entities into a flat dict keyed by
+    "Type:id" and replaces nested objects with {"__ref": "Type:id"} pointers
+    — resolve one such pointer back to the real entity."""
+    if isinstance(ref, dict) and "__ref" in ref:
+        return state.get(ref["__ref"])
+    return ref
+
+
+def get_ordered_paragraphs(state: dict) -> list:
+    """Resolve Post -> content -> bodyModel.paragraphs (a list of Apollo
+    refs) into the actual, ordered list of paragraph entity dicts."""
+    post_key = next(k for k in state if k.startswith("Post:"))
+    post = state[post_key]
+    content_key = next(k for k in post if k.startswith("content("))
+    content = _resolve_ref(state, post[content_key])
+    para_refs = content["bodyModel"]["paragraphs"]
+    return [_resolve_ref(state, ref) for ref in para_refs]
+
+
+# The Apollo cache represents paragraph `type` as a string, not the integer
+# codes the old ?format=json endpoint used. Verified against real posts
+# spanning 2019-2026:
+#   H3/H4 = post title — observed only ever as paragraph 0. Older posts
+#        sometimes tag their title paragraph "P" instead (no distinct heading
+#        type at all), so paragraph 0 is unconditionally skipped as the title
+#        regardless of its type, rather than relying on the type string.
+#   P    = plain paragraph. Per-album headers are ALSO type "P" — there is no
+#        way to tell them apart from paragraph type alone. Older posts
+#        (pre-~2020) even fuse the header into the start of the review as
+#        one paragraph, e.g. "7 Frank Sinatra – Songs for Swingin' Lovers
+#        (1956). Daar is Frank weer...".
+#   IMG  = image.
+#   IFRAME = native iframe embed (YouTube/Spotify), caption in its own
+#        `text`. Resolved via iframe.mediaResource -> MediaResource.iframeSrc
+#        (an embed.ly wrapper URL whose own `url=` query param is the real,
+#        playable source URL) — see resolve_iframe_url().
+#   MIXTAPE_EMBED = Medium's auto-generated link-preview card
+#        (`mixtapeMetadata.href`). Observed for plain hyperlinks (e.g. a
+#        linked news article), not for the album embeds themselves, but its
+#        href is directly usable.
+TYPE_TITLE = ("H3", "H4")
+TYPE_P = "P"
+TYPE_IMG = "IMG"
+TYPE_IFRAME = "IFRAME"
+TYPE_MIXTAPE = "MIXTAPE_EMBED"
 
 # Separator must be an actual dash character (– or —), not a plain hyphen —
 # band/album names routinely contain hyphens (e.g. "The Go-Betweens"), which
@@ -100,20 +182,24 @@ HEADER_RE = re.compile(
     r"^\s*(\d{1,4})[.:]?\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
 )
 
-YOUTUBE_THUMBNAIL_RE = re.compile(r"ytimg\.com/vi/([^/]+)/")
+def resolve_iframe_url(paragraph: dict, state: dict) -> str | None:
+    """Resolve a type=IFRAME paragraph to the embed's real, playable URL.
 
-
-def resolve_iframe_url(iframe: dict) -> str | None:
-    """Best-effort resolution of a native iframe embed's source URL. Medium
-    only retains thumbnailUrl/externalSrc for recently-created posts; for
-    older ones both are empty and the source can't be recovered here."""
-    external_src = iframe.get("externalSrc")
-    if external_src:
-        return external_src
-    match = YOUTUBE_THUMBNAIL_RE.search(iframe.get("thumbnailUrl", ""))
-    if match:
-        return f"https://www.youtube.com/watch?v={match.group(1)}"
-    return None
+    `iframe.mediaResource` is an Apollo ref to a MediaResource entity whose
+    `iframeSrc` is an embed.ly wrapper URL
+    (cdn.embedly.com/widgets/media.html?src=...&url=<real_url>&...) — the
+    wrapper's own `url` query param is the real YouTube watch / Spotify
+    album URL, and Medium's rendered page always carries it, regardless of
+    how old the post is."""
+    iframe = paragraph.get("iframe") or {}
+    media_resource = _resolve_ref(state, iframe.get("mediaResource"))
+    if not media_resource:
+        return None
+    iframe_src = media_resource.get("iframeSrc")
+    if not iframe_src:
+        return None
+    query = parse_qs(urlparse(iframe_src).query)
+    return (query.get("url") or [None])[0]
 
 
 def classify_media_url(url: str) -> str:
@@ -124,7 +210,7 @@ def classify_media_url(url: str) -> str:
     return "other"
 
 
-def parse_medium_post(data: dict) -> list:
+def parse_medium_post(state: dict) -> list:
     """
     Walk a Medium post's paragraph list and group into album entries.
     Returns a list of dicts: {number, artist, album, year, text, media}
@@ -132,19 +218,19 @@ def parse_medium_post(data: dict) -> list:
     than one embed (typically several YouTube clips).
     """
     try:
-        paragraphs = data["payload"]["value"]["content"]["bodyModel"]["paragraphs"]
-    except KeyError:
+        paragraphs = get_ordered_paragraphs(state)
+    except (StopIteration, KeyError):
         return []
 
     entries = []
     current = None
 
-    for p in paragraphs:
+    for i, p in enumerate(paragraphs):
         ptype = p.get("type")
         text = p.get("text", "")
 
-        if ptype == TYPE_TITLE:
-            continue
+        if i == 0 or ptype in TYPE_TITLE:
+            continue  # post title — always paragraph 0, regardless of type
 
         if ptype == TYPE_P:
             match = HEADER_RE.match(text)
@@ -167,7 +253,7 @@ def parse_medium_post(data: dict) -> list:
             continue  # embeds/images before the first recognized album header
 
         if ptype == TYPE_IMG:
-            image_id = p.get("metadata", {}).get("id")
+            image_id = (p.get("metadata") or {}).get("id")
             if image_id:
                 current["media"].append({
                     "type": "image",
@@ -176,15 +262,15 @@ def parse_medium_post(data: dict) -> list:
                 })
 
         elif ptype == TYPE_IFRAME:
-            url = resolve_iframe_url(p.get("iframe", {}))
+            url = resolve_iframe_url(p, state)
             if url:
                 current["media"].append({
                     "type": classify_media_url(url),
                     "url": url,
                     "caption": text or None,
                 })
-            # else: Medium didn't retain enough data to resolve this embed's
-            # source (common for older posts) — nothing usable to store.
+            # else: the embed's MediaResource couldn't be resolved (rare) —
+            # nothing usable to store.
 
         elif ptype == TYPE_MIXTAPE:
             url = (p.get("mixtapeMetadata") or {}).get("href")
@@ -207,8 +293,8 @@ def scrape_medium_posts(post_urls: list) -> list:
     for url in post_urls:
         print(f"Scraping {url} ...")
         try:
-            data = fetch_medium_post_json(url)
-            entries = parse_medium_post(data)
+            state = fetch_medium_post_state(url)
+            entries = parse_medium_post(state)
             all_entries.extend(entries)
             print(f"  -> {len(entries)} entries")
         except Exception as e:
@@ -437,19 +523,59 @@ def main():
     ]
 
     print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
-    entries = scrape_medium_posts(post_urls)
-    print(f"Total album entries: {len(entries)}")
+    scraped = scrape_medium_posts(post_urls)
+    print(f"Total album entries scraped: {len(scraped)}")
 
-    print("=== Stage 2: Spotify enrichment ===")
-    entries = enrich_with_spotify(entries)
+    # Incremental merge: an entry already in OUTPUT_FILE (matched by
+    # number+artist+album — NOT number alone, since a handful of posts reuse
+    # the same catalog number for two different albums, e.g. "389" for both
+    # Television and Wire; a number-only key would silently collapse those
+    # pairs into one) keeps its existing spotify/musicbrainz enrichment and
+    # only has its header/text/media refreshed from the fresh scrape —
+    # avoids re-hitting the rate-limited MusicBrainz/Spotify APIs for the
+    # whole dataset on every run. Only entries not seen before go through
+    # stages 2 and 3.
+    def merge_key(e):
+        return (e["number"], e["artist"], e["album"])
 
-    print("=== Stage 3: MusicBrainz enrichment ===")
-    entries = enrich_with_musicbrainz(entries)
+    output_path = Path(OUTPUT_FILE)
+    existing_by_key = {}
+    if output_path.exists():
+        existing_by_key = {
+            merge_key(e): e
+            for e in json.loads(output_path.read_text(encoding="utf-8"))
+        }
 
-    Path(OUTPUT_FILE).write_text(
-        json.dumps(entries, indent=2, ensure_ascii=False), encoding="utf-8"
+    new_entries = []
+    for e in scraped:
+        existing = existing_by_key.get(merge_key(e))
+        if existing:
+            existing.update({
+                "artist": e["artist"],
+                "album": e["album"],
+                "year": e["year"],
+                "text": e["text"],
+                "media": e["media"],
+            })
+        else:
+            new_entries.append(e)
+
+    if new_entries:
+        print(f"=== Stage 2: Spotify enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_spotify(new_entries)
+
+        print(f"=== Stage 3: MusicBrainz enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_musicbrainz(new_entries)
+    else:
+        print("No new entries — skipping Spotify/MusicBrainz stages.")
+
+    merged = list(existing_by_key.values()) + new_entries
+    merged.sort(key=lambda e: int(e["number"]))
+
+    output_path.write_text(
+        json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    print(f"Done. Wrote {len(entries)} entries to {OUTPUT_FILE}")
+    print(f"Done. Wrote {len(merged)} entries to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
