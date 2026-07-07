@@ -16,6 +16,7 @@
 <header>
   <div>
     <h1>1001 Albums</h1>
+    <div class="tagline">You Must Hear Before You Die</div>
     <div class="sub">EEN PERSOONLIJKE LUISTERTOCHT</div>
   </div>
   <div class="header-right">
@@ -23,6 +24,7 @@
   </div>
 </header>
 
+<div class="dashboard-hint">Klik in de widgets om te filteren</div>
 <div class="dashboard">
   <div class="dash-panel">
     <div class="dash-label"><span class="disc"></span>Voortgang</div>
@@ -61,7 +63,8 @@
   <div>
     <label class="mono" style="font-size:0.72rem;color:var(--ink-dim);margin-right:8px;">SORTEER</label>
     <select id="sortSelect">
-      <option value="number">Nummer (boek)</option>
+      <option value="number_desc">Nieuwste eerst</option>
+      <option value="number">Oudste eerst</option>
       <option value="year">Jaar</option>
       <option value="artist">Artiest</option>
       <option value="album">Album</option>

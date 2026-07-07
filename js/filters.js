@@ -40,6 +40,7 @@ export function sortAlbums(list){
   const copy = [...list];
   copy.sort((a,b)=>{
     if(state.sort === "number") return parseInt(a.number) - parseInt(b.number);
+    if(state.sort === "number_desc") return parseInt(b.number) - parseInt(a.number);
     if(state.sort === "year") return parseInt(a.year) - parseInt(b.year);
     if(state.sort === "artist") return a.artist.localeCompare(b.artist);
     if(state.sort === "album") return a.album.localeCompare(b.album);

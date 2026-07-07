@@ -3,7 +3,7 @@ import { loadData } from "./data.js";
 import { getFiltered, setFilter, clearFilter, clearAllFilters, renderFilterChips } from "./filters.js";
 import { renderGrid, renderTable, renderPagination } from "./grid.js";
 import { openModal, closeModal } from "./modal.js";
-import { renderDashboard, resizeGenreBubbles } from "./charts.js";
+import { renderDashboard, resizeGenreBubbles, replayProgressAnimation } from "./charts.js";
 
 function render(){
   const q = document.getElementById("searchInput").value;
@@ -56,6 +56,7 @@ function wireEvents(){
   });
 
   window.addEventListener("resize", ()=> resizeGenreBubbles(render));
+  document.querySelector(".knob").addEventListener("click", replayProgressAnimation);
 }
 
 async function init(){

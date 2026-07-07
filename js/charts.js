@@ -2,7 +2,7 @@ import { state } from "./state.js";
 import { decadeOf, genreList } from "./data.js";
 import { classifyGenre, GENRE_COLORS } from "./taxonomy.js";
 import { normalizeCountry } from "./taxonomy.js";
-import { setFilter } from "./filters.js";
+import { setFilter, clearFilter } from "./filters.js";
 import { escapeHtml } from "./grid.js";
 
 let decadeChartInstance, countryChartInstance;
@@ -47,11 +47,15 @@ function animatePercent(el, to){
   requestAnimationFrame(tick);
 }
 
+function currentProgressPct(){
+  return Math.min(100, Math.round((state.albums.length / 1001) * 100));
+}
+
 // `onChange` is called after any chart-driven filter mutation so the caller
 // (app.js) can re-render the list/chips without this module importing app.js.
 export function renderDashboard(onChange){
   const total = state.albums.length;
-  const pct = Math.min(100, Math.round((total / 1001) * 100));
+  const pct = currentProgressPct();
   document.getElementById("progressLine").style.transform =
     `translateX(-50%) rotate(${progressAngle(pct)}deg)`;
   animatePercent(document.getElementById("progressLabel"), pct);
@@ -62,6 +66,22 @@ export function renderDashboard(onChange){
   renderCountryChart(onChange);
 }
 
+// Clicking the knob replays the turn + count-up from scratch, even though
+// the target value hasn't changed — the CSS transition and animatePercent's
+// guard both only fire on a value change, so the pointer is snapped back to
+// its 0% rest position (transition disabled, then reflowed) before being
+// re-animated to the current value.
+export function replayProgressAnimation(){
+  const line = document.getElementById("progressLine");
+  line.style.transition = "none";
+  line.style.transform = "translateX(-50%) rotate(-150deg)";
+  void line.offsetWidth; // force reflow so the reset above actually commits
+  line.style.transition = "";
+  line.style.transform = `translateX(-50%) rotate(${progressAngle(currentProgressPct())}deg)`;
+  lastAnimatedPct = null;
+  animatePercent(document.getElementById("progressLabel"), currentProgressPct());
+}
+
 function renderDecadeChart(onChange){
   const labelEl = document.getElementById("decadeLabel");
   const canvas = document.getElementById("decadeChart");
@@ -70,8 +90,8 @@ function renderDecadeChart(onChange){
     const decade = state.decadeDrill;
     labelEl.innerHTML = `<span class="disc"></span>${decade}<button class="dash-back" id="decadeBack">← Decennia</button>`;
     document.getElementById("decadeBack").addEventListener("click", ()=>{
-      state.decadeDrill = null;
-      renderDecadeChart(onChange);
+      clearFilter("decade");
+      onChange();
     });
 
     const startYear = parseInt(decade);
@@ -161,8 +181,8 @@ function renderGenreBubbles(onChange){
     const macro = state.genreDrill;
     labelEl.innerHTML = `<span class="disc"></span>${macro}<button class="dash-back" id="genreBack">← Genres</button>`;
     document.getElementById("genreBack").addEventListener("click", ()=>{
-      state.genreDrill = null;
-      renderGenreBubbles(onChange);
+      clearFilter("genreMacro");
+      onChange();
     });
 
     const tagCounts = {};
@@ -219,6 +239,7 @@ function renderGenreBubbles(onChange){
     el.style.top = (leaf.y - leaf.r) + "px";
     el.style.background = colorFor(leaf.data);
     el.style.fontSize = Math.max(10, Math.min(14, leaf.r/2.8)) + "px";
+    el.title = `${leaf.data.name} (${leaf.data.value})`;
     el.innerHTML = `<div><div class="bubble-name">${escapeHtml(leaf.data.name)}</div><div class="bubble-count">${leaf.data.value}</div></div>`;
     el.addEventListener("click", ()=> onBubbleClick(leaf.data));
     container.appendChild(el);

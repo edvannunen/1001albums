@@ -5,7 +5,7 @@ export const PAGE_SIZE = 48;
 export const state = {
   albums: [],
   view: "grid",
-  sort: "number",
+  sort: "number_desc",
   page: 1,
   filters: {
     decade: null,
