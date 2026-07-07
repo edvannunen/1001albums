@@ -464,6 +464,16 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 .modal-title-block .catalog{
   font-family:'Space Mono',monospace;color:var(--mustard);font-size:0.75rem;
 }
+.modal-title-row{display:flex;align-items:center;gap:10px;}
+.modal-nav-group{display:flex;gap:6px;}
+.modal-nav-btn{
+  background:var(--rule);border:none;color:var(--ink);
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  cursor:pointer;font-size:0.85rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal-nav-btn:hover:not(:disabled){background:var(--mustard);color:var(--bg);}
+.modal-nav-btn:disabled{opacity:0.3;cursor:default;}
 .modal-title-block h2{margin:4px 0 2px;font-size:1.6rem;}
 .modal-title-block .modal-album{color:var(--ink-dim);font-style:italic;margin-bottom:8px;}
 .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}

@@ -2,7 +2,7 @@ import { state, PAGE_SIZE } from "./state.js";
 import { loadData } from "./data.js";
 import { getFiltered, setFilter, clearFilter, clearAllFilters, renderFilterChips } from "./filters.js";
 import { renderGrid, renderTable, renderPagination } from "./grid.js";
-import { openModal, closeModal } from "./modal.js";
+import { openModal, closeModal, showModalPrev, showModalNext } from "./modal.js";
 import { renderDashboard, resizeGenreBubbles, replayProgressAnimation } from "./charts.js";
 
 function render(){
@@ -51,8 +51,13 @@ function wireEvents(){
   document.getElementById("modalBackdrop").addEventListener("click", (e)=>{
     if(e.target.id === "modalBackdrop") closeModal();
   });
+  document.getElementById("modalNavPrev").addEventListener("click", showModalPrev);
+  document.getElementById("modalNavNext").addEventListener("click", showModalNext);
   document.addEventListener("keydown", (e)=>{
     if(e.key === "Escape") closeModal();
+    if(!document.getElementById("modalBackdrop").classList.contains("open")) return;
+    if(e.key === "ArrowLeft") showModalPrev();
+    if(e.key === "ArrowRight") showModalNext();
   });
 
   window.addEventListener("resize", ()=> resizeGenreBubbles(render));
