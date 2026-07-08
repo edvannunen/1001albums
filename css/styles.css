@@ -497,5 +497,15 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 
 @media (max-width:720px){
   .dashboard{grid-template-columns:1fr;}
-  .modal-header{flex-direction:column;}
+  .modal-header{
+    display:grid;
+    grid-template-columns:140px 1fr;
+    column-gap:16px;
+    row-gap:8px;
+  }
+  .modal-title-block{display:contents;}
+  .modal-title-row{grid-column:2;justify-self:start;align-self:start;}
+  .modal-title-block h2,
+  .modal-title-block .modal-album,
+  .modal-title-block .modal-badges{grid-column:1 / -1;}
 }
