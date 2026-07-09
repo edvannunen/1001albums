@@ -1,8 +1,8 @@
 import { state, PAGE_SIZE } from "./state.js";
-import { loadData } from "./data.js";
+import { loadData, findAlbumByParam } from "./data.js";
 import { getFiltered, setFilter, clearFilter, clearAllFilters, renderFilterChips } from "./filters.js";
 import { renderGrid, renderTable, renderPagination } from "./grid.js";
-import { openModal, closeModal, showModalPrev, showModalNext } from "./modal.js";
+import { openModal, closeModal, showModalPrev, showModalNext, shareCurrentAlbum } from "./modal.js";
 import { renderDashboard, resizeGenreBubbles, replayProgressAnimation } from "./charts.js";
 
 function render(){
@@ -53,6 +53,7 @@ function wireEvents(){
   });
   document.getElementById("modalNavPrev").addEventListener("click", showModalPrev);
   document.getElementById("modalNavNext").addEventListener("click", showModalNext);
+  document.getElementById("modalShare").addEventListener("click", shareCurrentAlbum);
   document.addEventListener("keydown", (e)=>{
     if(e.key === "Escape") closeModal();
     if(!document.getElementById("modalBackdrop").classList.contains("open")) return;
@@ -68,6 +69,10 @@ async function init(){
   wireEvents();
   await loadData();
   render();
+
+  const albumParam = new URLSearchParams(location.search).get("album");
+  const linkedAlbum = findAlbumByParam(albumParam);
+  if(linkedAlbum) openModal(linkedAlbum);
 }
 
 init();

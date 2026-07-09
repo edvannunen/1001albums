@@ -60,3 +60,34 @@ export function decadeOf(a){
   if(!y) return null;
   return Math.floor(y/10)*10 + "s";
 }
+
+function slugify(s){
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(new RegExp("[̀-ͯ]", "g"), "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// number-artist-album rather than a bare number: a handful of catalog
+// numbers are genuinely reused for two different albums (authoring typos
+// in the source posts, see CLAUDE.md), so the number alone can't uniquely
+// identify an album.
+export function albumSlug(a){
+  return `${a.number}-${slugify(`${a.artist} ${a.album}`)}`;
+}
+
+export function albumShareUrl(a){
+  return `${location.origin}${location.pathname}?album=${albumSlug(a)}`;
+}
+
+// Accepts either a full slug or a bare number (e.g. a hand-typed URL) —
+// falls back to the first album with a matching number, which only
+// matters for the handful of reused catalog numbers noted above.
+export function findAlbumByParam(param){
+  if(!param) return null;
+  const exact = state.albums.find(a => albumSlug(a) === param);
+  if(exact) return exact;
+  const number = param.split("-")[0];
+  return state.albums.find(a => a.number === number) || null;
+}
