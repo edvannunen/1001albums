@@ -1,6 +1,7 @@
 import { state } from "./state.js";
-import { coverUrl, genreList } from "./data.js";
+import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso } from "./data.js";
 import { getFiltered, sortAlbums } from "./filters.js";
+import { showToast } from "./toast.js";
 
 function extractYouTubeId(url){
   const m = (url||"").match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
@@ -35,8 +36,18 @@ export function showModalNext(){
   if(modalIndex !== -1 && modalIndex < modalList.length - 1) openModal(modalList[modalIndex + 1]);
 }
 
+export function shareCurrentAlbum(){
+  const a = modalIndex !== -1 ? modalList[modalIndex] : null;
+  if(!a) return;
+  const text = `#1001Albums ${a.number} ${a.artist} - ${a.album} (${a.year})\n\n${albumShareUrl(a)}`;
+  navigator.clipboard.writeText(text)
+    .then(()=> showToast("Album review copied to the clipboard"))
+    .catch(()=> showToast("Could not copy to clipboard"));
+}
+
 export function openModal(a){
   updateNav(a);
+  history.replaceState(null, "", "?album=" + albumSlug(a));
   document.getElementById("modalCatalog").textContent = "#" + a.number;
   document.getElementById("modalArtist").textContent = a.artist;
   document.getElementById("modalAlbum").textContent = `${a.album} (${a.year})`;
@@ -48,8 +59,16 @@ export function openModal(a){
   const country = a.musicbrainz && a.musicbrainz.country;
   if(country){
     const b = document.createElement("span");
-    b.className = "badge";
-    b.textContent = country;
+    b.className = "badge badge-country";
+    const iso = countryIso(country);
+    if(iso){
+      const flag = document.createElement("img");
+      flag.className = "flag-icon";
+      flag.src = `https://flagcdn.com/${iso.toLowerCase()}.svg`;
+      flag.alt = "";
+      b.appendChild(flag);
+    }
+    b.appendChild(document.createTextNode(country));
     badges.appendChild(b);
   }
   genreList(a).slice(0, 10).forEach(g=>{
@@ -156,4 +175,5 @@ export function openModal(a){
 
 export function closeModal(){
   document.getElementById("modalBackdrop").classList.remove("open");
+  history.replaceState(null, "", location.pathname);
 }

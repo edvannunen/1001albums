@@ -55,8 +55,64 @@ export function genreList(a){
   return (a.musicbrainz && a.musicbrainz.genres) ? a.musicbrainz.genres : [];
 }
 
+// Country badge flag lookup — keyed on the exact strings seen in
+// musicbrainz.country across the current dataset (checked 2026-07), not a
+// general country-name-to-ISO library. MusicBrainz's artist `area` is
+// sometimes a city/region rather than a country (e.g. "New York",
+// "Scotland") so those need mapping too, same as a real country. Anything
+// not in this list just shows no flag — safe no-op, doesn't need
+// updating unless re-running the enrichment pipeline turns up a new one.
+const COUNTRY_ISO = {
+  "United States":"US", "New York":"US", "Memphis":"US", "Los Angeles":"US", "Boston":"US", "Phoenix":"US",
+  "United Kingdom":"GB", "England":"GB", "Scotland":"GB", "Wales":"GB", "Northern Ireland":"GB", "London":"GB",
+  "Canada":"CA", "Germany":"DE", "Brazil":"BR", "Jamaica":"JM", "Australia":"AU",
+  "South Africa":"ZA", "Ladysmith":"ZA", "Ireland":"IE", "India":"IN", "France":"FR", "Sweden":"SE",
+  "Cuba":"CU", "Belgium":"BE", "Estonia":"EE", "Nigeria":"NG", "Japan":"JP", "Finland":"FI",
+  "Switzerland":"CH", "Senegal":"SN", "Norway":"NO", "Argentina":"AR", "Slovenia":"SI",
+};
+
+// Returns a lowercase ISO 3166-1 alpha-2 code (or "" if unmapped) rather
+// than a flag emoji — Windows doesn't reliably render regional-indicator
+// flag sequences as pictorial flags (shows the two letters as plain text
+// instead, even on Windows 11), so the badge renders an actual flag image
+// (flagcdn.com) keyed on this code instead.
+export function countryIso(country){
+  return COUNTRY_ISO[country] || "";
+}
+
 export function decadeOf(a){
   const y = parseInt(a.year);
   if(!y) return null;
   return Math.floor(y/10)*10 + "s";
+}
+
+function slugify(s){
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(new RegExp("[̀-ͯ]", "g"), "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// number-artist-album rather than a bare number: a handful of catalog
+// numbers are genuinely reused for two different albums (authoring typos
+// in the source posts, see CLAUDE.md), so the number alone can't uniquely
+// identify an album.
+export function albumSlug(a){
+  return `${a.number}-${slugify(`${a.artist} ${a.album}`)}`;
+}
+
+export function albumShareUrl(a){
+  return `${location.origin}${location.pathname}?album=${albumSlug(a)}`;
+}
+
+// Accepts either a full slug or a bare number (e.g. a hand-typed URL) —
+// falls back to the first album with a matching number, which only
+// matters for the handful of reused catalog numbers noted above.
+export function findAlbumByParam(param){
+  if(!param) return null;
+  const exact = state.albums.find(a => albumSlug(a) === param);
+  if(exact) return exact;
+  const number = param.split("-")[0];
+  return state.albums.find(a => a.number === number) || null;
 }
