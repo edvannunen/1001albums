@@ -55,6 +55,31 @@ export function genreList(a){
   return (a.musicbrainz && a.musicbrainz.genres) ? a.musicbrainz.genres : [];
 }
 
+// Country badge flag lookup — keyed on the exact strings seen in
+// musicbrainz.country across the current dataset (checked 2026-07), not a
+// general country-name-to-ISO library. MusicBrainz's artist `area` is
+// sometimes a city/region rather than a country (e.g. "New York",
+// "Scotland") so those need mapping too, same as a real country. Anything
+// not in this list just shows no flag — safe no-op, doesn't need
+// updating unless re-running the enrichment pipeline turns up a new one.
+const COUNTRY_ISO = {
+  "United States":"US", "New York":"US", "Memphis":"US", "Los Angeles":"US", "Boston":"US", "Phoenix":"US",
+  "United Kingdom":"GB", "England":"GB", "Scotland":"GB", "Wales":"GB", "Northern Ireland":"GB", "London":"GB",
+  "Canada":"CA", "Germany":"DE", "Brazil":"BR", "Jamaica":"JM", "Australia":"AU",
+  "South Africa":"ZA", "Ladysmith":"ZA", "Ireland":"IE", "India":"IN", "France":"FR", "Sweden":"SE",
+  "Cuba":"CU", "Belgium":"BE", "Estonia":"EE", "Nigeria":"NG", "Japan":"JP", "Finland":"FI",
+  "Switzerland":"CH", "Senegal":"SN", "Norway":"NO", "Argentina":"AR", "Slovenia":"SI",
+};
+
+// Returns a lowercase ISO 3166-1 alpha-2 code (or "" if unmapped) rather
+// than a flag emoji — Windows doesn't reliably render regional-indicator
+// flag sequences as pictorial flags (shows the two letters as plain text
+// instead, even on Windows 11), so the badge renders an actual flag image
+// (flagcdn.com) keyed on this code instead.
+export function countryIso(country){
+  return COUNTRY_ISO[country] || "";
+}
+
 export function decadeOf(a){
   const y = parseInt(a.year);
   if(!y) return null;

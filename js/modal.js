@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { coverUrl, genreList, albumSlug, albumShareUrl } from "./data.js";
+import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso } from "./data.js";
 import { getFiltered, sortAlbums } from "./filters.js";
 import { showToast } from "./toast.js";
 
@@ -59,8 +59,16 @@ export function openModal(a){
   const country = a.musicbrainz && a.musicbrainz.country;
   if(country){
     const b = document.createElement("span");
-    b.className = "badge";
-    b.textContent = country;
+    b.className = "badge badge-country";
+    const iso = countryIso(country);
+    if(iso){
+      const flag = document.createElement("img");
+      flag.className = "flag-icon";
+      flag.src = `https://flagcdn.com/${iso.toLowerCase()}.svg`;
+      flag.alt = "";
+      b.appendChild(flag);
+    }
+    b.appendChild(document.createTextNode(country));
     badges.appendChild(b);
   }
   genreList(a).slice(0, 10).forEach(g=>{
