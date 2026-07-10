@@ -485,7 +485,7 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 .badge-country{display:inline-flex;align-items:center;gap:5px;}
 .flag-icon{width:13px;height:auto;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,0.3);}
 .modal-body{padding:20px 28px;}
-.modal-body .review-text{line-height:1.6;font-size:0.92rem;margin-bottom:20px;}
+.modal-body .review-text{line-height:1.6;font-size:1.0rem;margin-bottom:20px;}
 .media-list{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
 .media-item iframe, .media-item img{width:100%;border:none;border-radius:var(--radius);}
 .media-item .caption{font-size:0.75rem;color:var(--ink-dim);margin-top:4px;font-style:italic;}
