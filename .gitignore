@@ -10,3 +10,17 @@ __pycache__/
 *.db
 *.db-shm
 *.db-wal
+
+# editor + local reference/scratch files, not site assets
+.vscode/
+img/album typos - to be fixed.txt
+img/banner1.png
+img/banner2.png
+img/records-example-charts.png
+img/records-example-components.png
+img/tonearm2.png
+img/ui-elements.png
+img/ui-elements2.png
+img/volume_example_0%.png
+img/volume_example_100%.png
+img/volume_example_50%.png
