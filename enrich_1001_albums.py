@@ -516,7 +516,7 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
         params={
             "query": query,
             "fmt": "json",
-            "limit": 1,
+            "limit": 10,
         },
         timeout=15,
     )
@@ -526,7 +526,12 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
     if not groups:
         return {}
 
-    rg = groups[0]
+    # The top-scored result isn't necessarily the studio album - a title-track
+    # single/remix sharing the exact album title (e.g. Michael Jackson's
+    # "Thriller" single vs. the "Thriller" album) can outscore it. Prefer the
+    # highest-scored result with primary-type "Album", falling back to the
+    # plain top result if none of the candidates are typed "Album" at all.
+    rg = next((g for g in groups if g.get("primary-type") == "Album"), groups[0])
     rg_id = rg["id"]
     artist_credit = rg.get("artist-credit", [])
     artist_id = artist_credit[0]["artist"]["id"] if artist_credit else None

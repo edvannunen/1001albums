@@ -18049,7 +18049,7 @@
         "synth funk",
         "halloween music"
       ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/3a7817b5-22cb-32c3-a31b-2c8309fbf92e/front"
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/f32fab67-77dd-3937-addc-9062e28e4c37/front"
     },
     "spotify": null
   },
@@ -23628,5 +23628,276 @@
       "matched_release_year": 1989,
       "exact_year_match": false
     }
+  },
+  {
+    "number": "622",
+    "artist": "Tracy Chapman",
+    "album": "Tracy Chapman",
+    "year": "1988",
+    "text": "Tsja, Tracy Chapman. Heb ik daar wel zo’n zin in? De grote hit is natuurlijk “Fast Car”. Ik heb ‘m wel eens geprobeerd op gitaar. De overbekende riff is best te doen, maar tegelijkertijd die melodielijn erover zingen is echt lastig. Ook in de studio-opname doet Tracy het tegelijk. Ene Luke Combs blijkt in 2023 nog een gigantische hit met “Fast Car” te hebben gehad. Nooit van gehoord, maar hij stond laatst gewoon in de Arena voor 50.000 man. Het zal wel van alles over mij zeggen. Afijn, Tracy. Wel dapper hoe ze “Behind the Wall” solo a-capella zingt: ‘Last night I heard the screaming. Loud voices behind the wall’. Dat doet me aan “Luka” van Suzanne Vega denken: ‘If you hear something late at night, some kind of trouble, some kind of fight. Just don’t ask me what it was’. Was even vergeten hoeveel nummers ik ken van de plaat. De eerste vijf zijn mij allemaal bekend, zoals “Talkin’ About a Revolution” en “Baby I Can Hold You”. Ook wel goed eigenlijk. Daarna kakt het wel wat in, of vind ik het wel mooi geweest.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=wGmHpn-prd0",
+        "caption": "Tracy stond in 1988 al niet meer in kleine zaaltjes"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=aadu2FXQNA0",
+        "caption": "De gedoodverfde toegift van Luke in de Arena vorige week"
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "pop",
+        "alternative rock",
+        "folk",
+        "american",
+        "blues",
+        "singer-songwriter",
+        "usa",
+        "folk rock",
+        "acoustic",
+        "alternative",
+        "blues rock",
+        "américain",
+        "folk-rock",
+        "college rock",
+        "acoustic rock",
+        "adult contemporary",
+        "pop rock",
+        "contemporary folk",
+        "english",
+        "folk pop",
+        "1988",
+        "pop-folk",
+        "alternative folk",
+        "singer/songwriter",
+        "pop/rock",
+        "alternative/indie rock",
+        "adult alternative pop/rock",
+        "folk/rock",
+        "offizielle charts",
+        "5+ wochen"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/a738bdf1-f610-30aa-9ae7-9a4f90d6f2d7/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/6hmmX5UP4rIvOpGSaPerV8",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/6hmmX5UP4rIvOpGSaPerV8",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27390b8a540137ee2a718a369f9",
+      "matched_artist_name": "Tracy Chapman",
+      "matched_album_name": "Tracy Chapman",
+      "matched_release_year": 1988,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "623",
+    "artist": "My Bloody Valentine",
+    "album": "Isn’t Anything",
+    "year": "1988",
+    "text": "Ik ken van MBV eigenlijk alleen Loveless uit 1991, met de beukende shoegaze-opener “only shallow” (alle titels op die plaat kleine letters), maar die komt later misschien nog. Dit is de plaat ervoor. En je hoort in de opener “Soft as Snow (But Warm Inside)” al een soort vingeroefening van “only shallow”. “Feed My With Your Kiss” en “Nothing Much To Lose” zijn ook ontzettend lekker om in te gaan hangen. In die eerste hoor ik nog behoorlijk veel Dinosaur Jr. trouwens. Die invloed hoor ik ook in volgende nr “Sueisfine”, waarvan de tekst nogal wrang overgaat van ‘Sue is fine’ naar ‘suicide’. Hoewel dit een echte gitaarplaat is, zitten de gitaren op een paar nummers er niet meer echt in. Kevin Shields gooide enorme hoeveelheden reverb over de gitaarsound en haalde vervolgens de gitaar zelf weg, zodat alleen die reverb nog over bleef. Ik hoor ook nogal wat rare gitaarstemmingen en wringende akkoorden, waardoor Sonic Youth ook niet heel ver weg is.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=hIT7EszMYEs",
+        "caption": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=9rxE0Mr_U8U",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "Ireland",
+      "genres": [
+        "rock",
+        "shoegaze",
+        "indie rock",
+        "indie",
+        "noise pop",
+        "noise rock",
+        "vyrzukhisuc-album"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/55a73423-bf7d-3969-b1b2-c34c43140e1a/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2ncj0SrtsnWzol4SWMk54b",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2ncj0SrtsnWzol4SWMk54b",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2730222c0b380a726b620cd7e4e",
+      "matched_artist_name": "my bloody valentine",
+      "matched_album_name": "Isn’t Anything",
+      "matched_release_year": 1988,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "624",
+    "artist": "Pixies",
+    "album": "Surfer Rosa",
+    "year": "1988",
+    "text": "Deze plaat hoef ik eigenlijk helemaal niet te draaien. Ik kan ‘m dromen. Dit was voor mij toentertijd, ik was een jaar of 18, denk ik dé plaat waarmee het voor mij duidelijk was dat de vreselijke 80s synthpop-jaren eindelijk voorbij waren. Move over Rick Astley en Bros! Pixies (zonder ‘the’) braken alles open wat mij betreft. Samen met de Chili Peppers. Later heb ik natuurlijk veel meer bands ontdekt die daar ook aan bijdroegen, maar voor mij waren het die twee bands die rond 1989 mij uit de 60s/70s muziek naar het alternatieve nu brachten. In m’n huis in Tilburg hing deze hoes als grote poster ingelijst aan de muur. Vormend materiaal. Nog beter dan opvolger Doolittle, wat mij betreft. Compromisloos geproduceerd door wijlen Steve Albini: elk geluid dat als ‘pussy’ geclassificeerd kon worden ging er rucksichtslos af. Maar bovenal: geweldige liedjes, allemaal. Op de CD uit die tijd werd overigens de eerste EP ‘Come On Pilgrim’ er aan toegevoegd. Die is ook heel goed, met o.a. “Ed is Dead”; wel passend op mijn begrafenis.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=Q9_7AKZ90RE",
+        "caption": "Leve de VPRO! Ze waren er weer op tijd bij. Vijf nummers live. Zo ontzettend goed dit. Leve Kim!"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=ag4Mu4IqL1Q",
+        "caption": "Bowie coverde Cactus, van Come On Pilgrim, op Heathen en vaak live."
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=A7VhNjZXALU",
+        "caption": "Hij weet het ook prachtig te verwoorden"
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "alternative rock",
+        "80s",
+        "indie rock",
+        "alternative",
+        "college rock",
+        "post-hardcore",
+        "noise rock",
+        "alt rock",
+        "rock and indie",
+        "nsfw cover art",
+        "boobs on cover",
+        "rollingstone.de"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/74e36cbc-a747-3ebf-a60e-51e656c87741/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/50j4Wm1b9hLpSpPIA39Vp9",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/50j4Wm1b9hLpSpPIA39Vp9",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2738aa545a0ea869940cce358b5",
+      "matched_artist_name": "Pixies",
+      "matched_album_name": "Surfer Rosa (2007 Remaster)",
+      "matched_release_year": 1988,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "625",
+    "artist": "Metallica",
+    "album": "…And Justice for All",
+    "year": "1988",
+    "text": "Nog zo’n plaat die ik van buiten ken, hoewel die wel een stuk ingewikkelder is dan die van Pixies. Metallica’s vierde is hun meest complexe plaat. Negen lange nummers in ruim een uur. Opener “Blackened” is meteen een killer binnenkomer. Met het bijna tien minuten durende titelnummer duiken ze nog verder de complexiteit in, maar het werkt wel. Ondanks al die wisselende maatsoorten en talloze riffs is het geen oeverloze prog-rock waarbij het nummer uit het oog verloren raakt. In essentie is het catchy. Helaas lukt ze dat al dik 30 jaar niet meer op dit niveau. De rauwe trash-metal van de eerste jaren wordt hier wel grotendeels verlaten (nou vooruit, op afsluiter “Dyer’s Eve” na), en is op opvolger Black Album helemaal verdwenen. Prijsnummer is het iconische “One”, ongelooflijk hoe goed dat nummer is. Het verhaal van de album mix is al vaak verteld. In het kort: drummert Lars Ulrich eiste op het laatste moment bij het mixen dat de bas teruggedraaid werd tot ‘barely audible’, en dan nog wat zachter. Onderdeel van de jarenlange pesterijen van de drie bandleden richting nieuwe bassist Jason Newsted na het overlijden van Cliff Burton. Arme Jason. De plaat heeft dus vrijwel geen bas, is vrij dun qua sound en gortdroog, maar ik ben er wel aan gewend eigenlijk. Meesterwerk. Het is dat ze Master of Puppets al hadden gemaakt.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=qjAhgd9K-8o",
+        "caption": "Het kan live nog sneller dan op de plaat. Godskolere wat een binnenkomer"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=5U-rSxTTgys",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "heavy metal"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/bd14f98a-8c45-4a0d-b148-17cbc96740aa/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/6jZ1z25PyF4Yd3kHxt9rl1",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/6jZ1z25PyF4Yd3kHxt9rl1",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273fe896727e3db1027ed72d885",
+      "matched_artist_name": "Metallica",
+      "matched_album_name": "…And Justice for All (Remastered)",
+      "matched_release_year": 1988,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "626",
+    "artist": "Dinosaur Jr.",
+    "album": "Bug",
+    "year": "1988",
+    "text": "Oeh, ik zit wel in een voor mij superlekker hoekje van de lijst nu. Pixies, Metallica en nu J. Mascis met zijn Dinosaurs. Maf dat ze allemaal nog bestaan, of in het geval van Pixies weer bestaan. Met Bug gaat Dinosaur Jr al een ietsjes vriendelijkere kant op na You’re Living All Over Me. Zeker met opener, undergroundhit en hoogtepunt “Freak Scene”. Hoe vaak ik daar niet, al dan niet met behulp van een welriekende en nuttige plant, heb staan hoofdschudden. Bug is hun derde en (voorlopig) laatste plaat in de originele bezetting. Daarna werd Lou Barlow eruit geschopt en vormde hij Sebadoh. De plaat is iets minder dan de voorganger, maar nog steeds goed. J. heeft wel al flink dictatoriale trekjes hier. Hij schreef alles en Lou en Murph moesten exact uitvoeren wat Joseph, zo heet hij eigenlijk, in z’n hoofd had. Ook als Lou in “Don’t” zijn longen uit zijn lijf schreeuwt: ‘Why don’t you like me?’ (het nummer waarbij de visite maar weer eens op huis aan gaat).",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=5eO6up9Gpv0",
+        "caption": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=bQHM44yLMW4",
+        "caption": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "alternative rock",
+        "grunge",
+        "indie rock",
+        "indie",
+        "alternative",
+        "noise pop",
+        "noise rock",
+        "1988",
+        "alternative pop/rock"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/b45028e5-c9d9-34cf-9d2f-0e90ce500c9a/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/217wquCr9YCvsIHEsFkVPs",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/217wquCr9YCvsIHEsFkVPs",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27395fd171241997af5d3b654a9",
+      "matched_artist_name": "Dinosaur Jr.",
+      "matched_album_name": "Bug",
+      "matched_release_year": 1988,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "627",
+    "artist": "Dagmar Krause",
+    "album": "Tank Battles: The Songs of Hanns Eisler",
+    "year": "1988",
+    "text": "And now for something completely different, of eigenlijk: Und nun zu etwas völlig anderem! Na drie platen die ik kan dromen krijgen we Dagmar Krause. Eh, wie? Krause is een Duitse zangeres die jarenlang op de Reeperbahn in Hamburg heeft gezongen. Een album met interpretaties van de muziek van Hanns Eisler, een Duitse componist en tijdgenoot van Kurt Weill, beiden werkten met Bertolt Brecht. Dat hoor je overigens wel. Het doet meteen aan Brecht en Weill denken. Als je bijv “Mack the Knife”, of het origineel van “Alabama Song” kent, dan weet je in welke hoek je het moet zoeken: jaren 20 (van de vorige eeuw dus) politiek cabaret. Geproduceerd door Greg Cohen en die werkte ook mee aan Tom Waits’ Frank’s Wild Years en dat hoor je ook, zoals in “Mother Beimleim”. Dit is de Engelse versie (wel met Duits accent), er schijnt ook een Duitse te zijn. 22 nummers in minder dan 40 minuten (het is duidelijk geen Metallica). Leuk om eens een keer te draaien, en wel verfrissend zo’n interpretatie van 100 jaar oude Duitse cabaretpop.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=Irmn9e2O-HQ",
+        "caption": "Het album staat niet op Spotify. Dit is de Engelse plaat op YouTube"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=ysb-9lpNbjk",
+        "caption": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=e7emkdc4Pjg",
+        "caption": "Alabama Song, uit 1927, in een opname uit 1930! Stuk maffer dan de bekende Doors versie."
+      }
+    ],
+    "musicbrainz": {
+      "country": "Germany",
+      "genres": [
+        "pop",
+        "ballad"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/0ff9acaf-2710-316d-ba3c-37ded4372c0f/front"
+    },
+    "spotify": null
   }
 ]
