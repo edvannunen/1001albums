@@ -20,4 +20,5 @@ export const state = {
   // filtered the list yet.
   decadeDrill: null,   // e.g. "1980s" while showing that decade's years
   genreDrill: null,    // e.g. "Rock" while showing its sub-genre tags
+  hideUsUk: false,      // countries chart: hide US/UK so smaller countries are visible
 };

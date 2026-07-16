@@ -253,12 +253,25 @@ function capBubbles(entries){
 }
 
 function renderCountryChart(onChange){
+  const labelEl = document.getElementById("countryLabel");
   const canvas = document.getElementById("countryChart");
+
+  labelEl.innerHTML = `<span class="disc"></span>Landen` +
+    `<button class="dash-back" id="usUkToggle">${state.hideUsUk ? "US &amp; UK tonen" : "US &amp; UK verbergen"}</button>`;
+  document.getElementById("usUkToggle").addEventListener("click", ()=>{
+    state.hideUsUk = !state.hideUsUk;
+    onChange();
+  });
+
   const countryCounts = {};
   state.albums.forEach(a=>{
     const c = normalizeCountry(a.musicbrainz && a.musicbrainz.country);
     if(c) countryCounts[c] = (countryCounts[c]||0) + 1;
   });
+  if(state.hideUsUk){
+    delete countryCounts["United States"];
+    delete countryCounts["United Kingdom"];
+  }
   const sorted = Object.entries(countryCounts).sort((a,b)=> b[1]-a[1]);
   const top = sorted.slice(0, 12);
   const labels = top.map(([c])=>c);
