@@ -525,6 +525,9 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
     grid-template-columns:140px 1fr;
     column-gap:16px;
     row-gap:8px;
+    /* leave room for the absolutely-positioned .modal-close (32px wide,
+       14px from the right edge) so the nav buttons don't tuck behind it */
+    padding-right:54px;
   }
   .modal-title-block{display:contents;}
   .modal-title-row{grid-column:2;justify-self:start;align-self:start;}
