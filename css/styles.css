@@ -530,7 +530,13 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
     padding-right:54px;
   }
   .modal-title-block{display:contents;}
-  .modal-title-row{grid-column:2;justify-self:start;align-self:start;}
+  .modal-title-row{
+    grid-column:2;justify-self:start;align-self:start;
+    /* catalog + share + prev/next don't all fit on one line on narrow
+       phones — let the nav buttons wrap to their own line instead of
+       overflowing past the track and under the floating close button */
+    flex-wrap:wrap;row-gap:6px;
+  }
   .modal-title-block h2,
   .modal-title-block .modal-album,
   .modal-title-block .modal-badges{grid-column:1 / -1;}
