@@ -1254,7 +1254,15 @@
       }
     ],
     "musicbrainz": {},
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2kzkwgOFAtRsDsas5Hi0Qu",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2kzkwgOFAtRsDsas5Hi0Qu",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2730899a5627109fbfd913f1727",
+      "matched_artist_name": "Various Artists",
+      "matched_album_name": "A Christmas Gift For You From Phil Spector",
+      "matched_release_year": 1963,
+      "exact_year_match": true
+    }
   },
   {
     "number": "38",
@@ -2028,7 +2036,15 @@
       "genres": [],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/37361035-bf07-45d4-973d-3f4ef2a62873/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/3PRoXYsngSwjEQWR5PsHWR",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/3PRoXYsngSwjEQWR5PsHWR",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27328b8b9b46428896e6491e97a",
+      "matched_artist_name": "The Beatles",
+      "matched_album_name": "Revolver (Remastered)",
+      "matched_release_year": 1966,
+      "exact_year_match": true
+    }
   },
   {
     "number": "61",
@@ -2636,7 +2652,15 @@
       "genres": [],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/763da602-d1cf-410c-949a-e1188ad806d8/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/6QaVfG1pHYl1z15ZxkvVDW",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/6QaVfG1pHYl1z15ZxkvVDW",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27334ef8f7d06cf2fc2146f420a",
+      "matched_artist_name": "The Beatles",
+      "matched_album_name": "Sgt. Pepper's Lonely Hearts Club Band (Remastered)",
+      "matched_release_year": 1967,
+      "exact_year_match": false
+    }
   },
   {
     "number": "79",
@@ -11219,7 +11243,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/e8b8b0a2-896f-3768-8b52-2b7eff6706cf/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5WupqgR68HfuHt3BMJtgun",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5WupqgR68HfuHt3BMJtgun",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273f72f1e38e9bd48f18a17ed9b",
+      "matched_artist_name": "Elton John",
+      "matched_album_name": "Goodbye Yellow Brick Road (Remastered)",
+      "matched_release_year": 1973,
+      "exact_year_match": true
+    }
   },
   {
     "number": "290",
@@ -13250,7 +13282,15 @@
       }
     ],
     "musicbrainz": {},
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/4JXen1DO7SmgTd0sEWLRJd",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/4JXen1DO7SmgTd0sEWLRJd",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2730d540122038626c417cf6de2",
+      "matched_artist_name": "Various Artists",
+      "matched_album_name": "Shalimar (Original Motion Picture Soundtrack)",
+      "matched_release_year": 1978,
+      "exact_year_match": false
+    }
   },
   {
     "number": "341",
@@ -16219,7 +16259,15 @@
       }
     ],
     "musicbrainz": {},
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5yj769ALl6uKp6ZIJO0BQM",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5yj769ALl6uKp6ZIJO0BQM",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273b5bf108337b7d01b07f0da7d",
+      "matched_artist_name": "Throbbing Gristle",
+      "matched_album_name": "D.O.A. the Third and Final Report of Throbbing Gristle (Remastered)",
+      "matched_release_year": 1978,
+      "exact_year_match": true
+    }
   },
   {
     "number": "412",
