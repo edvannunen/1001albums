@@ -8592,7 +8592,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/af7ec21c-c921-445c-bc4e-2fa6d8fc04e9/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/4UZmpGH8kpAgyZ2yqQ8sP9",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/4UZmpGH8kpAgyZ2yqQ8sP9",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27362f7c579da4d8219a0f81bf1",
+      "matched_artist_name": "War",
+      "matched_album_name": "The World is a Ghetto",
+      "matched_release_year": 1972,
+      "exact_year_match": true
+    }
   },
   {
     "number": "269",
