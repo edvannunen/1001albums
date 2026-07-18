@@ -60,6 +60,11 @@ def main():
     candidates = []  # (entry, entity_type, entity_id)
     no_embed = []
     unresolvable_type = []
+    multi_link = []  # entries with >1 Spotify media link -- can't safely
+    # guess which one is the album; several posts embed a second link that's
+    # just an aside track or a different, deliberately-referenced album (see
+    # #37, #60, #78, #289, #411 -- confirmed by manual review 2026-07-18).
+    # Report these separately instead of silently resolving media[0].
 
     for e in data:
         if e["spotify"] is not None:
@@ -67,6 +72,9 @@ def main():
         spotify_media = [m for m in e["media"] if m["type"] == "spotify"]
         if not spotify_media:
             no_embed.append(e)
+            continue
+        if len(spotify_media) > 1:
+            multi_link.append(e)
             continue
         m = EMBED_URL_RE.search(spotify_media[0]["url"])
         if not m:
@@ -86,6 +94,10 @@ def main():
     for e in unresolvable_type:
         url = [m["url"] for m in e["media"] if m["type"] == "spotify"][0]
         print(f"    #{e['number']} {e['artist']} - {e['album']} -> {url}")
+    print(f"  multiple Spotify links, needs manual pick: {len(multi_link)}")
+    for e in multi_link:
+        urls = [m["url"] for m in e["media"] if m["type"] == "spotify"]
+        print(f"    #{e['number']} {e['artist']} - {e['album']} -> {urls}")
     print(f"  resolvable album/track embeds: {len(candidates)}")
 
     token = get_spotify_token()
