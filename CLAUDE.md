@@ -33,6 +33,13 @@ entries, so the pipeline should be easy to re-run incrementally.
   `spotify_manual_review.md`). Re-running `enrich_1001_albums.py` is safe
   and incremental (see "Known open items").
 
+## Deployment
+
+Live at `https://bier-en-brood.nl/1001albums`. Coolify auto-deploys on every push to `main`
+(GitHub App webhook — no manual deploy step). Server/infra details (SSH access, env vars,
+start command, DB volume path, backups) live in `D:\Dropbox\App\Coolify Hosting Playbook.md`,
+not duplicated here — check that file for anything deploy- or server-related.
+
 ## Pipeline stages (enrich_1001_albums.py)
 
 1. **Medium scrape** — fetches the plain rendered post page and parses its
@@ -280,8 +287,7 @@ link (see "Known open items").
    open items"). MusicBrainz country/genre spot-check for obviously wrong
    matches (compilations, self-titled albums, common band names) still
    not done.
-2. Decide on hosting — Ed hosts projects on Hetzner + Coolify, connected
-   to GitHub, and will use that same setup for this project.
+2. ~~Decide on hosting~~ — done, deployed to Coolify (see Deployment section above).
 3. Decide how to handle the 3 duplicate-catalog-number typos and 4
    never-used numbers (see "Known open items" and `img/album typos - to
    be fixed.txt`) — deferred, Ed's call on renumbering.
