@@ -37,7 +37,7 @@ entries, so the pipeline should be easy to re-run incrementally.
 
 Live at `https://bier-en-brood.nl/1001albums`. Coolify auto-deploys on every push to `main`
 (GitHub App webhook — no manual deploy step). Server/infra details (SSH access, env vars,
-start command, DB volume path, backups) live in `D:\Dropbox\App\Coolify Hosting Playbook.md`,
+start command, DB volume path, backups) live in `../Coolify Hosting Playbook.md`,
 not duplicated here — check that file for anything deploy- or server-related.
 
 ## Pipeline stages (enrich_1001_albums.py)
