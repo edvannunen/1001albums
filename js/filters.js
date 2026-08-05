@@ -13,27 +13,41 @@ export function matchesSearch(a, q){
   return haystack.includes(q);
 }
 
-export function matchesFilters(a){
+// `exclude` skips one dimension's own filter — used by the dashboard charts
+// so each chart cross-filters by the *other* two (clicking a decade narrows
+// the genre/country charts) without also collapsing itself down to a single
+// highlighted bar.
+export function matchesFiltersExcept(a, exclude = []){
   const f = state.filters;
-  if(f.year){
-    if(parseInt(a.year) !== f.year) return false;
-  } else if(f.decade){
-    if(decadeOf(a) !== f.decade) return false;
+  if(!exclude.includes("time")){
+    if(f.year){
+      if(parseInt(a.year) !== f.year) return false;
+    } else if(f.decade){
+      if(decadeOf(a) !== f.decade) return false;
+    }
   }
-  if(f.genre){
-    if(!genreList(a).includes(f.genre)) return false;
-  } else if(f.genreMacro){
-    const macros = genreList(a).map(classifyGenre);
-    if(!macros.includes(f.genreMacro)) return false;
+  if(!exclude.includes("genre")){
+    if(f.genre){
+      if(!genreList(a).includes(f.genre)) return false;
+    } else if(f.genreMacro){
+      const macros = genreList(a).map(classifyGenre);
+      if(!macros.includes(f.genreMacro)) return false;
+    }
   }
-  if(f.country){
-    const c = normalizeCountry(a.musicbrainz && a.musicbrainz.country);
-    if(c !== f.country) return false;
+  if(!exclude.includes("country")){
+    if(f.country){
+      const c = normalizeCountry(a.musicbrainz && a.musicbrainz.country);
+      if(c !== f.country) return false;
+    }
   }
   if(f.artist){
     if(a.artist !== f.artist) return false;
   }
   return true;
+}
+
+export function matchesFilters(a){
+  return matchesFiltersExcept(a, []);
 }
 
 export function sortAlbums(list){

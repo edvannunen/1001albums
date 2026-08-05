@@ -2,7 +2,7 @@ import { state } from "./state.js";
 import { decadeOf, genreList } from "./data.js";
 import { classifyGenre, GENRE_COLORS } from "./taxonomy.js";
 import { normalizeCountry } from "./taxonomy.js";
-import { setFilter, clearFilter } from "./filters.js";
+import { setFilter, clearFilter, matchesFiltersExcept } from "./filters.js";
 import { escapeHtml } from "./grid.js";
 
 let decadeChartInstance, countryChartInstance;
@@ -97,7 +97,7 @@ function renderDecadeChart(onChange){
     const startYear = parseInt(decade);
     const counts = {};
     for(let y = startYear; y < startYear + 10; y++) counts[y] = 0;
-    state.albums.forEach(a=>{
+    state.albums.filter(a => matchesFiltersExcept(a, ["time"])).forEach(a=>{
       const y = parseInt(a.year);
       if(y >= startYear && y < startYear + 10) counts[y] = (counts[y]||0) + 1;
     });
@@ -132,7 +132,7 @@ function renderDecadeChart(onChange){
 
   labelEl.innerHTML = `<span class="disc"></span>Albums per decennium`;
   const decadeCounts = {};
-  state.albums.forEach(a=>{
+  state.albums.filter(a => matchesFiltersExcept(a, ["time"])).forEach(a=>{
     const d = decadeOf(a);
     if(!d) return;
     decadeCounts[d] = (decadeCounts[d]||0) + 1;
@@ -186,7 +186,7 @@ function renderGenreBubbles(onChange){
     });
 
     const tagCounts = {};
-    state.albums.forEach(a=>{
+    state.albums.filter(a => matchesFiltersExcept(a, ["genre"])).forEach(a=>{
       genreList(a).forEach(g=>{
         if(classifyGenre(g) === macro) tagCounts[g] = (tagCounts[g]||0) + 1;
       });
@@ -198,7 +198,7 @@ function renderGenreBubbles(onChange){
   } else {
     labelEl.innerHTML = `<span class="disc"></span>Top genres`;
     const macroCounts = {};
-    state.albums.forEach(a=>{
+    state.albums.filter(a => matchesFiltersExcept(a, ["genre"])).forEach(a=>{
       const macros = new Set(genreList(a).map(classifyGenre).filter(Boolean));
       macros.forEach(m => macroCounts[m] = (macroCounts[m]||0) + 1);
     });
@@ -264,7 +264,7 @@ function renderCountryChart(onChange){
   });
 
   const countryCounts = {};
-  state.albums.forEach(a=>{
+  state.albums.filter(a => matchesFiltersExcept(a, ["country"])).forEach(a=>{
     const c = normalizeCountry(a.musicbrainz && a.musicbrainz.country);
     if(c) countryCounts[c] = (countryCounts[c]||0) + 1;
   });
