@@ -12,6 +12,8 @@ CREATE TABLE albums (
   album                         TEXT NOT NULL,
   year                          INTEGER NOT NULL,
   text                          TEXT,
+  text_en                       TEXT,   -- English translation of `text`, filled in by
+                                         -- translate.py; NULL until translated
   medium_post_url               TEXT,   -- NULL for the initial migration backfill;
                                          -- populated going forward once the pipeline
                                          -- tags entries with their source post at scrape time
@@ -35,6 +37,7 @@ CREATE TABLE media (
   type        TEXT NOT NULL,  -- youtube|spotify|image|other
   url         TEXT NOT NULL,
   caption     TEXT,
+  caption_en  TEXT,           -- English translation of `caption`; NULL until translated
   position    INTEGER NOT NULL DEFAULT 0
 );
 

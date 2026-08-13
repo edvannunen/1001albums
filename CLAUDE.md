@@ -16,8 +16,9 @@ entries, so the pipeline should be easy to re-run incrementally.
 
 ## Current state
 
-- `enrich_1001_albums.py` — the enrichment pipeline (3 stages, see below).
-  Spotify/MusicBrainz credentials live in `.env` (see `.env.example`).
+- `enrich_1001_albums.py` — the enrichment pipeline (4 stages, see below).
+  Spotify/MusicBrainz credentials, plus `ANTHROPIC_API_KEY` for the
+  translation stage, live in `.env` (see `.env.example`).
 - Storage is SQLite (`data/1001albums.db`, schema in `schema.sql`, helpers
   in `db.py`) — migrated from flat-JSON 2026-07 (`migrate_json_to_sqlite.py`
   is the one-off migration script, safe to re-run but shouldn't need to be).
@@ -65,6 +66,22 @@ not duplicated here — check that file for anything deploy- or server-related.
    Cover Art Archive URL as an art fallback for the rare cases Spotify
    has nothing.
 
+4. **Translation** (`translate.py`) — Dutch review text + media captions
+   translated to English via the Claude API (Sonnet 5), so the frontend can
+   offer NL/EN without a second dataset. Runs last in `sync_posts()`, only
+   for albums/captions still missing `text_en`/`caption_en` — cheap and
+   idempotent, same "only touch what's actually new" shape as the rest of
+   the pipeline. **Never translates artist/album names** (passed to the
+   model only as context, explicitly instructed not to alter them), and
+   genres/countries are out of scope entirely — they're already English.
+   `update_album_text_media()` only nulls `text_en` when the Dutch text
+   actually changed, so a full pipeline re-run doesn't re-translate
+   everything; media rows are always fully replaced on refresh (existing
+   behavior), so `caption_en` resets and gets cheaply retranslated each time
+   — accepted as negligible cost. One-off backfill for existing data:
+   `translate_content.py` (mirrors `backfill_spotify.py`'s
+   commit-per-album, safe-to-resume pattern).
+
 Output: `albums_enriched.json`, one record per album:
 ```json
 {
@@ -73,8 +90,9 @@ Output: `albums_enriched.json`, one record per album:
   "album": "...",
   "year": "1988",
   "text": "...",
+  "text_en": "... | null",
   "media": [
-    {"type": "youtube|spotify|image|other", "url": "...", "caption": "..."}
+    {"type": "youtube|spotify|image|other", "url": "...", "caption": "...", "caption_en": "... | null"}
   ],
   "spotify": {
     "spotify_url": "...",

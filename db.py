@@ -19,6 +19,21 @@ DB_FILE = "data/1001albums.db"
 SCHEMA_FILE = "schema.sql"
 
 
+def _ensure_translation_columns(conn: sqlite3.Connection):
+    """Self-healing migration for the text_en/caption_en columns, added after
+    the DB (local or prod) already existed. Runs on every connection — cheap
+    (a PRAGMA + no-op if already present) and means neither dev machine nor
+    the Coolify persistent volume needs a manual migration step; the next
+    deploy just picks it up on its first request."""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(albums)")}
+    if "text_en" not in cols:
+        conn.execute("ALTER TABLE albums ADD COLUMN text_en TEXT")
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(media)")}
+    if "caption_en" not in cols:
+        conn.execute("ALTER TABLE media ADD COLUMN caption_en TEXT")
+    conn.commit()
+
+
 def get_connection() -> sqlite3.Connection:
     """Open the DB, creating the data/ dir and schema on first use."""
     Path(DB_FILE).parent.mkdir(parents=True, exist_ok=True)
@@ -29,6 +44,7 @@ def get_connection() -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode = WAL")
     if is_new:
         conn.executescript(Path(SCHEMA_FILE).read_text(encoding="utf-8"))
+    _ensure_translation_columns(conn)
     return conn
 
 
@@ -61,12 +77,12 @@ def insert_album(conn: sqlite3.Connection, e: dict) -> int:
     cur = conn.execute(
         """
         INSERT INTO albums (
-            catalog_number, artist, album, year, text, medium_post_url,
+            catalog_number, artist, album, year, text, text_en, medium_post_url,
             spotify_url, spotify_embed_url, spotify_cover_art_url,
             spotify_matched_artist_name, spotify_matched_album_name,
             spotify_matched_release_year, spotify_exact_year_match,
             mb_country, mb_cover_art_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             int(e["number"]), e["artist"], e["album"], int(e["year"]), e["text"],
@@ -111,14 +127,25 @@ def update_album_text_media(conn: sqlite3.Connection, album_id: int, e: dict):
     """Refresh an existing album's header/text/media/source-url from a fresh
     scrape, WITHOUT touching its already-fetched spotify/musicbrainz data —
     the same incremental-merge behavior the JSON-based pipeline has always
-    had."""
+    had.
+
+    Only nulls text_en when the Dutch text actually changed — the pipeline
+    already re-scrapes and re-writes every album's text/media on every full
+    run, and unconditionally invalidating text_en here would re-translate
+    every review on every run for nothing. replace_media() below already
+    fully deletes+reinserts media rows regardless, so caption_en resets to
+    NULL on every call — accepted as a small, cheap re-translation cost."""
+    row = conn.execute("SELECT text FROM albums WHERE id=?", (album_id,)).fetchone()
+    text_changed = row["text"] != e["text"]
     conn.execute(
         """
         UPDATE albums SET artist=?, album=?, year=?, text=?, medium_post_url=?,
+            text_en = CASE WHEN ? THEN NULL ELSE text_en END,
             updated_at=CURRENT_TIMESTAMP
         WHERE id=?
         """,
-        (e["artist"], e["album"], int(e["year"]), e["text"], e.get("medium_post_url"), album_id),
+        (e["artist"], e["album"], int(e["year"]), e["text"], e.get("medium_post_url"),
+         text_changed, album_id),
     )
     replace_media(conn, album_id, e.get("media") or [])
 
@@ -167,7 +194,8 @@ def export_from_db(conn: sqlite3.Connection | None = None) -> list:
     media_by_album = {}
     for m in media_rows:
         media_by_album.setdefault(m["album_id"], []).append(
-            {"type": m["type"], "url": m["url"], "caption": m["caption"]}
+            {"type": m["type"], "url": m["url"], "caption": m["caption"],
+             "caption_en": m["caption_en"]}
         )
     genres_by_album = {}
     for g in genre_rows:
@@ -208,6 +236,7 @@ def export_from_db(conn: sqlite3.Connection | None = None) -> list:
             "album": a["album"],
             "year": str(a["year"]),
             "text": a["text"],
+            "text_en": a["text_en"],
             "media": media_by_album.get(a["id"], []),
             "musicbrainz": musicbrainz,
             "spotify": spotify,

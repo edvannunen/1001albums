@@ -1,5 +1,6 @@
 import { state, PAGE_SIZE } from "./state.js";
 import { coverUrl, genreList } from "./data.js";
+import { t } from "./i18n.js";
 
 export function escapeHtml(s){
   const div = document.createElement("div");
@@ -67,16 +68,16 @@ export function renderPagination(total, onPageChange){
   el.innerHTML = "";
 
   const prev = document.createElement("button");
-  prev.textContent = "← Vorige";
+  prev.textContent = t("pagination_prev");
   prev.disabled = state.page === 1;
   prev.addEventListener("click", ()=>{ state.page--; onPageChange(); window.scrollTo({top:0, behavior:"smooth"}); });
 
   const label = document.createElement("span");
   label.className = "mono";
-  label.textContent = `${start}–${end} van ${total}`;
+  label.textContent = t("pagination_range")(start, end, total);
 
   const next = document.createElement("button");
-  next.textContent = "Volgende →";
+  next.textContent = t("pagination_next");
   next.disabled = state.page === totalPages;
   next.addEventListener("click", ()=>{ state.page++; onPageChange(); window.scrollTo({top:0, behavior:"smooth"}); });
 

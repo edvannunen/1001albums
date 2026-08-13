@@ -1,7 +1,8 @@
 import { state } from "./state.js";
-import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso } from "./data.js";
+import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso, albumText, mediaCaption } from "./data.js";
 import { getFiltered, sortAlbums } from "./filters.js";
 import { showToast } from "./toast.js";
+import { t } from "./i18n.js";
 
 function extractYouTubeId(url){
   const m = (url||"").match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
@@ -41,18 +42,18 @@ export function shareCurrentAlbum(){
   if(!a) return;
   const text = `#1001Albums ${a.number} ${a.artist} - ${a.album} (${a.year})\n\n${albumShareUrl(a)}`;
   navigator.clipboard.writeText(text)
-    .then(()=> showToast("Album review copied to the clipboard"))
-    .catch(()=> showToast("Could not copy to clipboard"));
+    .then(()=> showToast(t("toast_copied")))
+    .catch(()=> showToast(t("toast_copy_failed")));
 }
 
 export function openModal(a){
   updateNav(a);
-  history.replaceState(null, "", "?album=" + albumSlug(a));
+  history.replaceState(null, "", "?album=" + albumSlug(a) + "&lang=" + state.lang);
   document.getElementById("modalCatalog").textContent = "#" + a.number;
   document.getElementById("modalArtist").textContent = a.artist;
   document.getElementById("modalAlbum").textContent = `${a.album} (${a.year})`;
   document.getElementById("modalCover").style.backgroundImage = `url('${coverUrl(a)}')`;
-  document.getElementById("modalText").textContent = a.text || "";
+  document.getElementById("modalText").textContent = albumText(a) || "";
 
   const badges = document.getElementById("modalBadges");
   badges.innerHTML = "";
@@ -109,7 +110,7 @@ export function openModal(a){
     const img = document.createElement("img");
     img.src = m.url; img.alt = "";
     wrap.appendChild(img);
-  }, m.caption));
+  }, mediaCaption(m)));
 
   youtubes.forEach(m => appendMedia(wrap => {
     const videoId = extractYouTubeId(m.url);
@@ -125,7 +126,7 @@ export function openModal(a){
       link.textContent = m.url;
       wrap.appendChild(link);
     }
-  }, m.caption));
+  }, mediaCaption(m)));
 
   if(a.spotify && a.spotify.spotify_embed_url){
     appendMedia(wrap => {
@@ -143,14 +144,14 @@ export function openModal(a){
     iframe.src = m.url.replace("open.spotify.com/", "open.spotify.com/embed/");
     iframe.allow = "encrypted-media";
     wrap.appendChild(iframe);
-  }, m.caption));
+  }, mediaCaption(m)));
 
   otherLinks.forEach(m => appendMedia(wrap => {
     const link = document.createElement("a");
     link.href = m.url; link.target = "_blank"; link.rel = "noopener";
     link.textContent = m.url;
     wrap.appendChild(link);
-  }, m.caption));
+  }, mediaCaption(m)));
 
   const others = state.albums.filter(x => x.artist === a.artist && x !== a);
   const moreBlock = document.getElementById("modalMoreByArtist");

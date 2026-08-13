@@ -4,6 +4,7 @@ import { classifyGenre, GENRE_COLORS } from "./taxonomy.js";
 import { normalizeCountry } from "./taxonomy.js";
 import { setFilter, clearFilter, matchesFiltersExcept } from "./filters.js";
 import { escapeHtml } from "./grid.js";
+import { t } from "./i18n.js";
 
 let decadeChartInstance, countryChartInstance;
 
@@ -88,7 +89,7 @@ function renderDecadeChart(onChange){
 
   if(state.decadeDrill){
     const decade = state.decadeDrill;
-    labelEl.innerHTML = `<span class="disc"></span>${decade}<button class="dash-back" id="decadeBack">← Decennia</button>`;
+    labelEl.innerHTML = `<span class="disc"></span>${decade}<button class="dash-back" id="decadeBack">${t("chart_back_decades")}</button>`;
     document.getElementById("decadeBack").addEventListener("click", ()=>{
       clearFilter("decade");
       onChange();
@@ -130,7 +131,7 @@ function renderDecadeChart(onChange){
     return;
   }
 
-  labelEl.innerHTML = `<span class="disc"></span>Albums per decennium`;
+  labelEl.innerHTML = `<span class="disc"></span>${t("decade_label")}`;
   const decadeCounts = {};
   state.albums.filter(a => matchesFiltersExcept(a, ["time"])).forEach(a=>{
     const d = decadeOf(a);
@@ -179,7 +180,7 @@ function renderGenreBubbles(onChange){
 
   if(state.genreDrill){
     const macro = state.genreDrill;
-    labelEl.innerHTML = `<span class="disc"></span>${macro}<button class="dash-back" id="genreBack">← Genres</button>`;
+    labelEl.innerHTML = `<span class="disc"></span>${macro}<button class="dash-back" id="genreBack">${t("chart_back_genres")}</button>`;
     document.getElementById("genreBack").addEventListener("click", ()=>{
       clearFilter("genreMacro");
       onChange();
@@ -196,7 +197,7 @@ function renderGenreBubbles(onChange){
     onBubbleClick = (d)=>{ setFilter("genre", d.name); onChange(); };
     isActive = (d)=> state.filters.genre === d.name;
   } else {
-    labelEl.innerHTML = `<span class="disc"></span>Top genres`;
+    labelEl.innerHTML = `<span class="disc"></span>${t("genre_label")}`;
     const macroCounts = {};
     state.albums.filter(a => matchesFiltersExcept(a, ["genre"])).forEach(a=>{
       const macros = new Set(genreList(a).map(classifyGenre).filter(Boolean));
@@ -256,8 +257,8 @@ function renderCountryChart(onChange){
   const labelEl = document.getElementById("countryLabel");
   const canvas = document.getElementById("countryChart");
 
-  labelEl.innerHTML = `<span class="disc"></span>Landen` +
-    `<button class="dash-back" id="usUkToggle">${state.hideUsUk ? "US &amp; UK tonen" : "US &amp; UK verbergen"}</button>`;
+  labelEl.innerHTML = `<span class="disc"></span>${t("country_label")}` +
+    `<button class="dash-back" id="usUkToggle">${state.hideUsUk ? t("us_uk_show") : t("us_uk_hide")}</button>`;
   document.getElementById("usUkToggle").addEventListener("click", ()=>{
     state.hideUsUk = !state.hideUsUk;
     onChange();

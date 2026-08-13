@@ -55,6 +55,17 @@ export function genreList(a){
   return (a.musicbrainz && a.musicbrainz.genres) ? a.musicbrainz.genres : [];
 }
 
+// English text/captions are backfilled by translate.py — until a given
+// album/caption has been translated, fall back to the Dutch original rather
+// than showing nothing.
+export function albumText(a){
+  return (state.lang === "en" && a.text_en) ? a.text_en : a.text;
+}
+
+export function mediaCaption(m){
+  return (state.lang === "en" && m.caption_en) ? m.caption_en : m.caption;
+}
+
 // Country badge flag lookup — keyed on the exact strings seen in
 // musicbrainz.country across the current dataset (checked 2026-07), not a
 // general country-name-to-ISO library. MusicBrainz's artist `area` is
@@ -103,7 +114,7 @@ export function albumSlug(a){
 }
 
 export function albumShareUrl(a){
-  return `${location.origin}${location.pathname}?album=${albumSlug(a)}`;
+  return `${location.origin}${location.pathname}?album=${albumSlug(a)}&lang=${state.lang}`;
 }
 
 // Accepts either a full slug or a bare number (e.g. a hand-typed URL) —

@@ -4,6 +4,31 @@ import { getFiltered, setFilter, clearFilter, clearAllFilters, renderFilterChips
 import { renderGrid, renderTable, renderPagination } from "./grid.js";
 import { openModal, closeModal, showModalPrev, showModalNext, shareCurrentAlbum } from "./modal.js";
 import { renderDashboard, resizeGenreBubbles, replayProgressAnimation } from "./charts.js";
+import { setLang, applyStaticStrings } from "./i18n.js";
+
+function updateLangFlagIcon(){
+  document.getElementById("langCurrentFlag").src =
+    state.lang === "en" ? "https://flagcdn.com/gb.svg" : "https://flagcdn.com/nl.svg";
+}
+
+function selectLang(lang){
+  setLang(lang);
+  updateLangFlagIcon();
+  document.getElementById("langMenu").classList.add("hidden");
+  document.getElementById("langCurrent").setAttribute("aria-expanded", "false");
+  applyStaticStrings();
+
+  const params = new URLSearchParams(location.search);
+  params.set("lang", lang);
+  history.replaceState(null, "", "?" + params.toString());
+
+  render();
+
+  const albumParam = new URLSearchParams(location.search).get("album");
+  const openAlbum = document.getElementById("modalBackdrop").classList.contains("open")
+    ? findAlbumByParam(albumParam) : null;
+  if(openAlbum) openModal(openAlbum);
+}
 
 function render(){
   const q = document.getElementById("searchInput").value;
@@ -55,6 +80,23 @@ function wireEvents(){
   document.getElementById("modalNavNext").addEventListener("click", showModalNext);
   document.getElementById("modalShare").addEventListener("click", shareCurrentAlbum);
 
+  document.getElementById("langCurrent").addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const menu = document.getElementById("langMenu");
+    const willOpen = menu.classList.contains("hidden");
+    menu.classList.toggle("hidden", !willOpen);
+    document.getElementById("langCurrent").setAttribute("aria-expanded", String(willOpen));
+  });
+  document.querySelectorAll("#langMenu li").forEach(li=>{
+    li.addEventListener("click", ()=> selectLang(li.dataset.lang));
+  });
+  document.addEventListener("click", (e)=>{
+    if(!document.getElementById("langSwitch").contains(e.target)){
+      document.getElementById("langMenu").classList.add("hidden");
+      document.getElementById("langCurrent").setAttribute("aria-expanded", "false");
+    }
+  });
+
   document.getElementById("infoBtn").addEventListener("click", ()=>{
     document.getElementById("infoBackdrop").classList.add("open");
   });
@@ -80,11 +122,17 @@ function wireEvents(){
 }
 
 async function init(){
+  const params = new URLSearchParams(location.search);
+  const langParam = params.get("lang");
+  setLang(langParam === "en" || langParam === "nl" ? langParam : state.lang);
+  updateLangFlagIcon();
+  applyStaticStrings();
+
   wireEvents();
   await loadData();
   render();
 
-  const albumParam = new URLSearchParams(location.search).get("album");
+  const albumParam = params.get("album");
   const linkedAlbum = findAlbumByParam(albumParam);
   if(linkedAlbum) openModal(linkedAlbum);
 }

@@ -4,6 +4,7 @@ export const PAGE_SIZE = 48;
 // circular imports between modules that both need to read/write it.
 export const state = {
   albums: [],
+  lang: localStorage.getItem("lang") === "en" ? "en" : "nl",
   view: "grid",
   sort: "number_desc",
   page: 1,

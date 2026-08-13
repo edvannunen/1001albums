@@ -32,26 +32,36 @@
     <h1>1001 Albums</h1>
     <div class="tagline">You Must Hear Before You Die</div>
     <div class="sub-row">
-      <div class="sub">EEN PERSOONLIJKE LUISTERTOCHT</div>
-      <button class="info-btn" id="infoBtn" aria-label="Over dit project">i</button>
+      <div class="sub" data-i18n="tagline_sub">EEN PERSOONLIJKE LUISTERTOCHT</div>
+      <button class="info-btn" id="infoBtn" data-i18n-aria="info_btn_aria" aria-label="Over dit project">i</button>
     </div>
   </div>
   <div class="header-right">
+    <div class="lang-switch" id="langSwitch">
+      <button class="lang-current" id="langCurrent" aria-haspopup="listbox" aria-expanded="false" data-i18n-aria="lang_switch_aria" aria-label="Taal wijzigen">
+        <img class="lang-flag" id="langCurrentFlag" src="https://flagcdn.com/nl.svg" alt="">
+        <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <ul class="lang-menu hidden" id="langMenu" role="listbox">
+        <li role="option" data-lang="nl"><img class="lang-flag" src="https://flagcdn.com/nl.svg" alt="">Nederlands</li>
+        <li role="option" data-lang="en"><img class="lang-flag" src="https://flagcdn.com/gb.svg" alt="">English</li>
+      </ul>
+    </div>
     <img class="avatar" src="img/Platenspeler_klein.png" alt="Ed van Nunen">
   </div>
 </header>
 
-<div class="dashboard-hint">Klik in de widgets om te filteren</div>
+<div class="dashboard-hint" data-i18n="dashboard_hint">Klik in de widgets om te filteren</div>
 <div class="dashboard">
   <div class="dash-panel">
-    <div class="dash-label"><span class="disc"></span>Voortgang</div>
+    <div class="dash-label"><span class="disc"></span><span data-i18n="progress_label">Voortgang</span></div>
     <div class="knob-wrap">
       <div class="knob">
         <img class="knob-face" src="img/volumeknob.png" alt="">
         <img class="knob-line" id="progressLine" src="img/volumeknob_line.png" alt="">
       </div>
       <div class="knob-caption">
-        <b class="mono" id="progressLabel">0%</b> — <b id="doneCount">0</b> van 1001 albums beluisterd en besproken
+        <b class="mono" id="progressLabel">0%</b> — <b id="doneCount">0</b> <span data-i18n="progress_suffix">van 1001 albums beluisterd en besproken</span>
       </div>
     </div>
   </div>
@@ -72,26 +82,26 @@
 <div class="controls">
   <div class="controls-left">
     <div class="toggle-group">
-      <button id="viewGrid" class="active">Grid</button>
-      <button id="viewTable">Tabel</button>
+      <button id="viewGrid" class="active" data-i18n="view_grid">Grid</button>
+      <button id="viewTable" data-i18n="view_table">Tabel</button>
     </div>
-    <input class="search" id="searchInput" type="text" placeholder="zoek artiest, album, jaar, genre...">
+    <input class="search" id="searchInput" type="text" data-i18n-placeholder="search_placeholder" placeholder="zoek artiest, album, jaar, genre...">
   </div>
   <div>
-    <label class="mono" style="font-size:0.72rem;color:var(--ink-dim);margin-right:8px;">SORTEER</label>
+    <label class="mono" style="font-size:0.72rem;color:var(--ink-dim);margin-right:8px;" data-i18n="sort_label">SORTEER</label>
     <select id="sortSelect">
-      <option value="number_desc">Nieuwste eerst</option>
-      <option value="number">Oudste eerst</option>
-      <option value="artist">Artiest</option>
-      <option value="album">Album</option>
+      <option value="number_desc" data-i18n="sort_newest">Nieuwste eerst</option>
+      <option value="number" data-i18n="sort_oldest">Oudste eerst</option>
+      <option value="artist" data-i18n="sort_artist">Artiest</option>
+      <option value="album" data-i18n="sort_album">Album</option>
     </select>
   </div>
 </div>
 
 <div class="filter-bar" id="filterBar">
-  <span class="filter-label">FILTERS:</span>
+  <span class="filter-label" data-i18n="filters_label">FILTERS:</span>
   <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-  <button class="clear-filters" id="clearFilters">Alles wissen</button>
+  <button class="clear-filters" id="clearFilters" data-i18n="clear_filters">Alles wissen</button>
 </div>
 
 <div id="grid"></div>
@@ -99,16 +109,16 @@
   <thead>
     <tr>
       <th data-key="number">#</th>
-      <th data-key="artist">Artiest</th>
-      <th data-key="album">Album</th>
-      <th data-key="year">Jaar</th>
-      <th data-key="country">Land</th>
-      <th data-key="genres">Genre</th>
+      <th data-key="artist" data-i18n="table_artist">Artiest</th>
+      <th data-key="album" data-i18n="table_album">Album</th>
+      <th data-key="year" data-i18n="table_year">Jaar</th>
+      <th data-key="country" data-i18n="table_country">Land</th>
+      <th data-key="genres" data-i18n="table_genre">Genre</th>
     </tr>
   </thead>
   <tbody id="tableBody"></tbody>
 </table>
-<div id="emptyState" class="empty-state hidden">Geen albums gevonden voor deze zoekopdracht.</div>
+<div id="emptyState" class="empty-state hidden" data-i18n="empty_state">Geen albums gevonden voor deze zoekopdracht.</div>
 <div class="pagination" id="pagination"></div>
 
 <div class="modal-backdrop" id="modalBackdrop">
@@ -119,7 +129,7 @@
       <div class="modal-title-block">
         <div class="modal-title-row">
           <div class="catalog mono" id="modalCatalog"></div>
-          <button class="modal-nav-btn" id="modalShare" aria-label="Deel album review">
+          <button class="modal-nav-btn" id="modalShare" data-i18n-aria="modal_share_aria" aria-label="Deel album review">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
               <circle cx="18" cy="5" r="3"></circle>
               <circle cx="6" cy="12" r="3"></circle>
@@ -129,8 +139,8 @@
             </svg>
           </button>
           <div class="modal-nav-group">
-            <button class="modal-nav-btn" id="modalNavPrev" aria-label="Vorig album">&#10094;</button>
-            <button class="modal-nav-btn" id="modalNavNext" aria-label="Volgend album">&#10095;</button>
+            <button class="modal-nav-btn" id="modalNavPrev" data-i18n-aria="modal_prev_aria" aria-label="Vorig album">&#10094;</button>
+            <button class="modal-nav-btn" id="modalNavNext" data-i18n-aria="modal_next_aria" aria-label="Volgend album">&#10095;</button>
           </div>
         </div>
         <h2 id="modalArtist"></h2>
@@ -142,7 +152,7 @@
       <div class="review-text" id="modalText"></div>
       <div class="media-list" id="modalMedia"></div>
       <div class="more-by-artist hidden" id="modalMoreByArtist">
-        <div class="dash-label">Meer van deze artiest</div>
+        <div class="dash-label" data-i18n="modal_more_by_artist">Meer van deze artiest</div>
         <ul id="modalMoreByArtistList"></ul>
       </div>
     </div>
@@ -155,7 +165,7 @@
     <h2 class="info-title">1001 Albums You Must Hear Before You Die</h2>
     <div class="info-body">
       <div class="info-text">
-        <p>Vanaf november 2019 luister ik alle platen uit het boek "1001 Albums You Must Hear Before You Die" in de chronologische volgorde van het boek, en schrijf een kort stukje over elk album. De bijdrages zijn ook te lezen op <a href="https://bsky.app/profile/edvannunen.bsky.social" target="_blank" rel="noopener">BlueSky</a> en <a href="https://edvannunen.medium.com/" target="_blank" rel="noopener">Medium</a>.</p>
+        <p data-i18n-html="info_body">Vanaf november 2019 luister ik alle platen uit het boek "1001 Albums You Must Hear Before You Die" in de chronologische volgorde van het boek, en schrijf een kort stukje over elk album. De bijdrages zijn ook te lezen op <a href="https://bsky.app/profile/edvannunen.bsky.social" target="_blank" rel="noopener">BlueSky</a> en <a href="https://edvannunen.medium.com/" target="_blank" rel="noopener">Medium</a>.</p>
       </div>
       <img class="info-avatar" src="img/profielfoto.jpg" alt="Ed van Nunen">
     </div>
