@@ -54,8 +54,22 @@ function wireEvents(){
   document.getElementById("modalNavPrev").addEventListener("click", showModalPrev);
   document.getElementById("modalNavNext").addEventListener("click", showModalNext);
   document.getElementById("modalShare").addEventListener("click", shareCurrentAlbum);
+
+  document.getElementById("infoBtn").addEventListener("click", ()=>{
+    document.getElementById("infoBackdrop").classList.add("open");
+  });
+  document.getElementById("infoClose").addEventListener("click", ()=>{
+    document.getElementById("infoBackdrop").classList.remove("open");
+  });
+  document.getElementById("infoBackdrop").addEventListener("click", (e)=>{
+    if(e.target.id === "infoBackdrop") document.getElementById("infoBackdrop").classList.remove("open");
+  });
+
   document.addEventListener("keydown", (e)=>{
-    if(e.key === "Escape") closeModal();
+    if(e.key === "Escape"){
+      closeModal();
+      document.getElementById("infoBackdrop").classList.remove("open");
+    }
     if(!document.getElementById("modalBackdrop").classList.contains("open")) return;
     if(e.key === "ArrowLeft") showModalPrev();
     if(e.key === "ArrowRight") showModalNext();

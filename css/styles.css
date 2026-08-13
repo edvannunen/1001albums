@@ -51,9 +51,28 @@ header .tagline{
 header .sub{
   color:var(--ink-dim);
   font-size:0.85rem;
-  margin-top:4px;
   letter-spacing:0.04em;
 }
+.sub-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:4px;
+}
+.info-btn{
+  background:var(--rule);
+  border:none;
+  color:var(--ink-dim);
+  width:18px;height:18px;
+  border-radius:50%;
+  font-family:'Space Mono',monospace;
+  font-size:0.68rem;
+  line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.info-btn:hover{background:var(--mustard);color:var(--bg);}
 .header-right{
   display:flex;
   align-items:center;
@@ -496,6 +515,30 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
   font-size:0.85rem;color:var(--teal);cursor:pointer;
 }
 .more-by-artist a:hover{text-decoration:underline;}
+
+.info-modal{padding:28px;max-width:640px;}
+.info-title{font-size:1.7rem;margin:0 0 20px;padding-right:36px;}
+.info-body{display:flex;gap:24px;align-items:flex-start;margin-bottom:24px;}
+.info-text{flex:1;line-height:1.6;font-size:0.95rem;}
+.info-text p{margin:0;}
+.info-text a{color:var(--teal);text-decoration:underline;}
+.info-avatar{
+  width:120px;height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  flex-shrink:0;
+}
+.info-book{
+  display:block;
+  max-width:200px;width:100%;
+  margin:0 auto;
+  border-radius:var(--radius);
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+@media (max-width:520px){
+  .info-body{flex-direction:column;align-items:center;text-align:left;}
+}
 
 .toast{
   position:fixed;
