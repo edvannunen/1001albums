@@ -134,18 +134,30 @@ def update_album_text_media(conn: sqlite3.Connection, album_id: int, e: dict):
     run, and unconditionally invalidating text_en here would re-translate
     every review on every run for nothing. replace_media() below already
     fully deletes+reinserts media rows regardless, so caption_en resets to
-    NULL on every call — accepted as a small, cheap re-translation cost."""
+    NULL on every call — accepted as a small, cheap re-translation cost.
+
+    If the fresh scrape now finds a Medium-embedded Spotify link where it
+    didn't before (e.g. the iframe-resolution fix picking up an older
+    post's embed retroactively — see CLAUDE.md), null out the album's own
+    spotify_embed_url: it's the enrichment stage's fallback search match,
+    and enrich_with_spotify() itself skips that search whenever media
+    already has a Spotify embed, so this keeps update-time behavior
+    matching insert-time behavior and avoids rendering both. spotify_url/
+    spotify_cover_art_url are left alone — cover_art_url is still used as
+    album art regardless of which Spotify link is authoritative."""
     row = conn.execute("SELECT text FROM albums WHERE id=?", (album_id,)).fetchone()
     text_changed = row["text"] != e["text"]
+    has_new_spotify_media = any(m["type"] == "spotify" for m in e.get("media") or [])
     conn.execute(
         """
         UPDATE albums SET artist=?, album=?, year=?, text=?, medium_post_url=?,
             text_en = CASE WHEN ? THEN NULL ELSE text_en END,
+            spotify_embed_url = CASE WHEN ? THEN NULL ELSE spotify_embed_url END,
             updated_at=CURRENT_TIMESTAMP
         WHERE id=?
         """,
         (e["artist"], e["album"], int(e["year"]), e["text"], e.get("medium_post_url"),
-         text_changed, album_id),
+         text_changed, has_new_spotify_media, album_id),
     )
     replace_media(conn, album_id, e.get("media") or [])
 

@@ -13,6 +13,11 @@ __pycache__/
 
 # editor + local reference/scratch files, not site assets
 .vscode/
+
+# Throwaway scripts (repros, one-off debug/data scripts). Always reused at this
+# fixed path rather than named uniquely, so its permission-allow entry doesn't
+# go stale every time the file's contents change.
+scratchpad/
 img/album typos - to be fixed.txt
 img/banner1.png
 img/banner2.png
