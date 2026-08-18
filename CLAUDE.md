@@ -116,6 +116,26 @@ live on the site, no need to duplicate it in the data.
 
 ## Known open items / things to verify
 
+- **`/admin/add-post`'s direct Medium fetch can get Cloudflare-challenged
+  from production — confirmed 2026-08-18.** Not a fixed IP ban: the
+  response was a real Cloudflare JS challenge (`cf-mitigated: challenge`,
+  body is the "Just a moment..." page), and posts #75/#76 had genuinely
+  been added successfully via the live `/admin` panel before this (their
+  `medium_posts.last_scraped_at` timestamps are distinct from the original
+  bulk-migration batch). Cloudflare's bot-fight scoring flags datacenter
+  ASNs (Hetzner, here) on and off dynamically — the same server IP can
+  work one week and get challenged the next, with no code change on our
+  side. A plain `requests.get()` can never pass a JS challenge regardless
+  of User-Agent. Fixed with a relay path for when this happens again:
+  `relay_add_post.py`, run locally (residential IP, not challenged) —
+  fetches the post itself via the existing `fetch_medium_post_state()`,
+  then POSTs the already-fetched Apollo state to a new
+  `/admin/add-post-relay` endpoint (`server.py`), which skips the network
+  fetch and does everything else `sync_posts()` normally does (merge,
+  Spotify/MusicBrainz enrichment for new albums, translation). The
+  `/admin/add-post` web form is untouched and still tries the direct
+  fetch first, since it's free and sometimes still works — reach for the
+  relay script specifically when that form's error message shows up.
 - **`?format=json` is dead — Medium/Cloudflare now ignores that query
   param entirely** (confirmed 2026-07: `CF-Cache-Status: HIT` on every
   request regardless of cache-busting params; a plain server-rendered HTML

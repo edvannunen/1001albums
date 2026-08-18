@@ -46,6 +46,17 @@ locally, a harmless no-op-equivalent for a root-served app.
     the shared site-root <base>, not to the admin page's own directory —
     <base> makes ALL relative resolution in the document relative to the
     same fixed value, not to each element's own location).
+  - /admin/add-post-relay — same end result as /admin/add-post, but takes
+    an already-fetched Apollo state instead of fetching Medium itself.
+    Exists because Medium/Cloudflare intermittently challenges requests
+    from this server's own (Hetzner datacenter) IP — confirmed 2026-08-18,
+    not a fixed block, Cloudflare's bot-fight scoring just flags
+    datacenter ASNs on and off — which a plain server-side `requests.get`
+    can never pass (it's a JS challenge, not a header check). When
+    /admin/add-post's direct fetch fails this way, run
+    `python relay_add_post.py <url>` locally instead — it fetches from a
+    normal residential IP (which Cloudflare doesn't challenge) and POSTs
+    the result here.
 
 Run locally: uvicorn server:app --reload --port 8000, then browse
 http://localhost:8000/ — BASE_PATH is unset/empty locally, so <base
@@ -56,6 +67,7 @@ Auth: HTTP Basic, single shared username/password from .env
 """
 
 import html
+import json
 import os
 import re
 import secrets
@@ -69,7 +81,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from db import export_from_db, get_connection
-from enrich_1001_albums import sync_posts
+from enrich_1001_albums import sync_posts, sync_prefetched_post
 
 load_dotenv()
 
@@ -204,6 +216,26 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
     return ADMIN_PAGE.format(base=BASE_PATH, result=result)
+
+
+@app.post("/admin/add-post-relay")
+def add_post_relay(
+    url: str = Form(...), state: str = Form(...), _: str = Depends(require_admin)
+):
+    """Relay endpoint for relay_add_post.py — used when Medium/Cloudflare
+    is challenging requests from this server's own (datacenter) IP, which
+    a plain request from a residential IP still gets past. The caller
+    fetches the post itself and hands over its Apollo state (the same blob
+    fetch_medium_post_state() would have fetched here) so this only needs
+    to parse/merge/enrich, no outbound Medium request. Returns JSON, not
+    HTML — this is meant to be called by a script, not a browser.
+    """
+    conn = get_connection()
+    try:
+        stats = sync_prefetched_post(url, json.loads(state), conn)
+    finally:
+        conn.close()
+    return JSONResponse(stats)
 
 
 @app.get("/")

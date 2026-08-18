@@ -574,12 +574,13 @@ def enrich_with_musicbrainz(entries: list) -> list:
 # SYNC — scrape a set of posts and merge into the DB
 # ---------------------------------------------------------------------------
 
-def sync_posts(post_urls: list, conn) -> dict:
-    """Scrape post_urls, merge into the DB, and run Spotify/MusicBrainz
-    enrichment only for genuinely new albums. Shared by main() (the full
-    medium_post_urls.txt list) and, later, an admin endpoint that calls this
-    with a single newly-added URL — the incremental behavior is identical
-    either way, it's just a matter of how many URLs are in the list.
+def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -> dict:
+    """Shared tail end of sync_posts(): merge already-scraped entries into
+    the DB, enrich genuinely new ones, record post status, translate.
+    Factored out so the admin relay path (sync_prefetched_post(), below —
+    for when Medium's Cloudflare challenge blocks the server's own IP, see
+    CLAUDE.md "Known open items") can reuse everything after the network
+    fetch without duplicating it.
 
     An album already in the DB (matched by catalog_number+artist+album —
     NOT catalog_number alone, since a handful of posts reuse the same
@@ -590,8 +591,6 @@ def sync_posts(post_urls: list, conn) -> dict:
 
     Returns a small stats dict: {"scraped", "new", "updated", "failed_urls"}.
     """
-    print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
-    scraped, failures = scrape_medium_posts(post_urls)
     print(f"Total album entries scraped: {len(scraped)}")
 
     new_entries = []
@@ -635,6 +634,38 @@ def sync_posts(post_urls: list, conn) -> dict:
         "updated": updated,
         "failed_urls": sorted(failed_urls),
     }
+
+
+def sync_posts(post_urls: list, conn) -> dict:
+    """Scrape post_urls, merge into the DB, and run Spotify/MusicBrainz
+    enrichment only for genuinely new albums. Shared by main() (the full
+    medium_post_urls.txt list) and the admin endpoint that calls this with
+    a single newly-added URL — the incremental behavior is identical
+    either way, it's just a matter of how many URLs are in the list.
+    """
+    print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
+    scraped, failures = scrape_medium_posts(post_urls)
+    return sync_scraped_entries(scraped, failures, post_urls, conn)
+
+
+def sync_prefetched_post(url: str, state: dict, conn) -> dict:
+    """Same as sync_posts(), but for a single post whose Apollo state was
+    already fetched elsewhere instead of by this process — the relay path
+    for when Medium/Cloudflare is challenging requests from the server's
+    own IP (a datacenter ASN, which Cloudflare's bot-fight mode
+    intermittently starts challenging even though it isn't a fixed block —
+    confirmed 2026-08-18, see CLAUDE.md "Known open items") but a plain
+    request from a residential IP still gets through fine. Used by
+    relay_add_post.py via the /admin/add-post-relay endpoint.
+    """
+    try:
+        entries = parse_medium_post(state)
+        for e in entries:
+            e["medium_post_url"] = url
+        scraped, failures = entries, []
+    except Exception as e:
+        scraped, failures = [], [(url, str(e))]
+    return sync_scraped_entries(scraped, failures, [url], conn)
 
 
 # ---------------------------------------------------------------------------
