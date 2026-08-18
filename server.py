@@ -187,16 +187,33 @@ ADMIN_PAGE = """<!doctype html>
   <form method="post" action="admin/add-post">
     <input name="url" type="url" placeholder="https://edvannunen.medium.com/..."
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
-    <button type="submit" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>
+    <button type="submit" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>{relay_button}
   </form>
   {result}
 </body>
 </html>"""
 
+# Only meaningful when running locally: this is the process that has a
+# normal (non-datacenter) IP Cloudflare doesn't challenge, so it's the one
+# that can actually do the relay fetch. On production BASE_PATH is set
+# ("/1001albums"), so this button is simply omitted from the rendered page
+# — see the "why this exists" note on /admin/relay-to-prod below.
+RELAY_BUTTON = (
+    '<button type="submit" formaction="admin/relay-to-prod" '
+    'style="margin-top:0.75rem; margin-left:0.5rem; padding:0.5rem 1rem;">'
+    "Scrape locally &amp; push to production</button>"
+)
+
+
+def _admin_page(result: str) -> str:
+    return ADMIN_PAGE.format(
+        base=BASE_PATH, result=result, relay_button=RELAY_BUTTON if not BASE_PATH else ""
+    )
+
 
 @app.get("/admin/", response_class=HTMLResponse)
 def admin_page(_: str = Depends(require_admin)):
-    return ADMIN_PAGE.format(base=BASE_PATH, result="")
+    return _admin_page("")
 
 
 @app.post("/admin/add-post", response_class=HTMLResponse)
@@ -215,7 +232,39 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
             f"{' (Spotify/MusicBrainz enrichment ran for those)' if stats['new'] else ''}, "
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
-    return ADMIN_PAGE.format(base=BASE_PATH, result=result)
+    return _admin_page(result)
+
+
+@app.post("/admin/relay-to-prod", response_class=HTMLResponse)
+def relay_to_prod(url: str = Form(...), _: str = Depends(require_admin)):
+    """Browser-facing trigger for relay_add_post.relay_add_post() — lets
+    the local dev admin page ('Scrape locally & push to production'
+    button) do the same thing the CLI script does, without a terminal.
+    Local-only: this process needs to be the one running on a normal
+    residential IP for the relay to make sense at all (see
+    relay_add_post.py's module docstring), so this 404s if it's ever hit
+    on production itself (BASE_PATH set) rather than silently doing a
+    pointless prod-fetches-and-POSTs-to-itself round trip.
+    """
+    if BASE_PATH:
+        raise HTTPException(status_code=404)
+
+    from relay_add_post import relay_add_post
+
+    try:
+        stats = relay_add_post(url)
+    except Exception as e:
+        return _admin_page(f"<p style='color:#b00'>Relay to production failed: {html.escape(str(e))}</p>")
+
+    if stats["failed_urls"]:
+        result = f"<p style='color:#b00'>Production failed to process {url} — check the URL and try again.</p>"
+    else:
+        result = (
+            f"<p>Pushed to production — {stats['new']} new album(s) added"
+            f"{' (Spotify/MusicBrainz enrichment ran for those)' if stats['new'] else ''}, "
+            f"{stats['updated']} already existed and had their text/media refreshed.</p>"
+        )
+    return _admin_page(result)
 
 
 @app.post("/admin/add-post-relay")

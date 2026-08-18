@@ -34,16 +34,21 @@ load_dotenv()
 PROD_RELAY_URL = "https://bier-en-brood.nl/1001albums/admin/add-post-relay"
 
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python relay_add_post.py <medium-post-url>")
-        sys.exit(1)
-    url = sys.argv[1]
+def relay_add_post(url: str) -> dict:
+    """Fetch `url` from wherever this process is running (expected to be a
+    normal residential connection, not the prod VPS) and hand the result
+    to production's /admin/add-post-relay endpoint. Returns the same stats
+    dict sync_posts()/sync_prefetched_post() return. Shared by main() (CLI
+    use) and server.py's /admin/relay-to-prod (a button on the *local* dev
+    admin page — see server.py — so the same relay can be triggered from
+    the browser instead of a terminal).
 
-    print(f"Fetching {url} locally ...")
+    Raises on an HTTP-level failure talking to production itself (auth,
+    network, 5xx); a scrape/parse failure on production's side instead
+    comes back as a normal 200 with `failed_urls` populated, same as
+    /admin/add-post already does.
+    """
     state = fetch_medium_post_state(url)
-
-    print("Sending to production ...")
     resp = requests.post(
         PROD_RELAY_URL,
         data={"url": url, "state": json.dumps(state)},
@@ -54,7 +59,18 @@ def main():
         timeout=60,
     )
     resp.raise_for_status()
-    stats = resp.json()
+    return resp.json()
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python relay_add_post.py <medium-post-url>")
+        sys.exit(1)
+    url = sys.argv[1]
+
+    print(f"Fetching {url} locally ...")
+    print("Sending to production ...")
+    stats = relay_add_post(url)
 
     if stats["failed_urls"]:
         print(f"Failed: {stats['failed_urls']}")
