@@ -69,14 +69,16 @@ Auth: HTTP Basic, single shared username/password from .env
 import html
 import json
 import os
+import queue
 import re
 import secrets
+import threading
 import unicodedata
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
@@ -185,11 +187,55 @@ ADMIN_PAGE = """<!doctype html>
 <body style="font-family: sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem;">
   <h1>Add a Medium post</h1>
   <form method="post" action="admin/add-post">
-    <input name="url" type="url" placeholder="https://edvannunen.medium.com/..."
+    <input name="url" type="url" placeholder="https://edvannunen.medium.com/..." value="{url}"
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
     <button type="submit" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>{relay_button}
   </form>
+  <pre id="push-log" style="display:none; background:#f4f4f4; padding:0.75rem;
+       margin-top:0.75rem; max-height:20rem; overflow:auto; white-space:pre-wrap;
+       font-size:0.85rem;"></pre>
   {result}
+  <script>
+    // Live progress for "Scrape locally & push to production": intercepts
+    // the click and streams Server-Sent Events from admin/relay-to-prod-stream
+    // instead of the plain form POST (whose formaction stays wired up as a
+    // no-JS fallback). A genuinely new post can take 60-90s+ (Spotify +
+    // rate-limited MusicBrainz + translation) and a blank page for that long
+    // reads as "did this hang?" — see CLAUDE.md for the incident this fixed.
+    (function() {{
+      var btn = document.getElementById('push-btn');
+      if (!btn || !window.EventSource) return;
+      btn.addEventListener('click', function(ev) {{
+        var input = document.querySelector('input[name=url]');
+        var url = input.value;
+        if (!url) return;
+        ev.preventDefault();
+        var log = document.getElementById('push-log');
+        log.style.display = 'block';
+        log.textContent = '';
+        btn.disabled = true;
+        var es = new EventSource('admin/relay-to-prod-stream?url=' + encodeURIComponent(url));
+        es.onmessage = function(e) {{
+          log.textContent += e.data + '\\n';
+          log.scrollTop = log.scrollHeight;
+        }};
+        es.addEventListener('done', function(e) {{
+          var stats = JSON.parse(e.data);
+          log.textContent += (stats.failed_urls && stats.failed_urls.length
+            ? 'Production failed to process ' + url + ' — check the URL and try again.'
+            : 'Pushed to production — ' + stats.new + ' new album(s) added, '
+              + stats.updated + ' already existed and had their text/media refreshed.') + '\\n';
+          es.close();
+          btn.disabled = false;
+        }});
+        es.addEventListener('error', function(e) {{
+          log.textContent += (e.data ? 'Failed: ' + e.data : 'Connection lost.') + '\\n';
+          es.close();
+          btn.disabled = false;
+        }});
+      }});
+    }})();
+  </script>
 </body>
 </html>"""
 
@@ -199,15 +245,16 @@ ADMIN_PAGE = """<!doctype html>
 # ("/1001albums"), so this button is simply omitted from the rendered page
 # — see the "why this exists" note on /admin/relay-to-prod below.
 RELAY_BUTTON = (
-    '<button type="submit" formaction="admin/relay-to-prod" '
+    '<button type="submit" formaction="admin/relay-to-prod" id="push-btn" '
     'style="margin-top:0.75rem; margin-left:0.5rem; padding:0.5rem 1rem;">'
     "Scrape locally &amp; push to production</button>"
 )
 
 
-def _admin_page(result: str) -> str:
+def _admin_page(result: str, url: str = "") -> str:
     return ADMIN_PAGE.format(
-        base=BASE_PATH, result=result, relay_button=RELAY_BUTTON if not BASE_PATH else ""
+        base=BASE_PATH, result=result, url=html.escape(url),
+        relay_button=RELAY_BUTTON if not BASE_PATH else ""
     )
 
 
@@ -232,7 +279,7 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
             f"{' (Spotify/MusicBrainz enrichment ran for those)' if stats['new'] else ''}, "
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
-    return _admin_page(result)
+    return _admin_page(result, url)
 
 
 @app.post("/admin/relay-to-prod", response_class=HTMLResponse)
@@ -254,7 +301,7 @@ def relay_to_prod(url: str = Form(...), _: str = Depends(require_admin)):
     try:
         stats = relay_add_post(url)
     except Exception as e:
-        return _admin_page(f"<p style='color:#b00'>Relay to production failed: {html.escape(str(e))}</p>")
+        return _admin_page(f"<p style='color:#b00'>Relay to production failed: {html.escape(str(e))}</p>", url)
 
     if stats["failed_urls"]:
         result = f"<p style='color:#b00'>Production failed to process {url} — check the URL and try again.</p>"
@@ -264,7 +311,37 @@ def relay_to_prod(url: str = Form(...), _: str = Depends(require_admin)):
             f"{' (Spotify/MusicBrainz enrichment ran for those)' if stats['new'] else ''}, "
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
-    return _admin_page(result)
+    return _admin_page(result, url)
+
+
+@app.get("/admin/relay-to-prod-stream")
+def relay_to_prod_stream(url: str, _: str = Depends(require_admin)):
+    """SSE version of /admin/relay-to-prod, for the admin page's JS to show
+    live progress instead of a blank page for however long a genuinely new
+    post's enrichment takes (confirmed 2026-08-18 to run 60-90s+ — see
+    CLAUDE.md — long enough that it read as "did this hang?"). GET with a
+    query-string url (not the form's POST) because the browser's built-in
+    EventSource only supports GET. Same local-only restriction as
+    /admin/relay-to-prod, and that plain-POST route stays in place
+    unchanged as a no-JS fallback (its formaction is still wired up on the
+    button; this route just intercepts the click first when JS runs).
+    """
+    if BASE_PATH:
+        raise HTTPException(status_code=404)
+
+    from relay_add_post import relay_add_post_stream
+
+    def event_stream():
+        try:
+            for item in relay_add_post_stream(url):
+                if isinstance(item, dict):
+                    yield f"event: done\ndata: {json.dumps(item)}\n\n"
+                else:
+                    yield f"data: {item}\n\n"
+        except Exception as e:
+            yield f"event: error\ndata: {json.dumps(str(e))}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @app.post("/admin/add-post-relay")
@@ -276,15 +353,45 @@ def add_post_relay(
     a plain request from a residential IP still gets past. The caller
     fetches the post itself and hands over its Apollo state (the same blob
     fetch_medium_post_state() would have fetched here) so this only needs
-    to parse/merge/enrich, no outbound Medium request. Returns JSON, not
-    HTML — this is meant to be called by a script, not a browser.
+    to parse/merge/enrich, no outbound Medium request.
+
+    Streams progress as Server-Sent Events instead of a single blocking
+    JSON response — a genuinely new post's Spotify + rate-limited
+    MusicBrainz + translation stages can run 60-90s+, and a plain blocking
+    response left relay_add_post.py's HTTP client timing out on requests
+    that were actually still succeeding here (confirmed 2026-08-18, see
+    CLAUDE.md). sync_prefetched_post() runs in a background thread so its
+    on_progress callback can push lines onto a queue that this generator
+    drains and forwards live; the run ends with a `done` event carrying the
+    same stats dict the old JSON response used to return directly, or an
+    `error` event if the thread raised.
     """
-    conn = get_connection()
-    try:
-        stats = sync_prefetched_post(url, json.loads(state), conn)
-    finally:
-        conn.close()
-    return JSONResponse(stats)
+    q: queue.Queue = queue.Queue()
+
+    def worker():
+        conn = get_connection()
+        try:
+            stats = sync_prefetched_post(url, json.loads(state), conn, on_progress=q.put)
+            q.put(("__done__", stats))
+        except Exception as e:
+            q.put(("__error__", str(e)))
+        finally:
+            conn.close()
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    def event_stream():
+        while True:
+            item = q.get()
+            if isinstance(item, tuple) and item[0] == "__done__":
+                yield f"event: done\ndata: {json.dumps(item[1])}\n\n"
+                return
+            if isinstance(item, tuple) and item[0] == "__error__":
+                yield f"event: error\ndata: {json.dumps(item[1])}\n\n"
+                return
+            yield f"data: {item}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @app.get("/")

@@ -82,10 +82,14 @@ def translate_album_content(
     return text_en, captions_en
 
 
-def translate_missing(conn: sqlite3.Connection, client: anthropic.Anthropic, verbose: bool = True):
+def translate_missing(
+    conn: sqlite3.Connection, client: anthropic.Anthropic, verbose: bool = True, on_progress=None
+):
     """Translate every album/caption still missing its English text. Safe to
     interrupt/resume — commits after every album, same reasoning as
-    backfill_spotify.py."""
+    backfill_spotify.py. `on_progress`, if given, is called with the same
+    per-album line as the verbose print (see enrich_1001_albums.py's
+    sync_scraped_entries) — used by the admin relay's SSE progress stream."""
     albums = conn.execute(
         """
         SELECT id, catalog_number, artist, album, text FROM albums
@@ -111,5 +115,8 @@ def translate_missing(conn: sqlite3.Connection, client: anthropic.Anthropic, ver
             conn.execute("UPDATE media SET caption_en = ? WHERE id = ?", (caption_en, m["id"]))
         conn.commit()
 
+        line = f"  [{i}/{len(albums)}] #{a['catalog_number']} {a['artist']} - {a['album']}"
         if verbose:
-            print(f"  [{i}/{len(albums)}] #{a['catalog_number']} {a['artist']} - {a['album']}")
+            print(line)
+        if on_progress:
+            on_progress(line)

@@ -67,6 +67,15 @@ USER_AGENT = os.environ["MUSICBRAINZ_USER_AGENT"]
 OUTPUT_FILE = "albums_enriched.json"
 POST_URLS_FILE = "medium_post_urls.txt"  # one Medium post URL per line
 
+
+def _emit(on_progress, msg: str):
+    """print() plus an optional callback — lets sync_scraped_entries() and
+    friends report progress to a caller (e.g. the admin relay's SSE stream)
+    without losing the existing server-log prints."""
+    print(msg)
+    if on_progress:
+        on_progress(msg)
+
 REQUEST_DELAY = 0.3  # seconds between API calls, be a good citizen
 
 
@@ -478,14 +487,16 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
     }
 
 
-def enrich_with_spotify(entries: list) -> list:
+def enrich_with_spotify(entries: list, on_progress=None) -> list:
     token = get_spotify_token()
-    for e in entries:
+    for i, e in enumerate(entries, 1):
+        _emit(on_progress, f"  [{i}/{len(entries)}] Spotify: {e['artist']} - {e['album']}")
         if any(m["type"] == "spotify" for m in e.get("media", [])):
             continue  # already has a Spotify embed from Medium, skip lookup
         result = spotify_search_album(token, e["artist"], e["album"], e["year"])
         if result and not result["confident"]:
-            print(
+            _emit(
+                on_progress,
                 f"  ! low-confidence Spotify match, treating as no match: "
                 f"{e['artist']} - {e['album']} -> {result['matched_artist_name']} - "
                 f"{result['matched_album_name']} (album_similarity={result['album_similarity']})"
@@ -493,7 +504,7 @@ def enrich_with_spotify(entries: list) -> list:
             result = None
         e["spotify"] = result
         if not result:
-            print(f"  ! no Spotify match: {e['artist']} - {e['album']}")
+            _emit(on_progress, f"  ! no Spotify match: {e['artist']} - {e['album']}")
         time.sleep(REQUEST_DELAY)
     return entries
 
@@ -562,8 +573,9 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
     }
 
 
-def enrich_with_musicbrainz(entries: list) -> list:
-    for e in entries:
+def enrich_with_musicbrainz(entries: list, on_progress=None) -> list:
+    for i, e in enumerate(entries, 1):
+        _emit(on_progress, f"  [{i}/{len(entries)}] MusicBrainz: {e['artist']} - {e['album']}")
         result = musicbrainz_lookup(e["artist"], e["album"])
         e["musicbrainz"] = result
         time.sleep(REQUEST_DELAY)
@@ -574,7 +586,7 @@ def enrich_with_musicbrainz(entries: list) -> list:
 # SYNC — scrape a set of posts and merge into the DB
 # ---------------------------------------------------------------------------
 
-def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -> dict:
+def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn, on_progress=None) -> dict:
     """Shared tail end of sync_posts(): merge already-scraped entries into
     the DB, enrich genuinely new ones, record post status, translate.
     Factored out so the admin relay path (sync_prefetched_post(), below —
@@ -589,9 +601,14 @@ def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -
     refreshed from the fresh scrape — avoids re-hitting the rate-limited
     MusicBrainz/Spotify APIs for the whole dataset on every run.
 
+    `on_progress`, if given, is called with each stage-progress string in
+    addition to the normal print() — lets the admin relay's SSE endpoint
+    (server.py) forward live progress to the browser instead of leaving the
+    caller staring at a blank page for however long enrichment takes.
+
     Returns a small stats dict: {"scraped", "new", "updated", "failed_urls"}.
     """
-    print(f"Total album entries scraped: {len(scraped)}")
+    _emit(on_progress, f"Total album entries scraped: {len(scraped)}")
 
     new_entries = []
     updated = 0
@@ -604,16 +621,16 @@ def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -
             new_entries.append(e)
 
     if new_entries:
-        print(f"=== Stage 2: Spotify enrichment ({len(new_entries)} new entries) ===")
-        enrich_with_spotify(new_entries)
+        _emit(on_progress, f"=== Stage 2: Spotify enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_spotify(new_entries, on_progress)
 
-        print(f"=== Stage 3: MusicBrainz enrichment ({len(new_entries)} new entries) ===")
-        enrich_with_musicbrainz(new_entries)
+        _emit(on_progress, f"=== Stage 3: MusicBrainz enrichment ({len(new_entries)} new entries) ===")
+        enrich_with_musicbrainz(new_entries, on_progress)
 
         for e in new_entries:
             insert_album(conn, e)
     else:
-        print("No new entries — skipping Spotify/MusicBrainz stages.")
+        _emit(on_progress, "No new entries — skipping Spotify/MusicBrainz stages.")
 
     failed_urls = {url for url, _ in failures}
     for url in post_urls:
@@ -625,8 +642,8 @@ def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -
 
     conn.commit()
 
-    print("=== Stage 4: translating new/changed text to English ===")
-    translate_missing(conn, anthropic.Anthropic())
+    _emit(on_progress, "=== Stage 4: translating new/changed text to English ===")
+    translate_missing(conn, anthropic.Anthropic(), on_progress=on_progress)
 
     return {
         "scraped": len(scraped),
@@ -636,19 +653,19 @@ def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn) -
     }
 
 
-def sync_posts(post_urls: list, conn) -> dict:
+def sync_posts(post_urls: list, conn, on_progress=None) -> dict:
     """Scrape post_urls, merge into the DB, and run Spotify/MusicBrainz
     enrichment only for genuinely new albums. Shared by main() (the full
     medium_post_urls.txt list) and the admin endpoint that calls this with
     a single newly-added URL — the incremental behavior is identical
     either way, it's just a matter of how many URLs are in the list.
     """
-    print(f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
+    _emit(on_progress, f"=== Stage 1: scraping {len(post_urls)} Medium posts ===")
     scraped, failures = scrape_medium_posts(post_urls)
-    return sync_scraped_entries(scraped, failures, post_urls, conn)
+    return sync_scraped_entries(scraped, failures, post_urls, conn, on_progress)
 
 
-def sync_prefetched_post(url: str, state: dict, conn) -> dict:
+def sync_prefetched_post(url: str, state: dict, conn, on_progress=None) -> dict:
     """Same as sync_posts(), but for a single post whose Apollo state was
     already fetched elsewhere instead of by this process — the relay path
     for when Medium/Cloudflare is challenging requests from the server's
@@ -665,7 +682,7 @@ def sync_prefetched_post(url: str, state: dict, conn) -> dict:
         scraped, failures = entries, []
     except Exception as e:
         scraped, failures = [], [(url, str(e))]
-    return sync_scraped_entries(scraped, failures, [url], conn)
+    return sync_scraped_entries(scraped, failures, [url], conn, on_progress)
 
 
 # ---------------------------------------------------------------------------

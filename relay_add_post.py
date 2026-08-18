@@ -34,32 +34,78 @@ load_dotenv()
 PROD_RELAY_URL = "https://bier-en-brood.nl/1001albums/admin/add-post-relay"
 
 
-def relay_add_post(url: str) -> dict:
-    """Fetch `url` from wherever this process is running (expected to be a
-    normal residential connection, not the prod VPS) and hand the result
-    to production's /admin/add-post-relay endpoint. Returns the same stats
-    dict sync_posts()/sync_prefetched_post() return. Shared by main() (CLI
-    use) and server.py's /admin/relay-to-prod (a button on the *local* dev
-    admin page — see server.py — so the same relay can be triggered from
-    the browser instead of a terminal).
+def _prod_auth():
+    return (os.environ.get("ADMIN_USERNAME", "admin"), os.environ["ADMIN_PASSWORD"])
 
-    Raises on an HTTP-level failure talking to production itself (auth,
-    network, 5xx); a scrape/parse failure on production's side instead
-    comes back as a normal 200 with `failed_urls` populated, same as
-    /admin/add-post already does.
+
+def relay_add_post_stream(url: str):
+    """Generator version of relay_add_post(): fetches `url` locally, then
+    streams production's Server-Sent Events response (/admin/add-post-relay
+    — see server.py) line by line, yielding each progress string as it
+    arrives. The final yielded item is the stats dict instead of a string —
+    callers should check `isinstance(item, dict)` to detect the end.
+
+    Exists because a genuinely-new post's enrichment (Spotify + rate-limited
+    MusicBrainz + translation) can take 60-90s+, and a single blocking POST
+    made that whole stretch look identical to a hang, with no way to tell
+    the two apart — confirmed 2026-08-18 (see CLAUDE.md), a request that
+    was actually still succeeding server-side got reported as failed
+    because the client gave up first. Streaming means progress is visible
+    the whole time, and the per-chunk read timeout below only needs to
+    cover the gap *between* messages, not the whole run.
+
+    Raises on an HTTP-level failure talking to production (auth, network,
+    5xx, or an `error` event from production's own worker thread); a
+    scrape/parse failure on production's side instead comes back inside the
+    final stats dict's `failed_urls`, same as the non-streaming path always
+    did.
     """
+    yield f"Fetching {url} locally..."
     state = fetch_medium_post_state(url)
+    yield "Fetched. Sending to production..."
+
     resp = requests.post(
         PROD_RELAY_URL,
         data={"url": url, "state": json.dumps(state)},
-        auth=(
-            os.environ.get("ADMIN_USERNAME", "admin"),
-            os.environ["ADMIN_PASSWORD"],
-        ),
-        timeout=60,
+        auth=_prod_auth(),
+        stream=True,
+        # (connect timeout, per-chunk read timeout) — NOT a total-duration
+        # cap, since the connection stays open and SSE bytes keep arriving;
+        # 120s only needs to cover the longest gap between two progress
+        # messages (MusicBrainz's ~1req/sec rate limit is the slowest).
+        timeout=(10, 120),
     )
     resp.raise_for_status()
-    return resp.json()
+
+    event = "message"
+    for line in resp.iter_lines(decode_unicode=True):
+        if not line:
+            event = "message"
+            continue
+        if line.startswith("event:"):
+            event = line[len("event:"):].strip()
+        elif line.startswith("data:"):
+            data = line[len("data:"):].strip()
+            if event == "done":
+                yield json.loads(data)
+                return
+            if event == "error":
+                raise RuntimeError(json.loads(data))
+            yield data
+
+
+def relay_add_post(url: str) -> dict:
+    """Blocking wrapper around relay_add_post_stream() — prints each
+    progress line as it arrives (so a terminal run of this script still
+    shows live output) and returns the final stats dict. Used by main()
+    below and by anywhere a single final result is enough."""
+    stats = None
+    for item in relay_add_post_stream(url):
+        if isinstance(item, dict):
+            stats = item
+        else:
+            print(item)
+    return stats
 
 
 def main():
