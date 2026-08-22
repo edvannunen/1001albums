@@ -539,7 +539,11 @@
         "caption_en": null
       }
     ],
-    "musicbrainz": {},
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [],
+      "cover_art_archive_url": null
+    },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/1XjabdmwipT62cLSZV45SU",
       "spotify_embed_url": null,
@@ -2176,7 +2180,7 @@
       }
     ],
     "musicbrainz": {
-      "country": null,
+      "country": "United Kingdom",
       "genres": [],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/37361035-bf07-45d4-973d-3f4ef2a62873/front"
     },
@@ -2900,7 +2904,7 @@
       }
     ],
     "musicbrainz": {
-      "country": null,
+      "country": "United Kingdom",
       "genres": [],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/763da602-d1cf-410c-949a-e1188ad806d8/front"
     },
@@ -10825,7 +10829,11 @@
         "caption_en": null
       }
     ],
-    "musicbrainz": {},
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [],
+      "cover_art_archive_url": null
+    },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/427BvOYZQRjTHODnreiZCo",
       "spotify_embed_url": null,
@@ -17560,7 +17568,11 @@
         "caption_en": "Alex Chilton in 1978"
       }
     ],
-    "musicbrainz": {},
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [],
+      "cover_art_archive_url": null
+    },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/0NJYYhhvOATAkUipSJEBDb",
       "spotify_embed_url": "https://open.spotify.com/embed/album/0NJYYhhvOATAkUipSJEBDb",
@@ -24057,7 +24069,11 @@
         "caption_en": "They just played Live Aid, with a single from the next record: King of Rock"
       }
     ],
-    "musicbrainz": {},
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [],
+      "cover_art_archive_url": null
+    },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/05n0d2kfwGPhKpTonLHRpY",
       "spotify_embed_url": "https://open.spotify.com/embed/album/05n0d2kfwGPhKpTonLHRpY",

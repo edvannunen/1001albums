@@ -243,11 +243,14 @@ def export_from_db(conn: sqlite3.Connection | None = None) -> list:
             }
 
         # musicbrainz_lookup() returns {} (not a fully-keyed dict) when no
-        # release-group matched at all — cover_art_archive_url is the only
-        # field that's unconditionally set whenever a release-group WAS
-        # found, so its absence is the exact signal for "no match" (verified
-        # against the pre-migration JSON: the two sets coincide exactly).
-        if a["mb_cover_art_url"] is None:
+        # release-group matched at all - cover_art_archive_url used to be the
+        # sole signal for "no match" (it's unconditionally set whenever a
+        # release-group WAS found), but that missed albums given a manually
+        # entered mb_country with no MusicBrainz match backing it at all
+        # (see CLAUDE.md - Tito Puente, Big Star, Run DMC, etc.) - their
+        # country silently vanished from the export despite being set in the
+        # DB. Treat either field being present as "has some data".
+        if a["mb_cover_art_url"] is None and a["mb_country"] is None:
             musicbrainz = {}
         else:
             musicbrainz = {

@@ -300,6 +300,24 @@ live on the site, no need to duplicate it in the data.
   alias entries for several of these bad values (`"Boston":"US"`,
   `"England":"GB"`, `"Ladysmith":"ZA"`, etc.) compensating for this exact
   bug at the flag-icon layer — now redundant but harmless, left in place.
+- **The remaining 6 genuine MusicBrainz gaps (Tito Puente, Beatles'
+  *Revolver*/*Sgt. Pepper's*, Aretha Franklin, Stephen Stills, Big Star, Run
+  DMC — see the two bullets above) were manually entered — fixed 2026-08-22.**
+  `mb_country` set by hand (Ed provided the countries directly, no
+  MusicBrainz call), but doing that alone didn't fix what the site showed:
+  `db.export_from_db()` used `mb_cover_art_url IS NULL` as its sole signal
+  for "no MusicBrainz match at all" (returning `{}` for the whole
+  `musicbrainz` object in that case) — since these albums never had a real
+  MB match, `mb_cover_art_url` stayed NULL even after `mb_country` was set,
+  so the export kept silently dropping the country that had just been
+  written. Not a caching or deploy issue, despite looking exactly like one
+  (confirmed identical stale value from a direct SQLite query on the file,
+  from inside the container via `docker exec`, and via the app's own
+  internal `localhost:8000` HTTP response — ruling out Cloudflare, browser
+  cache, and container/volume mismatches one at a time before finding this).
+  Fixed by treating either `mb_country` or `mb_cover_art_url` being non-NULL
+  as "has some data" in `export_from_db()`, rather than gating on cover art
+  alone.
 - **Embed source URLs (YouTube/Spotify) now resolve for every post,
   regardless of age — fixed 2026-07.** The old `?format=json` approach's
   `iframe.thumbnailUrl`/`externalSrc` only worked for recently-created
