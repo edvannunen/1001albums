@@ -473,7 +473,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "New York",
+      "country": "United States",
       "genres": [
         "jazz",
         "swing",
@@ -3372,7 +3372,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "electronic",
@@ -4555,7 +4555,13 @@
         "caption_en": null
       }
     ],
-    "musicbrainz": {},
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "soul"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/13e7e89d-3157-4287-83ab-0508454d500f/front"
+    },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/7lEOKZaOpqP70UYqdLPejG",
       "spotify_embed_url": null,
@@ -5251,7 +5257,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Northern Ireland",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "jazz",
@@ -6599,7 +6605,7 @@
       }
     ],
     "musicbrainz": {
-      "country": null,
+      "country": "United States",
       "genres": [
         "rock",
         "jazz",
@@ -7736,7 +7742,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Northern Ireland",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "pop",
@@ -10091,7 +10097,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "pop",
@@ -10218,10 +10224,11 @@
       }
     ],
     "musicbrainz": {
-      "country": "Memphis",
+      "country": "United States",
       "genres": [
         "rock",
-        "power pop"
+        "power pop",
+        "folk pop"
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/18ec10a7-864f-3f1b-8d68-5cb622165b20/front"
     },
@@ -10298,7 +10305,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "New York",
+      "country": "United States",
       "genres": [
         "rock",
         "pop",
@@ -11232,11 +11239,12 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "alternative rock",
         "concept album",
+        "hard rock",
         "glam rock",
         "art rock",
         "classic rock",
@@ -11520,7 +11528,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "pop",
@@ -11722,7 +11730,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Los Angeles",
+      "country": "United States",
       "genres": [
         "rock",
         "singer-songwriter",
@@ -12266,7 +12274,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "New York",
+      "country": "United States",
       "genres": [
         "rock",
         "pop",
@@ -12349,7 +12357,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/5dbefdbd-8bdc-4611-91e5-f0c0a2695612/front"
     },
@@ -13028,7 +13036,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Northern Ireland",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "jazz",
@@ -13691,7 +13699,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "New York",
+      "country": "United States",
       "genres": [
         "rock",
         "pop",
@@ -14178,12 +14186,30 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
-        "pop rock"
+        "british",
+        "uk",
+        "britannique",
+        "funk",
+        "soul",
+        "disco",
+        "interview",
+        "album rock",
+        "pop rock",
+        "blue-eyed soul",
+        "classic pop and rock",
+        "1975",
+        "pop soul",
+        "bowie",
+        "should be public domain",
+        "art pop",
+        "philly soul",
+        "blue eye soul",
+        "rollingstone.de [5/5]"
       ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/cf7e5583-586c-406d-926d-ac4c74875881/front"
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/8c2a0eae-1359-3577-9127-e3d862acc2a2/front"
     },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/0lITGovWgaQGi42EfqcE5P",
@@ -14643,7 +14669,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "floyd",
         "trppy"
@@ -14956,7 +14982,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "alternative rock",
@@ -15062,7 +15088,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Boston",
+      "country": "United States",
       "genres": [
         "rock",
         "hard rock",
@@ -16182,7 +16208,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "electronic",
@@ -16238,9 +16264,27 @@
       }
     ],
     "musicbrainz": {
-      "country": "New York",
-      "genres": [],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/3e9b985b-1c77-4264-a1a3-18e4575e0d43/front"
+      "country": "United States",
+      "genres": [
+        "rock",
+        "pop",
+        "jazz",
+        "fusion",
+        "funk rock",
+        "jazz rock",
+        "classic rock",
+        "soft rock",
+        "pop rock",
+        "jazz fusion",
+        "jazz-rock",
+        "jazz pop",
+        "funk soul",
+        "liste de courses",
+        "rock/pop",
+        "yacht rock",
+        "sophisticated rock"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/8588c5a5-b491-37a4-8d51-2227346a072e/front"
     },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/1hOK2ey9W76x9GnftSRgrw",
@@ -16458,7 +16502,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "electronic",
@@ -19523,12 +19567,9 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
-      "genres": [
-        "rock",
-        "psychedelic rock"
-      ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/c4edc6ac-2e47-4ef9-ae83-7f2ef37f3f20/front"
+      "country": "United Kingdom",
+      "genres": [],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/9d70fc87-f80e-42d3-bc66-6a49cb6c204b/front"
     },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/5Dbax7G8SWrP9xyzkOvy2F",
@@ -22563,14 +22604,30 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "pop",
+        "progressive rock",
+        "80s",
+        "experimental",
+        "female vocalists",
         "art rock",
-        "pop rock"
+        "soft rock",
+        "college rock",
+        "pop rock",
+        "rock pop",
+        "misc",
+        "soundtracks",
+        "soulful",
+        "progressive pop",
+        "pop/rock",
+        "alternative/indie rock",
+        "stage & screen",
+        "art pop",
+        "artist on cover"
       ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/2a97dc86-e972-37f0-a277-49388bb64e51/front"
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/d28777fc-f135-3394-a033-eafb9ebcffb4/front"
     },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/2dR2ZmzPqVoBK9vxHNjEUo",
@@ -22728,7 +22785,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "London",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "alternative rock",
@@ -23832,7 +23889,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Phoenix",
+      "country": "United States",
       "genres": [
         "rock",
         "alternative rock",
@@ -24083,7 +24140,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Scotland",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "electronic",
@@ -24094,6 +24151,7 @@
         "dark wave",
         "darkwave",
         "dream pop",
+        "gothic rock",
         "ethereal wave",
         "ethereal",
         "shoegazer",
@@ -25361,16 +25419,39 @@
       }
     ],
     "musicbrainz": {
-      "country": "England",
+      "country": "United Kingdom",
       "genres": [
         "rock",
         "electronic",
+        "synthpop",
         "pop",
+        "alternative rock",
+        "progressive rock",
+        "concept album",
+        "blues",
+        "experimental",
+        "singer-songwriter",
         "new wave",
+        "vocal",
+        "alternative",
         "synth-pop",
-        "art rock"
+        "art rock",
+        "baroque pop",
+        "college rock",
+        "experimental rock",
+        "pop rock",
+        "symphonic rock",
+        "sofeaturing rock",
+        "dance music",
+        "progressive pop",
+        "singer/songwriter",
+        "pop/rock",
+        "alternative/indie rock",
+        "alternative pop/rock",
+        "art pop",
+        "folk rock/art rock/synth-pop/experimental"
       ],
-      "cover_art_archive_url": "https://coverartarchive.org/release-group/ecc129fd-419f-49ef-ac02-391cd8ef5c39/front"
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/017f2a37-a78f-3578-9611-fa40408e5d90/front"
     },
     "spotify": {
       "spotify_url": "https://open.spotify.com/album/5G5UwqPsxDKpxJLX4xsyuh",
@@ -27795,7 +27876,7 @@
       }
     ],
     "musicbrainz": {
-      "country": "Ladysmith",
+      "country": "South Africa",
       "genres": [
         "folk",
         "african",

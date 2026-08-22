@@ -270,6 +270,36 @@ live on the site, no need to duplicate it in the data.
   SQL generated from the local results (see "Single-row/single-field data
   corrections" in the Coolify playbook) rather than re-running the
   backfill against prod, since MusicBrainz was already queried once.
+- **`mb_country` was storing a city/UK-subdivision name instead of the
+  actual country for ~30 albums — fixed 2026-08-22.** `musicbrainz_lookup()`
+  read the artist's raw `area.name`, but MusicBrainz's `area` is set at
+  whatever granularity it happens to have on file for that artist, not
+  necessarily country level — produced values like "Boston" (the band, not
+  a country), "New York", "Phoenix", "Memphis", "Los Angeles", "London",
+  "Ladysmith" (Ladysmith Black Mambazo), and a `England`/`Scotland`/
+  `Northern Ireland`/`Wales` split alongside the correct "United Kingdom"
+  for other UK artists — all found via the table view's new country-column
+  sort (previous bullet), which put them all in obvious clusters for the
+  first time. Fixed by preferring the artist lookup's top-level `country`
+  field instead — an ISO 3166-1 alpha-2 code MusicBrainz has *already*
+  resolved to true country level regardless of area granularity (confirmed
+  live: Boston the band has `area.name = "Boston"` but `country = "US"`) —
+  resolved to a display name via a new `resolve_country_name()` (queries
+  MusicBrainz's own area-by-ISO-code search so the name matches MB's own
+  convention already used elsewhere in the DB, e.g. "United Kingdom" not
+  some ISO long-form string; cached module-wide since only a few dozen
+  distinct countries recur across hundreds of artists). Falls back to
+  `area.name` only when `area` itself already carries `iso-3166-1-codes`
+  (i.e. it's already country-level) and no top-level `country` is present.
+  One-off fix: `fix_musicbrainz_country.py`, re-run against every album
+  whose `mb_country` was one of the known-bad city/subdivision values or
+  `NULL` (36 albums) — 30 corrected, 6 unchanged (the same genuine
+  MusicBrainz gaps from the previous bullet). Applied to production the
+  same way: SQL generated from the local results, not a second MusicBrainz
+  query pass. The frontend's `COUNTRY_ISO` map in `js/data.js` already had
+  alias entries for several of these bad values (`"Boston":"US"`,
+  `"England":"GB"`, `"Ladysmith":"ZA"`, etc.) compensating for this exact
+  bug at the flag-icon layer — now redundant but harmless, left in place.
 - **Embed source URLs (YouTube/Spotify) now resolve for every post,
   regardless of age — fixed 2026-07.** The old `?format=json` approach's
   `iframe.thumbnailUrl`/`externalSrc` only worked for recently-created

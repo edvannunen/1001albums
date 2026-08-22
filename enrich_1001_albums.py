@@ -551,6 +551,30 @@ def _mb_get(url: str, params: dict) -> requests.Response | None:
     return None
 
 
+_COUNTRY_NAME_CACHE: dict = {}
+
+
+def resolve_country_name(iso_code: str) -> str:
+    """Resolve an ISO 3166-1 alpha-2 code to the actual name MusicBrainz
+    itself uses for that Country-type area, so it matches the naming
+    already used everywhere else in the DB (e.g. "United Kingdom", not an
+    ISO-standard long form) rather than introducing a second convention.
+    Cached module-wide since only a few dozen distinct countries recur
+    across hundreds of artists - keeps this to one extra request per
+    country, not per artist."""
+    if iso_code in _COUNTRY_NAME_CACHE:
+        return _COUNTRY_NAME_CACHE[iso_code]
+    time.sleep(MB_REQUEST_DELAY)
+    resp = _mb_get(
+        "https://musicbrainz.org/ws/2/area/",
+        {"query": f"iso:{iso_code} AND type:Country", "fmt": "json", "limit": 1},
+    )
+    areas = resp.json().get("areas", []) if resp else []
+    name = areas[0]["name"] if areas else iso_code
+    _COUNTRY_NAME_CACHE[iso_code] = name
+    return name
+
+
 def musicbrainz_lookup(artist: str, album: str) -> dict:
     query = f'artist:"{lucene_escape(artist)}" AND release:"{lucene_escape(album)}"'
     resp = _mb_get(
@@ -601,10 +625,24 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
         time.sleep(MB_REQUEST_DELAY)
         a_resp = _mb_get(f"https://musicbrainz.org/ws/2/artist/{artist_id}", {"fmt": "json"})
         if a_resp is not None:
-            # .get("area", {}) only falls back to {} when the key is absent -
-            # MusicBrainz returns "area": null (present, but None) for artists
-            # with no known area, which then crashes .get("name") on None.
-            country = (a_resp.json().get("area") or {}).get("name")
+            data = a_resp.json()
+            # An artist's "area" is however finely MusicBrainz happens to
+            # have it on file - a City ("Boston", "New York") or a UK
+            # Subdivision ("England", "Scotland"), not necessarily a
+            # Country - so area.name alone produced garbage like "Boston"
+            # or an inconsistent "England"/"United Kingdom" split (see
+            # CLAUDE.md). The artist's own top-level "country" field is an
+            # ISO 3166-1 alpha-2 code MusicBrainz has *already* resolved up
+            # to true country level regardless of area granularity - prefer
+            # that, and only fall back to area.name when area itself is
+            # already a country-level entity (has iso-3166-1-codes).
+            iso = data.get("country")
+            if iso:
+                country = resolve_country_name(iso)
+            else:
+                area = data.get("area") or {}
+                if area.get("iso-3166-1-codes"):
+                    country = area.get("name")
 
     genres = [t["name"] for t in rg.get("tags", [])] if rg.get("tags") else []
 
