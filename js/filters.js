@@ -50,15 +50,34 @@ export function matchesFilters(a){
   return matchesFiltersExcept(a, []);
 }
 
+// Each entry returns {value, missing} for one album — `missing` rows always
+// sort to the end regardless of direction, so reversing a column with gaps
+// (country/genre aren't enriched for every album) doesn't yank blank rows
+// to the top.
+const SORT_VALUE = {
+  number: a => ({ value: parseInt(a.number), missing: false }),
+  year: a => ({ value: parseInt(a.year), missing: false }),
+  artist: a => ({ value: a.artist, missing: false }),
+  album: a => ({ value: a.album, missing: false }),
+  country: a => {
+    const c = a.musicbrainz && a.musicbrainz.country;
+    return { value: c || "", missing: !c };
+  },
+  genres: a => {
+    const g = genreList(a)[0];
+    return { value: g || "", missing: !g };
+  },
+};
+
 export function sortAlbums(list){
+  const getValue = SORT_VALUE[state.sort] || SORT_VALUE.number;
+  const dir = state.sortDir === "desc" ? -1 : 1;
   const copy = [...list];
   copy.sort((a,b)=>{
-    if(state.sort === "number") return parseInt(a.number) - parseInt(b.number);
-    if(state.sort === "number_desc") return parseInt(b.number) - parseInt(a.number);
-    if(state.sort === "year") return parseInt(a.year) - parseInt(b.year);
-    if(state.sort === "artist") return a.artist.localeCompare(b.artist);
-    if(state.sort === "album") return a.album.localeCompare(b.album);
-    return 0;
+    const va = getValue(a), vb = getValue(b);
+    if(va.missing !== vb.missing) return va.missing ? 1 : -1;
+    const base = typeof va.value === "number" ? va.value - vb.value : va.value.localeCompare(vb.value);
+    return dir * base;
   });
   return copy;
 }

@@ -6,7 +6,8 @@ export const state = {
   albums: [],
   lang: localStorage.getItem("lang") === "en" ? "en" : "nl",
   view: "grid",
-  sort: "number_desc",
+  sort: "number",
+  sortDir: "desc",
   page: 1,
   filters: {
     decade: null,

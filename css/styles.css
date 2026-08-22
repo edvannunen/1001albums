@@ -435,6 +435,9 @@ th{
   user-select:none;
 }
 th:hover{color:var(--mustard);}
+th.sorted{color:var(--mustard);}
+th.sorted::after{content:" \25B2";font-size:0.6rem;}
+th.sorted.sort-desc::after{content:" \25BC";}
 td{padding:8px 10px;border-bottom:1px solid var(--rule);cursor:pointer;}
 tr:hover td{background:var(--sleeve);}
 td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}

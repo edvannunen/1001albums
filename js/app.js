@@ -46,6 +46,11 @@ function render(){
   if(state.view === "grid") renderGrid(pageItems, rowHandlers);
   else renderTable(pageItems, rowHandlers);
 
+  document.querySelectorAll("th[data-key]").forEach(th=>{
+    th.classList.toggle("sorted", th.dataset.key === state.sort);
+    th.classList.toggle("sort-desc", th.dataset.key === state.sort && state.sortDir === "desc");
+  });
+
   renderPagination(filtered.length, render);
   renderFilterChips((key)=>{ clearFilter(key); render(); });
   renderDashboard(render);
@@ -53,7 +58,12 @@ function render(){
 
 function wireEvents(){
   document.getElementById("searchInput").addEventListener("input", ()=>{ state.page = 1; render(); });
-  document.getElementById("sortSelect").addEventListener("change", e=>{ state.sort = e.target.value; render(); });
+  document.getElementById("sortSelect").addEventListener("change", e=>{
+    const v = e.target.value;
+    if(v === "number_desc"){ state.sort = "number"; state.sortDir = "desc"; }
+    else { state.sort = v; state.sortDir = "asc"; }
+    render();
+  });
   document.getElementById("clearFilters").addEventListener("click", ()=>{ clearAllFilters(); render(); });
 
   document.getElementById("viewGrid").addEventListener("click", ()=>{
@@ -69,7 +79,12 @@ function wireEvents(){
     render();
   });
   document.querySelectorAll("th[data-key]").forEach(th=>{
-    th.addEventListener("click", ()=>{ state.sort = th.dataset.key; render(); });
+    th.addEventListener("click", ()=>{
+      const key = th.dataset.key;
+      if(state.sort === key){ state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; }
+      else { state.sort = key; state.sortDir = "asc"; }
+      render();
+    });
   });
 
   document.getElementById("modalClose").addEventListener("click", closeModal);
