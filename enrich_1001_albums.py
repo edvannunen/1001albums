@@ -77,6 +77,10 @@ def _emit(on_progress, msg: str):
         on_progress(msg)
 
 REQUEST_DELAY = 0.3  # seconds between API calls, be a good citizen
+MB_REQUEST_DELAY = 1.1  # MusicBrainz enforces ~1 req/sec; REQUEST_DELAY alone
+                         # (used for Spotify) is too fast here and was causing
+                         # intermittent 503s that musicbrainz_lookup() silently
+                         # swallowed as "no match" — see backfill_musicbrainz.py
 
 
 # ---------------------------------------------------------------------------
@@ -520,22 +524,65 @@ def lucene_escape(value: str) -> str:
     return LUCENE_SPECIAL_RE.sub(r"\\\1", value)
 
 
-def musicbrainz_lookup(artist: str, album: str) -> dict:
+def _mb_get(url: str, params: dict) -> requests.Response | None:
+    """GET against the MusicBrainz API with retry-with-backoff on non-200
+    responses. A 503 (rate-limited) or transient hiccup used to be treated
+    identically to a genuine "no match" by the caller - silently returning
+    {} either way - which left ~48 albums (including obvious ones like the
+    Beatles' Revolver) with no country/genre data at all despite MusicBrainz
+    actually having them, because the request only got one shot at ever
+    succeeding. See backfill_musicbrainz.py."""
     headers = {"User-Agent": USER_AGENT}
+    delay = MB_REQUEST_DELAY
+    for attempt in range(4):
+        try:
+            resp = requests.get(url, headers=headers, params=params, timeout=15)
+        except requests.RequestException:
+            time.sleep(delay)
+            delay *= 2
+            continue
+        if resp.status_code == 200:
+            return resp
+        if resp.status_code in (503, 429):
+            time.sleep(delay)
+            delay *= 2
+            continue
+        return None  # a real error (4xx other than 429) - don't retry
+    return None
+
+
+def musicbrainz_lookup(artist: str, album: str) -> dict:
     query = f'artist:"{lucene_escape(artist)}" AND release:"{lucene_escape(album)}"'
-    resp = requests.get(
+    resp = _mb_get(
         "https://musicbrainz.org/ws/2/release-group/",
-        headers=headers,
-        params={
-            "query": query,
-            "fmt": "json",
-            "limit": 10,
-        },
-        timeout=15,
+        {"query": query, "fmt": "json", "limit": 10},
     )
-    if resp.status_code != 200:
-        return {}
-    groups = resp.json().get("release-groups", [])
+    groups = resp.json().get("release-groups", []) if resp else []
+
+    if not groups:
+        # The combined artist+release query is an exact-ish Lucene phrase
+        # match - a small title difference from MusicBrainz's own canonical
+        # title (e.g. our "All Hail To The Queen" vs MB's "All Hail the
+        # Queen") returns zero results even though the album is in MB's
+        # catalog. Fall back to a plain free-text query scored by name
+        # similarity, same fix already applied to Spotify search (see
+        # CLAUDE.md) - only accept a fallback match that's actually close,
+        # so an unrelated album with a similar name isn't wrongly attached.
+        time.sleep(MB_REQUEST_DELAY)
+        resp = _mb_get(
+            "https://musicbrainz.org/ws/2/release-group/",
+            {"query": f"{artist} {album}", "fmt": "json", "limit": 10},
+        )
+        candidates = resp.json().get("release-groups", []) if resp else []
+        scored = []
+        for g in candidates:
+            g_artist = " ".join(a["name"] for a in g.get("artist-credit", []))
+            artist_sim = difflib.SequenceMatcher(None, artist.lower(), g_artist.lower()).ratio()
+            album_sim = difflib.SequenceMatcher(None, album.lower(), g.get("title", "").lower()).ratio()
+            scored.append(((artist_sim + album_sim) / 2, g))
+        scored.sort(key=lambda p: p[0], reverse=True)
+        groups = [g for score, g in scored if score >= 0.75]
+
     if not groups:
         return {}
 
@@ -551,14 +598,9 @@ def musicbrainz_lookup(artist: str, album: str) -> dict:
 
     country = None
     if artist_id:
-        time.sleep(REQUEST_DELAY)
-        a_resp = requests.get(
-            f"https://musicbrainz.org/ws/2/artist/{artist_id}",
-            headers=headers,
-            params={"fmt": "json"},
-            timeout=15,
-        )
-        if a_resp.status_code == 200:
+        time.sleep(MB_REQUEST_DELAY)
+        a_resp = _mb_get(f"https://musicbrainz.org/ws/2/artist/{artist_id}", {"fmt": "json"})
+        if a_resp is not None:
             # .get("area", {}) only falls back to {} when the key is absent -
             # MusicBrainz returns "area": null (present, but None) for artists
             # with no known area, which then crashes .get("name") on None.
@@ -578,7 +620,7 @@ def enrich_with_musicbrainz(entries: list, on_progress=None) -> list:
         _emit(on_progress, f"  [{i}/{len(entries)}] MusicBrainz: {e['artist']} - {e['album']}")
         result = musicbrainz_lookup(e["artist"], e["album"])
         e["musicbrainz"] = result
-        time.sleep(REQUEST_DELAY)
+        time.sleep(MB_REQUEST_DELAY)
     return entries
 
 

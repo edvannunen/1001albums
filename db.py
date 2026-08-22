@@ -123,6 +123,20 @@ def update_album_spotify(conn: sqlite3.Connection, album_id: int, spotify: dict)
     )
 
 
+def update_album_musicbrainz(conn: sqlite3.Connection, album_id: int, mb: dict):
+    """Backfill a previously-unmatched album's MusicBrainz columns (country,
+    cover art fallback, genre tags). Used by the one-off gap backfill, not
+    the main incremental sync (which sets these at insert_album time for
+    genuinely new albums)."""
+    conn.execute(
+        "UPDATE albums SET mb_country=?, mb_cover_art_url=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+        (mb.get("country"), mb.get("cover_art_archive_url"), album_id),
+    )
+    conn.execute("DELETE FROM genres WHERE album_id=?", (album_id,))
+    for tag in mb.get("genres") or []:
+        conn.execute("INSERT INTO genres (album_id, tag) VALUES (?, ?)", (album_id, tag))
+
+
 def update_album_text_media(conn: sqlite3.Connection, album_id: int, e: dict):
     """Refresh an existing album's header/text/media/source-url from a fresh
     scrape, WITHOUT touching its already-fetched spotify/musicbrainz data —
