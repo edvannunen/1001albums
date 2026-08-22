@@ -238,15 +238,17 @@ header .sub{
 .knob-caption b{color:#2a2620;font-weight:600;}
 .knob-caption b#progressLabel{color:#6e4c7b;}
 
-canvas{max-height:140px;}
 /* height:auto + flex:1 (rather than a fixed px height) so each panel's
    chart/bubble area fills whatever row height the grid ends up giving it —
    fixed heights left dead cream space below a shorter panel whenever a
    taller sibling (e.g. the genre-bubbles panel) stretched the row. min-height
-   keeps each chart from collapsing when it's alone in its own row. */
+   keeps each chart from collapsing when it's alone in its own row. Chart.js's
+   own canvas needs max-height:none here too - a leftover blanket
+   `canvas{max-height:140px}` (matching the old fixed .chart-wrap height) was
+   still capping #decadeChart's canvas even after the container itself grew. */
 .chart-wrap{position:relative;height:auto;min-height:140px;flex:1;}
+.chart-wrap canvas{max-height:none;}
 .chart-wrap-tall{min-height:230px;}
-.chart-wrap-tall canvas{max-height:none;}
 
 /* bubble chart (D3 circle-pack) */
 .bubble-wrap{position:relative;height:auto;min-height:260px;flex:1;}
