@@ -151,6 +151,8 @@ header .sub{
   box-shadow:0 2px 12px rgba(0,0,0,0.3);
   position:relative;
   min-width:0;
+  display:flex;
+  flex-direction:column;
 }
 .dash-label{
   font-family:'Space Mono',monospace;
@@ -191,7 +193,7 @@ header .sub{
    0-10; the pointer's position IS the readout, no needle-vs-number math
    needed by the viewer). Static knob-face photo + a separately rotated
    pointer line, since the face art has no built-in indicator. */
-.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.knob-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;flex:1;}
 .knob{
   --progress-duration:1800ms;
   position:relative;width:180px;height:180px;flex-shrink:0;
@@ -237,12 +239,17 @@ header .sub{
 .knob-caption b#progressLabel{color:#6e4c7b;}
 
 canvas{max-height:140px;}
-.chart-wrap{position:relative;height:140px;}
-.chart-wrap-tall{height:230px;}
-.chart-wrap-tall canvas{max-height:230px;}
+/* height:auto + flex:1 (rather than a fixed px height) so each panel's
+   chart/bubble area fills whatever row height the grid ends up giving it —
+   fixed heights left dead cream space below a shorter panel whenever a
+   taller sibling (e.g. the genre-bubbles panel) stretched the row. min-height
+   keeps each chart from collapsing when it's alone in its own row. */
+.chart-wrap{position:relative;height:auto;min-height:140px;flex:1;}
+.chart-wrap-tall{min-height:230px;}
+.chart-wrap-tall canvas{max-height:none;}
 
 /* bubble chart (D3 circle-pack) */
-.bubble-wrap{position:relative;height:260px;}
+.bubble-wrap{position:relative;height:auto;min-height:260px;flex:1;}
 .bubble{
   position:absolute;
   border-radius:50%;

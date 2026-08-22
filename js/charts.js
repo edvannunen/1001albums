@@ -120,6 +120,7 @@ function renderDecadeChart(onChange){
           setFilter("year", parseInt(yearLabels[elements[0].index]));
           onChange();
         },
+        maintainAspectRatio:false,
         plugins:{legend:{display:false}},
         scales:{
           x:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{display:false}},
@@ -157,6 +158,7 @@ function renderDecadeChart(onChange){
         setFilter("decade", decade);
         onChange();
       },
+      maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
         x:{ticks:{color:"#7a6f5c",font:{family:"Space Mono",size:10}},grid:{display:false}},
