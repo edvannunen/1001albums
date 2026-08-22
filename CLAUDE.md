@@ -242,6 +242,34 @@ live on the site, no need to duplicate it in the data.
   when the key is *absent*, not when it's `None` — crashed with
   `AttributeError: 'NoneType' object has no attribute 'get'` partway
   through the first full run. Fixed with `(data.get("area") or {})`.
+- **MusicBrainz enrichment was silently dropping data on rate-limit
+  throttling — fixed 2026-08-22.** `REQUEST_DELAY` (0.3s) is shared with
+  Spotify calls but far too fast for MusicBrainz's documented ~1 req/sec
+  limit, and `musicbrainz_lookup()` treated any non-200 response
+  (a 503/429 throttle, or a transient timeout) identically to a genuine
+  "this album isn't in MusicBrainz" — silently returning `{}` either way,
+  with no retry and no way to tell the two cases apart later. Left 48
+  albums with zero country/genre data at all, including catalog entries
+  that are obviously in MusicBrainz (the Beatles' *Revolver*, *Sgt.
+  Pepper's*, Prince's *Sign O' the Times*). Fixed with `MB_REQUEST_DELAY`
+  (1.1s) plus retry-with-backoff on 429/503 in a new `_mb_get()` helper.
+  Also added a fuzzy free-text fallback query (scored by
+  `difflib.SequenceMatcher`, same approach as the Spotify fix above) for
+  when the strict `artist:"X" AND release:"Y"` Lucene phrase match finds
+  nothing because our stored title differs slightly from MusicBrainz's own
+  canonical title (e.g. Queen Latifah's "All Hail To The Queen" vs.
+  MusicBrainz's "All Hail the Queen") — only accepted above a 0.75
+  similarity floor so an unrelated same-ish-named album isn't wrongly
+  attached. One-off backfill: `backfill_musicbrainz.py` (mirrors
+  `backfill_spotify.py`'s commit-per-album, safe-to-resume pattern),
+  re-run against the 48 gap albums: 43 recovered, 5 genuinely have no
+  MusicBrainz entry at all (Tito Puente's "Dance Mania vol. 1", Aretha
+  Franklin's "Lady Soul", Stephen Stills' "Manassas", Big Star's
+  "Third/Sister Lovers", Run DMC's self-titled debut) — not yet manually
+  resolved. The 43 recovered rows were applied to production directly via
+  SQL generated from the local results (see "Single-row/single-field data
+  corrections" in the Coolify playbook) rather than re-running the
+  backfill against prod, since MusicBrainz was already queried once.
 - **Embed source URLs (YouTube/Spotify) now resolve for every post,
   regardless of age — fixed 2026-07.** The old `?format=json` approach's
   `iframe.thumbnailUrl`/`externalSrc` only worked for recently-created
