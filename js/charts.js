@@ -48,14 +48,23 @@ function animatePercent(el, to){
   requestAnimationFrame(tick);
 }
 
+// Personal picks (not part of the 1001-album book list) are numbered with a
+// decimal suffix, e.g. "663.1" inserted after book entry 663 — see
+// CLAUDE.md. Book-progress stats must exclude them or completion% would
+// overstate actual progress through the book.
+function isBookAlbum(a){
+  return Number.isInteger(parseFloat(a.number));
+}
+
 function currentProgressPct(){
-  return Math.min(100, Math.round((state.albums.length / 1001) * 100));
+  const bookCount = state.albums.filter(isBookAlbum).length;
+  return Math.min(100, Math.round((bookCount / 1001) * 100));
 }
 
 // `onChange` is called after any chart-driven filter mutation so the caller
 // (app.js) can re-render the list/chips without this module importing app.js.
 export function renderDashboard(onChange){
-  const total = state.albums.length;
+  const total = state.albums.filter(isBookAlbum).length;
   const pct = currentProgressPct();
   document.getElementById("progressLine").style.transform =
     `translateX(-50%) rotate(${progressAngle(pct)}deg)`;

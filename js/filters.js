@@ -55,7 +55,7 @@ export function matchesFilters(a){
 // (country/genre aren't enriched for every album) doesn't yank blank rows
 // to the top.
 const SORT_VALUE = {
-  number: a => ({ value: parseInt(a.number), missing: false }),
+  number: a => ({ value: parseFloat(a.number), missing: false }),
   year: a => ({ value: parseInt(a.year), missing: false }),
   artist: a => ({ value: a.artist, missing: false }),
   album: a => ({ value: a.album, missing: false }),

@@ -53,7 +53,7 @@ def find_album_id(conn: sqlite3.Connection, number, artist: str, album: str) -> 
     always merged on: (catalog_number, artist, album)."""
     row = conn.execute(
         "SELECT id FROM albums WHERE catalog_number = ? AND artist = ? AND album = ?",
-        (int(number), artist, album),
+        (float(number), artist, album),
     ).fetchone()
     return row["id"] if row else None
 
@@ -85,7 +85,7 @@ def insert_album(conn: sqlite3.Connection, e: dict) -> int:
         ) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            int(e["number"]), e["artist"], e["album"], int(e["year"]), e["text"],
+            float(e["number"]), e["artist"], e["album"], int(e["year"]), e["text"],
             e.get("medium_post_url"),
             spotify.get("spotify_url"), spotify.get("spotify_embed_url"),
             spotify.get("cover_art_url"), spotify.get("matched_artist_name"),

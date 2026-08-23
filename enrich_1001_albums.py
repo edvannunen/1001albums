@@ -199,9 +199,11 @@ TYPE_MIXTAPE = "MIXTAPE_EMBED"
 # would otherwise be mistaken for the artist/album separator. The number is
 # sometimes followed by a period or colon instead of just whitespace, e.g.
 # post #11's "84. The Beau Brummels – Triangle (1967)." or post #10's
-# "76: Astrud Gilberto – Beach Samba (1967)."
+# "76: Astrud Gilberto – Beach Samba (1967)." The number itself may carry a
+# decimal suffix (e.g. "663.1") for personal picks inserted between two book
+# entries — not part of the official 1001-album list, see CLAUDE.md.
 HEADER_RE = re.compile(
-    r"^\s*(\d{1,4})[.:]?\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
+    r"^\s*(\d{1,4}(?:\.\d+)?)[.:]?\s+(.*?)\s*[–—]\s*(.*?)\s*\((\d{4})(?:/\d{1,2})?\)\.?\s*(.*)$"
 )
 
 def resolve_iframe_url(paragraph: dict, state: dict) -> str | None:

@@ -159,7 +159,7 @@ export function openModal(a){
   moreList.innerHTML = "";
   if(others.length){
     moreBlock.classList.remove("hidden");
-    others.sort((x,y)=> parseInt(x.number) - parseInt(y.number)).forEach(o=>{
+    others.sort((x,y)=> parseFloat(x.number) - parseFloat(y.number)).forEach(o=>{
       const li = document.createElement("li");
       const link = document.createElement("a");
       link.textContent = `#${o.number} — ${o.album} (${o.year})`;
