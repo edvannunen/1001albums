@@ -6,7 +6,7 @@ export function matchesSearch(a, q){
   if(!q) return true;
   q = q.toLowerCase();
   const haystack = [
-    a.artist, a.album, a.year,
+    a.number, a.artist, a.album, a.year,
     a.musicbrainz && a.musicbrainz.country,
     ...genreList(a)
   ].filter(Boolean).join(" ").toLowerCase();
