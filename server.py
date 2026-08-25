@@ -189,50 +189,61 @@ ADMIN_PAGE = """<!doctype html>
   <form method="post" action="admin/add-post">
     <input name="url" type="url" placeholder="https://edvannunen.medium.com/..." value="{url}"
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
-    <button type="submit" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>{relay_button}
+    <button type="submit" id="add-btn" style="margin-top:0.75rem; padding:0.5rem 1rem;">Scrape &amp; add</button>{relay_button}
   </form>
-  <pre id="push-log" style="display:none; background:#f4f4f4; padding:0.75rem;
+  <pre id="admin-log" style="display:none; background:#f4f4f4; padding:0.75rem;
        margin-top:0.75rem; max-height:20rem; overflow:auto; white-space:pre-wrap;
        font-size:0.85rem;"></pre>
   {result}
   <script>
-    // Live progress for "Scrape locally & push to production": intercepts
-    // the click and streams Server-Sent Events from admin/relay-to-prod-stream
-    // instead of the plain form POST (whose formaction stays wired up as a
-    // no-JS fallback). A genuinely new post can take 60-90s+ (Spotify +
-    // rate-limited MusicBrainz + translation) and a blank page for that long
-    // reads as "did this hang?" — see CLAUDE.md for the incident this fixed.
+    // Live progress for both "Scrape & add" and "Scrape locally & push to
+    // production": intercepts the click and streams Server-Sent Events from
+    // the matching *-stream endpoint instead of the plain form POST (whose
+    // formaction stays wired up as a no-JS fallback for each button). A
+    // genuinely new post can take 60-90s+ (Spotify + rate-limited
+    // MusicBrainz + translation) and a blank page for that long reads as
+    // "did this hang?" — see CLAUDE.md for the incident this fixed.
     (function() {{
-      var btn = document.getElementById('push-btn');
-      if (!btn || !window.EventSource) return;
-      btn.addEventListener('click', function(ev) {{
-        var input = document.querySelector('input[name=url]');
-        var url = input.value;
-        if (!url) return;
-        ev.preventDefault();
-        var log = document.getElementById('push-log');
-        log.style.display = 'block';
-        log.textContent = '';
-        btn.disabled = true;
-        var es = new EventSource('admin/relay-to-prod-stream?url=' + encodeURIComponent(url));
-        es.onmessage = function(e) {{
-          log.textContent += e.data + '\\n';
-          log.scrollTop = log.scrollHeight;
-        }};
-        es.addEventListener('done', function(e) {{
-          var stats = JSON.parse(e.data);
-          log.textContent += (stats.failed_urls && stats.failed_urls.length
-            ? 'Production failed to process ' + url + ' — check the URL and try again.'
-            : 'Pushed to production — ' + stats.new + ' new album(s) added, '
-              + stats.updated + ' already existed and had their text/media refreshed.') + '\\n';
-          es.close();
-          btn.disabled = false;
+      var log = document.getElementById('admin-log');
+      function wire(btn, streamPath, formatDone) {{
+        if (!btn || !window.EventSource) return;
+        btn.addEventListener('click', function(ev) {{
+          var input = document.querySelector('input[name=url]');
+          var url = input.value;
+          if (!url) return;
+          ev.preventDefault();
+          log.style.display = 'block';
+          log.textContent = '';
+          btn.disabled = true;
+          var es = new EventSource(streamPath + '?url=' + encodeURIComponent(url));
+          es.onmessage = function(e) {{
+            log.textContent += e.data + '\\n';
+            log.scrollTop = log.scrollHeight;
+          }};
+          es.addEventListener('done', function(e) {{
+            var stats = JSON.parse(e.data);
+            log.textContent += formatDone(stats, url) + '\\n';
+            es.close();
+            btn.disabled = false;
+          }});
+          es.addEventListener('error', function(e) {{
+            log.textContent += (e.data ? 'Failed: ' + e.data : 'Connection lost.') + '\\n';
+            es.close();
+            btn.disabled = false;
+          }});
         }});
-        es.addEventListener('error', function(e) {{
-          log.textContent += (e.data ? 'Failed: ' + e.data : 'Connection lost.') + '\\n';
-          es.close();
-          btn.disabled = false;
-        }});
+      }}
+      wire(document.getElementById('add-btn'), 'admin/add-post-stream', function(stats, url) {{
+        return stats.failed_urls && stats.failed_urls.length
+          ? 'Failed to scrape ' + url + ' — check the URL and try again.'
+          : 'Done — ' + stats.new + ' new album(s) added, '
+            + stats.updated + ' already existed and had their text/media refreshed.';
+      }});
+      wire(document.getElementById('push-btn'), 'admin/relay-to-prod-stream', function(stats, url) {{
+        return stats.failed_urls && stats.failed_urls.length
+          ? 'Production failed to process ' + url + ' — check the URL and try again.'
+          : 'Pushed to production — ' + stats.new + ' new album(s) added, '
+            + stats.updated + ' already existed and had their text/media refreshed.';
       }});
     }})();
   </script>
@@ -280,6 +291,48 @@ def add_post(url: str = Form(...), _: str = Depends(require_admin)):
             f"{stats['updated']} already existed and had their text/media refreshed.</p>"
         )
     return _admin_page(result, url)
+
+
+@app.get("/admin/add-post-stream")
+def add_post_stream(url: str, _: str = Depends(require_admin)):
+    """SSE version of /admin/add-post — same live-progress motivation as
+    relay-to-prod-stream below: a genuinely new post's Spotify +
+    rate-limited MusicBrainz + translation stages can run 60-90s+, and a
+    blank page for that long reads as "did this hang?" (see CLAUDE.md).
+    GET (not the form's POST) because the browser's built-in EventSource
+    only supports GET. The plain POST route stays in place unchanged as a
+    no-JS fallback — its formaction is still the form's default action;
+    this route just intercepts the click first when JS runs. Unlike
+    relay-to-prod-stream, this isn't local-only: it's the same direct
+    Medium fetch /admin/add-post always did, just with progress streamed
+    instead of blocking.
+    """
+    q: queue.Queue = queue.Queue()
+
+    def worker():
+        conn = get_connection()
+        try:
+            stats = sync_posts([url], conn, on_progress=q.put)
+            q.put(("__done__", stats))
+        except Exception as e:
+            q.put(("__error__", str(e)))
+        finally:
+            conn.close()
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    def event_stream():
+        while True:
+            item = q.get()
+            if isinstance(item, tuple) and item[0] == "__done__":
+                yield f"event: done\ndata: {json.dumps(item[1])}\n\n"
+                return
+            if isinstance(item, tuple) and item[0] == "__error__":
+                yield f"event: error\ndata: {json.dumps(item[1])}\n\n"
+                return
+            yield f"data: {item}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @app.post("/admin/relay-to-prod", response_class=HTMLResponse)
