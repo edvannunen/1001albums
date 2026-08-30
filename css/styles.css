@@ -625,3 +625,12 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
   .modal-title-block .modal-album,
   .modal-title-block .modal-badges{grid-column:1 / -1;}
 }
+
+.site-footer{
+  text-align:center;
+  padding:24px 24px 40px;
+  font-family:'Work Sans',sans-serif;
+  font-size:12px;
+  line-height:1.6;
+  color:var(--ink-dim);
+}

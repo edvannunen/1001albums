@@ -44,6 +44,7 @@ export const STRINGS = {
     us_uk_hide: "US & UK verbergen",
     toast_copied: "Albumrecensie gekopieerd naar klembord",
     toast_copy_failed: "Kopiëren naar klembord mislukt",
+    footer_copyright: (year) => `&copy; ${year} Ed van Nunen &middot; bier-en-brood.nl<br>Deze pagina bevat verwijzingen naar en/of embeds van content (video's, afbeeldingen) van derden. Alle rechten daarop liggen bij de respectievelijke eigenaren. Gebruikt voor persoonlijke, niet-commerciële doeleinden. Verzoek tot verwijdering? Neem contact op via edvannunen [at] gmail [dot] com.`,
   },
   en: {
     tagline_sub: "A PERSONAL LISTENING JOURNEY",
@@ -85,6 +86,7 @@ export const STRINGS = {
     us_uk_hide: "Hide US & UK",
     toast_copied: "Album review copied to the clipboard",
     toast_copy_failed: "Could not copy to clipboard",
+    footer_copyright: (year) => `&copy; ${year} Ed van Nunen &middot; bier-en-brood.nl<br>This page includes references to and/or embeds of content (videos, images) from third parties. All rights to that content remain with their respective owners. Used for personal, non-commercial purposes. Removal request? Contact edvannunen [at] gmail [dot] com.`,
   },
 };
 
@@ -114,4 +116,6 @@ export function applyStaticStrings(){
   document.querySelectorAll("[data-i18n-html]").forEach(el=>{
     el.innerHTML = t(el.dataset.i18nHtml);
   });
+  const footerEl = document.getElementById("footerCopyright");
+  if (footerEl) footerEl.innerHTML = STRINGS[state.lang].footer_copyright(new Date().getFullYear());
 }
