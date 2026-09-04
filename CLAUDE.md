@@ -253,7 +253,10 @@ live on the site, no need to duplicate it in the data.
   spotify_url IS NULL AND id IN (media WHERE type='spotify')` instead of
   `NOT IN`) — 18/26 auto-confirmed and applied (locally and to production,
   via direct SQL per the Coolify playbook's single-row-correction recipe,
-  not a second query against prod), 7 need a manual look — see
+  not a second query against prod). Of the 7 flagged for manual review, Ed
+  confirmed 5 by hand the same day (title-format/reissue mismatches, not
+  wrong albums — #29, #38, #95, #259, #645), also written to both DB
+  copies; #19 and #233 are still genuinely open, see
   `spotify_manual_review_embedded_gap.md`. The underlying skip-condition bug
   in `enrich_with_spotify()` itself is NOT fixed — a future post whose
   embed is an off-album track will hit this again; worth a real fix

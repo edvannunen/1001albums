@@ -1049,7 +1049,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/2c1288fa-19c4-34d3-97a7-ff2fe9c96b57/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/7gTcPv1bE0THbjuvDbK1gq",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/7gTcPv1bE0THbjuvDbK1gq",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2738cc943f21a76f8dcc034f320",
+      "matched_artist_name": "Muddy Waters",
+      "matched_album_name": "Muddy Waters At Newport 1960",
+      "matched_release_year": 1960,
+      "exact_year_match": true
+    }
   },
   {
     "number": "30",
@@ -1382,7 +1390,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/1c17ea9a-97d1-33ed-930f-f4c28222d37f/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/3nTXqOEHr6AfTb1WSaB4Pm",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/3nTXqOEHr6AfTb1WSaB4Pm",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2731b8cd64d555da3f0b6fbae99",
+      "matched_artist_name": "Sam Cooke",
+      "matched_album_name": "One Night Stand - Sam Cooke Live At The Harlem Square Club, 1963",
+      "matched_release_year": 1963,
+      "exact_year_match": true
+    }
   },
   {
     "number": "39",
@@ -3729,7 +3745,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/56829851-672a-3921-827f-23252811f0e6/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5aQE05ji4wayN65QCZkl0U",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5aQE05ji4wayN65QCZkl0U",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273e93ad7c2b5032a9b07543c40",
+      "matched_artist_name": "The Young Rascals",
+      "matched_album_name": "Groovin' (Mono)",
+      "matched_release_year": 1967,
+      "exact_year_match": true
+    }
   },
   {
     "number": "96",
@@ -10999,7 +11023,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/6f78435e-5d1b-3cc8-83ce-10f0a2f11ee5/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/6w4b41IacQMT1aFAldWRrh",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/6w4b41IacQMT1aFAldWRrh",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2738b2db30e4493927c7b397ed5",
+      "matched_artist_name": "David Ackles",
+      "matched_album_name": "American Gothic (US Internet Release)",
+      "matched_release_year": 1972,
+      "exact_year_match": true
+    }
   },
   {
     "number": "260",
@@ -30166,7 +30198,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/f0b690ac-01cf-321c-a639-3898e464d1af/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5G6akYvygKGToUIB863YqU",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5G6akYvygKGToUIB863YqU",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2736c633b52614bdb04e9ccb0b4",
+      "matched_artist_name": "The Young Gods",
+      "matched_album_name": "L'Eau Rouge/Red Water",
+      "matched_release_year": 1989,
+      "exact_year_match": true
+    }
   },
   {
     "number": "646",
