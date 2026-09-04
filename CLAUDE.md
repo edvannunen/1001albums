@@ -236,6 +236,30 @@ live on the site, no need to duplicate it in the data.
   - Result: 230/243 auto-confirmed, 13 needed a manual look, resolved by
     hand — see `spotify_manual_review.md`. Final: 619/621 albums have a
     Spotify link; #5 and #137 confirmed genuinely absent from Spotify.
+- **A second, distinct Spotify gap — "already has a Spotify embed" wrongly
+  skipped the real album search — found and fixed 2026-09-04.**
+  `enrich_with_spotify()`'s skip condition only checks whether *any*
+  `type='spotify'` media row exists for the album; it doesn't check whether
+  that embed is actually *from* the catalogued album. When a review is
+  illustrated with a different song (a later single, a preview, a related
+  track), the album silently never gets a real Spotify search at all — found
+  via #648 Neneh Cherry's "Raw Like Sushi" (1989), whose only Spotify embed
+  was a 2014 "Blank Project" track. Checked the scope: 26 albums had
+  `spotify_url IS NULL` despite having a `spotify`-type media row (some of
+  those embeds were actually the right album, just never copied into the
+  dedicated `spotify_url`/cover-art columns; others were illustrative
+  off-album tracks like #648). Fixed with `backfill_spotify_embedded_gap.py`
+  (mirrors `backfill_spotify.py`'s commit-per-album pattern, `WHERE
+  spotify_url IS NULL AND id IN (media WHERE type='spotify')` instead of
+  `NOT IN`) — 18/26 auto-confirmed and applied (locally and to production,
+  via direct SQL per the Coolify playbook's single-row-correction recipe,
+  not a second query against prod), 7 need a manual look — see
+  `spotify_manual_review_embedded_gap.md`. The underlying skip-condition bug
+  in `enrich_with_spotify()` itself is NOT fixed — a future post whose
+  embed is an off-album track will hit this again; worth a real fix
+  (compare the embedded Spotify URL's matched album/artist against the
+  catalogued one, not just "does an embed exist at all") if it keeps
+  recurring.
 - **MusicBrainz artist lookup crashed on artists with no known area** —
   `artist.area` is `null` (present, not absent) in MusicBrainz's own
   JSON for such artists, and `.get("area", {})` only falls back to `{}`

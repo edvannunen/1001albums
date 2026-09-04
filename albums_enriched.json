@@ -1014,7 +1014,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/10bb15b0-2d55-369a-90c3-a5131406ac9e/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/6YhvR14clg0yibdTKB5aBv",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/6YhvR14clg0yibdTKB5aBv",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2730c6274c608807116d33fcee7",
+      "matched_artist_name": "Jimmy Smith",
+      "matched_album_name": "Back At The Chicken Shack",
+      "matched_release_year": 1963,
+      "exact_year_match": false
+    }
   },
   {
     "number": "29",
@@ -2238,7 +2246,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/fdd96703-7b21-365e-bdea-38029fbeb84e/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2CNEkSE8TADXRT2AzcEt1b",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2CNEkSE8TADXRT2AzcEt1b",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27350eb0c521d2d3b2f599bff04",
+      "matched_artist_name": "The Beach Boys",
+      "matched_album_name": "Pet Sounds",
+      "matched_release_year": 1966,
+      "exact_year_match": true
+    }
   },
   {
     "number": "62",
@@ -2265,7 +2281,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/43e95a39-7f85-3400-af58-03b800e63048/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/7wpo5k9gqXQHfxISH1jatO",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/7wpo5k9gqXQHfxISH1jatO",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273e947f4b2de84a522265b52e6",
+      "matched_artist_name": "Fred Neil",
+      "matched_album_name": "Fred Neil",
+      "matched_release_year": 1966,
+      "exact_year_match": true
+    }
   },
   {
     "number": "63",
@@ -2301,7 +2325,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/8b98a364-6551-379f-89ea-c3fed4d5552f/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/3dfPMayEO2G87wzXPMEvmb",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/3dfPMayEO2G87wzXPMEvmb",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2733f07e7daf8ef639ec8263b19",
+      "matched_artist_name": "The Byrds",
+      "matched_album_name": "Fifth Dimension",
+      "matched_release_year": 1966,
+      "exact_year_match": true
+    }
   },
   {
     "number": "64",
@@ -2621,7 +2653,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/26987c39-5914-483b-a897-d43ce6aad9b1/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/72qrnM4yUNMDDlWiqKc8iY",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/72qrnM4yUNMDDlWiqKc8iY",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273bad7062c3fd2f2d037989694",
+      "matched_artist_name": "The Rolling Stones",
+      "matched_album_name": "Aftermath",
+      "matched_release_year": 1966,
+      "exact_year_match": true
+    }
   },
   {
     "number": "71",
@@ -3090,7 +3130,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/483f15b5-e784-3c78-ba40-1988f5f9c6a4/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5MTUjDTUWFuyhWW7oRqqmi",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5MTUjDTUWFuyhWW7oRqqmi",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273dd68bd72d05daa2b1f258961",
+      "matched_artist_name": "Moby Grape",
+      "matched_album_name": "Moby Grape (with Bonus Tracks)",
+      "matched_release_year": 1967,
+      "exact_year_match": true
+    }
   },
   {
     "number": "83",
@@ -6514,7 +6562,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/e6c7e050-119b-3c99-92f6-039137c4a18d/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5ETcOu2ITbVLilnw3QQqSX",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5ETcOu2ITbVLilnw3QQqSX",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273e3f61a116639ccb26edc1596",
+      "matched_artist_name": "The Temptations",
+      "matched_album_name": "Cloud Nine",
+      "matched_release_year": 1969,
+      "exact_year_match": true
+    }
   },
   {
     "number": "160",
@@ -6693,7 +6749,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/321fe6af-3eef-30b1-a5c2-7b36b0a4aae1/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/76q2Ubo0vZIJxCqS0I1msH",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/76q2Ubo0vZIJxCqS0I1msH",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273f951a0fe43fad44d3f3fc0d8",
+      "matched_artist_name": "The Youngbloods",
+      "matched_album_name": "Elephant Mountain",
+      "matched_release_year": 1969,
+      "exact_year_match": true
+    }
   },
   {
     "number": "165",
@@ -7896,7 +7960,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/882b949e-c807-4499-ada9-a2611a4fed91/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/1JLi8OW3Gb89OpPPWoHKGA",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/1JLi8OW3Gb89OpPPWoHKGA",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2731265c31f83932d78953514da",
+      "matched_artist_name": "Ananda Shankar",
+      "matched_album_name": "Ananda Shankar And His Music",
+      "matched_release_year": 1984,
+      "exact_year_match": false
+    }
   },
   {
     "number": "193",
@@ -8360,7 +8432,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/161a0e3e-a8c7-47d6-9d3f-c427ee6a32b9/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/7eEYDv4xof4uQei8Y6SCzs",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/7eEYDv4xof4uQei8Y6SCzs",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2732be917cc67c4a6906c88739b",
+      "matched_artist_name": "Paul McCartney",
+      "matched_album_name": "McCartney II",
+      "matched_release_year": 1980,
+      "exact_year_match": false
+    }
   },
   {
     "number": "203",
@@ -9323,9 +9403,15 @@
     "artist": "Dolly Parton",
     "album": "Coat of Many Colors",
     "year": "1971",
-    "text": "Leuk, Dolly komt ook voorbij. Hoewel ik Dolly erg waardeer (topwijf!) heb ik denk ik nog nooit een album helemaal geluisterd. Bij deze dan. Hoewel haar 8e album is dit haar eerste met vooral nummers van haar eigen hand. Ze had al heel wat dikke hits op haar naam (solo en in duets), maar hier presenteert ze zich als serieus songschrijver. 10 nummers in minder dan een half uur. Country voornamelijk, maar van ballads, rockers tot tearjerkers. Niet alles helemaal mijn kop thee, maar het titelnummer of Here I Am bijv zijn prachtig.",
-    "text_en": "Nice, Dolly comes by too. Although I really appreciate Dolly (top gal!), I think I've never listened to a full album of hers before. So here goes. Although this is her 8th album, it's her first with mostly songs of her own hand. She already had quite a few big hits under her belt (solo and in duets), but here she presents herself as a serious songwriter. 10 songs in under half an hour. Mostly country, but ranging from ballads, rockers to tearjerkers. Not everything is completely my cup of tea, but the title track or Here I Am for instance are gorgeous.",
+    "text": "Mooi, dat Dolly ook voorbij komt. Hoewel ik Dolly erg waardeer (topwijf!) heb ik nog nooit een heel album geluisterd. Hoewel dit haar 8e album is, is het haar eerste met vooral nummers van eigen hand. Ze had al een paar hits op haar naam, maar hier presenteert ze zich als serieus songschrijver. Tien nummers in nog geen half uur. Het nummer “Coat of Many Colors” heb ik nog gespeeld in een gelegenheidsbandje. Schitterend en autobiografisch nummer: Ze vertelt hoe haar moeder, tijdens haar jeugd in armoede, voor haar een jas naaide van lapjes stof die de familie kreeg gedoneerd. “Here I Am” is ook prachtig.",
+    "text_en": "Nice that Dolly comes up too. Although I really appreciate Dolly (top gal!), I've never listened to a whole album of hers. Although this is her 8th album, it's her first one mostly featuring songs of her own. She already had a few hits to her name, but here she presents herself as a serious songwriter. Ten songs in under half an hour. I've actually played the song \"Coat of Many Colors\" in a pickup band once. Gorgeous and autobiographical song: she tells how her mother, during her childhood in poverty, sewed her a coat out of scraps of fabric the family had been given. \"Here I Am\" is also beautiful.",
     "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=JBGj96s6lEg",
+        "caption": null,
+        "caption_en": null
+      },
       {
         "type": "spotify",
         "url": "https://open.spotify.com/track/1l2Xmg54EUr3TDzNIaCr1z",
@@ -9500,13 +9586,13 @@
     "album": "Histoire de Melody Nelson",
     "year": "1971",
     "text": "Van een album dat ik al van buiten ken naar een plaat die ik nauwelijks ken. Ooit wel eens geluisterd maar is ook niet helemaal blijven hangen. Over deze plaat stond toevallig vorige week nog een mooi stuk in de Volkskrant: Heel handig. Hierdoor weet ik nu dat het openingsnummer gaat over een oudere man (Serge zelf) in een Rolls Royce, die een meisje op een fiets aanrijdt. Merde! Haar rokje is omhooggeschoven. Het is wel Serge Gainsbough natuurlijk. Het meisje, ook op de hoes, is zijn bijna 20 jaar jongere vriendin Jane Birkin, die van Je t’aime… moi non plus. Dit album schijnt nogal invloedrijk te zijn, bijv: ‘Alles wat ik maak, probeer ik te laten klinken als ‘Histoire de Melody Nelson’. Niet dat ik ook maar in de buurt ben gekomen’, aldus Alex Turner, zanger van Arctic Monkeys en Last Shadow Puppets. Het is vaak zwoel met strijkers, maar ook lekker lome funk, zoals in de opener. En zo’n En Melody, daar zit toch wel een flinke scheut Sky Stone in, en ik denk dat Daft Punk voor hun geweldige Giorgio by Moroder ook naar dit nummer hebben geluisterd. Het slotnummer Cargo Culte gaat helemaal los en heeft een 70 mans koor. Het is een raar, fascinerend album. Van elk nummer is toen een clip gemaakt en te zien als een soort film. Hier het eerste nummer. Clip is ook raar trouwens: Mocht je nog een T-shirt van de fascinerende hoes willen, dat kan dus ook nog",
-    "text_en": "From an album I know by heart to a record I barely know. I've listened to it once at some point, but it didn't really stick with me either. Coincidentally, there was a nice piece about this record in the Volkskrant just last week: Very handy. Thanks to that I now know that the opening track is about an older man (Serge himself) in a Rolls Royce, who hits a girl on a bike. Merde! Her skirt has ridden up. Well, it is Serge Gainsbough of course. The girl, also on the cover, is his girlfriend, almost 20 years younger, Jane Birkin, the one from Je t'aime… moi non plus. This album apparently is quite influential, e.g.: 'Everything I make, I try to make it sound like 'Histoire de Melody Nelson'. Not that I've ever come close', according to Alex Turner, singer of Arctic Monkeys and Last Shadow Puppets. It's often sultry with strings, but also nice languid funk, like in the opener. And that Melody, there's definitely a good dose of Sky Stone in it, and I think Daft Punk also listened to this track for their amazing Giorgio by Moroder. The closing track Cargo Culte really lets loose and has a 70-man choir. It's a strange, fascinating album. A video was made for every track back then, to be watched like a kind of film. Here's the first track. The video is odd too, by the way: If you still want a T-shirt of the fascinating cover, that's possible too",
+    "text_en": "From an album I already know by heart to a record I hardly know. I did listen to it once, but it didn't really stick. Coincidentally, there was a nice piece about this record in the Volkskrant just last week: very handy. Thanks to that, I now know that the opening track is about an older man (Serge himself) in a Rolls Royce, who runs into a girl on a bicycle. Merde! Her skirt has ridden up. Well, it is Serge Gainsbough after all. The girl, also on the cover, is his almost 20 years younger girlfriend Jane Birkin, the one from Je t'aime… moi non plus. This album turns out to be quite influential, e.g.: \"Everything I make, I try to make it sound like 'Histoire de Melody Nelson'. Not that I've come anywhere close,\" according to Alex Turner, singer of Arctic Monkeys and Last Shadow Puppets. It's often sultry with strings, but also nice and languid funk, like in the opener. And that Melody, there's definitely a good dose of Sky Stone in it, and I think Daft Punk also listened to this track for their amazing Giorgio by Moroder. The closing track Cargo Culte really lets loose and has a 70-man choir. It's a strange, fascinating album. A clip was made for every track back then, viewable as a kind of film. Here's the first track. The clip is also weird, by the way: If you still want a T-shirt of the fascinating cover, that's possible too",
     "media": [
       {
         "type": "other",
         "url": "https://www.volkskrant.nl/cultuur-media/na-50-jaar-is-histoire-de-melody-nelson-nog-altijd-een-inspirerend-album~b10818f4/",
         "caption": "Na 50 jaar is Histoire de Melody Nelson nog altijd een inspirerend album\nOude man rijdt in Rolls-Royce een tienermeisje aan, en praatzingt erover op een plaat bomvol strijkers, een enorm koor…www.volkskrant.nl",
-        "caption_en": "After 50 years, Histoire de Melody Nelson is still an inspiring album\nOld man hits a teenage girl with his Rolls-Royce, and talk-sings about it on a record packed with strings, a huge choir…www.volkskrant.nl"
+        "caption_en": "After 50 years, Histoire de Melody Nelson is still an inspiring album\nOld man in a Rolls-Royce runs into a teenage girl, and talk-sings about it on a record packed with strings, a huge choir…www.volkskrant.nl"
       },
       {
         "type": "youtube",
@@ -9968,7 +10054,7 @@
     "album": "John Prine",
     "year": "1971",
     "text": "John Prine wordt altijd hoog aangeslagen. En vaak vergeleken met Dylan. Dit is z’n debuut en heeft een flinke country invloed. Iets te veel voor mij. Ik vind het wel ok, maar zal dit toch niet vaak draaien. Doe dan Dylan toch maar (die draai ik overigens ook niet vaak). Angel from Montgomery blijk ik te kennen. Van Bonnie Raitt blijkbaar. Mooi nummer, mooie cover. Ik geloof wel dat dit een goed album is, maar het is niet mijn kop thee. Aan het begin van Corona was de arme Prine een van de eerste bekende muzikanten die aan Covid overleed als ik het goed heb.",
-    "text_en": "John Prine is always held in high regard. And often compared to Dylan. This is his debut and it has a pretty strong country influence. A bit too much for me. I think it's ok, but I still won't be playing it often. I'd rather put on Dylan then (though I don't play him much either, by the way). Turns out I know Angel from Montgomery. From Bonnie Raitt apparently. Nice song, nice cover. I do believe this is a good album, but it's not my cup of tea. At the start of Corona, poor Prine was one of the first well-known musicians to die of Covid, if I recall correctly.",
+    "text_en": "John Prine is always held in high regard. And often compared to Dylan. This is his debut and has quite a strong country influence. A bit too much for me. I think it's fine, but I still won't play this often. I'd rather put on Dylan then (who I also don't play that often, by the way). Turns out I know Angel from Montgomery. From Bonnie Raitt apparently. Nice song, nice cover. I do believe this is a good album, but it's not my cup of tea. At the start of Corona, poor Prine was one of the first well-known musicians to die of Covid, if I remember correctly.",
     "media": [
       {
         "type": "spotify",
@@ -9980,7 +10066,7 @@
         "type": "spotify",
         "url": "https://open.spotify.com/track/6JssQFiBCi6ZcE6060S9A7",
         "caption": "De cover van Bonnie Raitt",
-        "caption_en": "Bonnie Raitt's cover"
+        "caption_en": "The Bonnie Raitt cover"
       }
     ],
     "musicbrainz": {
@@ -11427,7 +11513,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/4838a3c9-fd2b-30a5-83eb-e32545b5d7fc/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/1D0PTM0bg7skufClSUOxTP",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/1D0PTM0bg7skufClSUOxTP",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273ad5b5ed2169d072a44e98a31",
+      "matched_artist_name": "The Rolling Stones",
+      "matched_album_name": "Exile On Main Street (Deluxe Version)",
+      "matched_release_year": 1972,
+      "exact_year_match": true
+    }
   },
   {
     "number": "271",
@@ -13487,7 +13581,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/63b98f81-cdf4-3d6f-a062-7a435fd8b81c/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2wg5odL4oUsDISjIuNApyK",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2wg5odL4oUsDISjIuNApyK",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273910382524ae45b2ced6c117e",
+      "matched_artist_name": "Gil Scott-Heron, Brian Jackson",
+      "matched_album_name": "Winter in America",
+      "matched_release_year": 1974,
+      "exact_year_match": true
+    }
   },
   {
     "number": "317",
@@ -14126,7 +14228,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/516d4629-7bf3-3ac3-907a-ed9a022db840/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/0I8vpSE1bSmysN2PhmHoQg",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/0I8vpSE1bSmysN2PhmHoQg",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27364d8292b7825888183e4da28",
+      "matched_artist_name": "Keith Jarrett",
+      "matched_album_name": "The Köln Concert",
+      "matched_release_year": 1975,
+      "exact_year_match": true
+    }
   },
   {
     "number": "332",
@@ -15527,7 +15637,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/d4ae4d1a-2fc6-3996-9d72-db5724280237/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2mrujo5T64bQN2SvPWranQ",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2mrujo5T64bQN2SvPWranQ",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2738b4b7e55c1bc0f4de48435ee",
+      "matched_artist_name": "Penguin Cafe Orchestra",
+      "matched_album_name": "Music From The Penguin Cafe",
+      "matched_release_year": 1976,
+      "exact_year_match": true
+    }
   },
   {
     "number": "363",
@@ -16588,7 +16706,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/9aa1dc17-d89c-3969-8453-defec8fe0361/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/55d1108rwedIaZkwpQB2v6",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/55d1108rwedIaZkwpQB2v6",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2733f64f217814ae4a86c6f54df",
+      "matched_artist_name": "Dennis Wilson",
+      "matched_album_name": "Pacific Ocean Blue",
+      "matched_release_year": 1977,
+      "exact_year_match": true
+    }
   },
   {
     "number": "386",
@@ -17621,7 +17747,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/e11c5bd2-59c3-3cb2-a1e8-c1024d9c98a1/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/4CQjKZ5ArVZpE9UFcBxLeW",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/4CQjKZ5ArVZpE9UFcBxLeW",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2738e427d750805452ce1555ad5",
+      "matched_artist_name": "The Residents",
+      "matched_album_name": "Duck Stab / Buster & Glen (Preserved Edition)",
+      "matched_release_year": 1978,
+      "exact_year_match": true
+    }
   },
   {
     "number": "407",
@@ -17705,7 +17839,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/5ef7ef5c-f9aa-3800-9f55-ec58130846ba/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/57l34nudIa2wEI2q3zdTVo",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/57l34nudIa2wEI2q3zdTVo",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2737a4932ac29b7df2b4783a266",
+      "matched_artist_name": "Magazine",
+      "matched_album_name": "Real Life",
+      "matched_release_year": 1978,
+      "exact_year_match": true
+    }
   },
   {
     "number": "409",
@@ -22767,7 +22909,15 @@
       ],
       "cover_art_archive_url": "https://coverartarchive.org/release-group/f32fab67-77dd-3937-addc-9062e28e4c37/front"
     },
-    "spotify": null
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2ANVost0y2y52ema1E9xAZ",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2ANVost0y2y52ema1E9xAZ",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27332a7d87248d1b75463483df5",
+      "matched_artist_name": "Michael Jackson",
+      "matched_album_name": "Thriller",
+      "matched_release_year": 1982,
+      "exact_year_match": true
+    }
   },
   {
     "number": "509",
@@ -29828,6 +29978,340 @@
       "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273683be10830a0928ba6c58aee",
       "matched_artist_name": "Queen Latifah",
       "matched_album_name": "All Hail the Queen",
+      "matched_release_year": 1989,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "642",
+    "artist": "Spacemen 3",
+    "album": "Playing With Fire",
+    "year": "1989",
+    "text": "Spacemen 3, nooit aandacht aan besteed. Ik heb altijd gedacht dat het een dertien in een dozijn rockbandje was. Waarschijnlijk door dat getal in hun naam, dat is eigenlijk nooit best: Maroon 5, Blink-182, Sum 41, Matchbox 20, 3 Doors Down, U2. Alleen K3 kan door de beugel ;). Ik lees in het 1001 boek dat de eerste platen vooral beïnvloed zijn door The Cramps, Stooges, VU en Suicide. Dat zijn nog eens namen. Daar duik ik maar eens in. Maar op dit album is het veelal fluisterende minimale hypnotiserende psychedelica. Het doet me vooral denken aan Spiritualized, en wat schetst mijn verbazing: ik kom er na een paar nummers pas achter dat Spacemen 3 vooral Peter Kember en Jason Pierce is (allebei geboren op 19 november 1965 overigens). Jason ‘Spiritualized’ Pierce dus. Wistikveel. Halverwege bij de single “Revolution” wordt de eerste bak met herrie open getrokken. Goed nummer wel. Het elf minuten durende instrumentale “Suicide” is een hoop feedback en wah-wah en een ode aan de band met dezelfde naam. Ook goed. Jammer dat ik de nuttige welriekende plant niet meer gebruik, want dat past hier wel bij. De CD en Spotify heeft bonus tracks en dan komt bijna meteen hetzelfde nummer gewoon nog een keer, in een twaalf minuten durende liveversie, opgenomen in De Melkweg in ’88. Dat is wel wat veel. Spacemen 3 heb ik dus altijd in het verkeerde hokje geplaatst. Is er dus toch één band met een getal in hun naam dat wel ok is.",
+    "text_en": "Spacemen 3, never paid any attention to them. I always thought they were just a run-of-the-mill rock band. Probably because of that number in their name, which is never really a good sign: Maroon 5, Blink-182, Sum 41, Matchbox 20, 3 Doors Down, U2. Only K3 gets a pass ;). I read in the 1001 book that their early records were mainly influenced by The Cramps, Stooges, VU and Suicide. Now those are some names. I really should dive into that. But on this album it's mostly whispering, minimal, hypnotizing psychedelia. It mostly reminds me of Spiritualized, and imagine my surprise: only after a few songs do I find out that Spacemen 3 is essentially Peter Kember and Jason Pierce (both born on November 19, 1965, by the way). So Jason 'Spiritualized' Pierce. Who knew. Halfway through, on the single \"Revolution\", the first barrel of noise gets cracked open. Good track though. The eleven-minute instrumental \"Suicide\" is a heap of feedback and wah-wah and a tribute to the band of the same name. Also good. Shame I don't use that useful fragrant plant anymore, because it would suit this perfectly. The CD and Spotify have bonus tracks, and almost immediately you get the same song again, in a twelve-minute live version, recorded at De Melkweg in '88. That's a bit much. So I've always filed Spacemen 3 under the wrong category. Turns out there is one band with a number in their name that's actually okay after all.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=FGiTQtSBkQA",
+        "caption": null,
+        "caption_en": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=_W2u_-D_aWE",
+        "caption": "Je kan er ook 20 minuten van maken…",
+        "caption_en": "You could also stretch it out to 20 minutes…"
+      }
+    ],
+    "musicbrainz": {
+      "country": "United Kingdom",
+      "genres": [
+        "rock",
+        "indie rock",
+        "alternative pop/rock"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/23e72d60-6199-3f19-b29d-21e460b997ac/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/75RM2r98uCI8XVd51Uf4LJ",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/75RM2r98uCI8XVd51Uf4LJ",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27338674617c9b966926416082e",
+      "matched_artist_name": "Spacemen 3",
+      "matched_album_name": "Playing With Fire",
+      "matched_release_year": 2003,
+      "exact_year_match": false
+    }
+  },
+  {
+    "number": "643",
+    "artist": "fIREHOSE",
+    "album": "Fromohio",
+    "year": "1989",
+    "text": "Dit is wel tof, een van favoriete bands staat toch in de lijst. Had ik eigenlijk niet verwacht. Meteen een andere hoopvol opgezocht, maar waarom staat NoMeansNo er dan ook niet in? Afijn: fIREHOSE dus, de waanzinnige opvolger van Minutemen. Hoe goed Minutemen ook is, ik vind Ed ‘FromOhio’ Crawford (die de Minutemen Mike Watt en George Hurley overhaalde om na de tragische dood van zanger D. Boon toch door te gaan) zo’n ongelooflijk goeie zanger en gitarist, die trekt deze helden nog verder omhoog. Dit is hun derde album en eigenlijk vind ik dat nog de minste van de eerste vier platen. Debuut Ragin’ Full-On, If’n en Flyin’ The Flannel (met deze leerde ik ze rond ’91 kennen) zijn meesterwerken. Fromohio is ook goed, maar waarom dan juist deze in de lijst? Ik ben heel blij dat ik ze nog ooit live heb kunnen zien in de Effenaar; 6 november 1991 zie ik. Vond het zeer indrukwekkend en het staat me nog bij dat Mike Watt ook een nummer zong, zonder microfoon met de band gewoon op vol volume achter hem, en er toch bovenuit kwam. De baas.",
+    "text_en": "This is pretty cool, one of my favorite bands actually made the list. I honestly hadn't expected that. Immediately looked up another one hopefully, but then why isn't NoMeansNo on there? Anyway: fIREHOSE then, the insane successor to Minutemen. As good as Minutemen is, I think Ed ‘FromOhio’ Crawford (who convinced Minutemen members Mike Watt and George Hurley to carry on after the tragic death of singer D. Boon) is such an incredibly good singer and guitarist that he pulls these heroes up even further. This is their third album and honestly I still think it's the weakest of the first four records. Debut Ragin' Full-On, If'n and Flyin' The Flannel (this is how I got to know them around '91) are masterpieces. Fromohio is good too, but then why exactly this one on the list? I'm really glad I got to see them live once at the Effenaar; November 6, 1991, I see. Found it very impressive and I still remember Mike Watt also sang a song, without a microphone with the band just going full volume behind him, and still coming through above it. The boss.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=raICDoMymBQ",
+        "caption": "Live in 1987, met wat onzin eromheen",
+        "caption_en": "Live in 1987, with some nonsense around it"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=4ysQ1duhNeY",
+        "caption": "Zo’n goed nummer dit",
+        "caption_en": "Such a good song, this one"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=nwth-rIeYD4",
+        "caption": "Van Minutemen naar fIREHOSE",
+        "caption_en": "From Minutemen to fIREHOSE"
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "rock",
+        "alternative rock",
+        "punk",
+        "punk rock",
+        "1989",
+        "alternative and punk",
+        "alternative/indie rock"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/6118acdb-7f49-389b-80ec-50a9b12a1690/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/5SUqb3XY2BmvfAFLTjnBs0",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/5SUqb3XY2BmvfAFLTjnBs0",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b27302e12add0a587ff1239d3062",
+      "matched_artist_name": "fIREHOSE",
+      "matched_album_name": "Fromohio",
+      "matched_release_year": 1989,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "644",
+    "artist": "Beastie Boys",
+    "album": "Paul’s Boutique",
+    "year": "1989",
+    "text": "Tsja, Beastie Boys. Daar heb ik toch een beetje hetzelfde mee als met De Jeugd van Tegenwoordig. De puberale lolligheid overschaduwt de rest en zorgt er voor dat ik het helemaal niet leuk vind en het dus ook nooit draai. Een paar nummers vind ik wel ok hoor, maar zeker geen heel album. Alleen Licence to Ill ken ik helemaal. Dit is dus de opvolger en net als bij hun debuut vliegen de samples je om de oren, zoals het onmiskenbare basloopje van “Superfly” op “Egg Men”, of meerdere Beatlesnummers op “The Sounds of Science”. Blijkbaar bestaat 95% van het album uit samples en hebben ze nog jaren later tot een half miljoen dollar aan royalties af moeten dragen. Het is schijnbaar het laatste album waarbij zoveel samples zonder toestemming zijn gebruikt en het zou sindsdien, door rechtszaken, onmogelijk worden om zo’n plaat uit te brengen. Hoe dan ook: hoewel ik een paar nummers wel lekker vind, zoals “Hey Ladies” (die uitroep is dus Curtis Blow, of “Shadrach”, merk ik dat ik me vooral irriteer aan de typisch rapstijl van de Beasties. De boys en ik zullen geen vrienden worden.",
+    "text_en": "Well, Beastie Boys. I have kind of the same thing with them as I do with De Jeugd van Tegenwoordig. The juvenile jokiness overshadows everything else and makes sure I don’t enjoy it at all, so I never play it. A few tracks I do think are ok, but definitely not a whole album. Licence to Ill is the only one I know completely. So this is the follow-up, and just like on their debut, samples come flying at you from all sides, like the unmistakable bassline of “Superfly” on “Egg Men”, or several Beatles songs on “The Sounds of Science”. Apparently 95% of the album consists of samples, and years later they still had to pay out up to half a million dollars in royalties. It’s apparently the last album where so many samples were used without permission, and since then, because of lawsuits, it would become impossible to release a record like this. Anyway: although I do quite like a few tracks, like “Hey Ladies” (that shout-out is Curtis Blow, by the way), or “Shadrach”, I notice that I’m mostly annoyed by the typical rap style of the Beasties. The boys and I aren’t going to become friends.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=AYwCZqzrmaQ",
+        "caption": "Dit is wel heel fascinered. Dit zijn ze dus allemaal. Ongelooflijk.",
+        "caption_en": "This is really fascinating. So this is all of them. Unbelievable."
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=k9SGrNuJj9U",
+        "caption": "Haha, met ook beelden van in de moshpit",
+        "caption_en": "Haha, also with footage from in the moshpit"
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "electronic",
+        "rap",
+        "hip-hop",
+        "hip hop",
+        "pop rap",
+        "alternative rap",
+        "alternative hip-hop",
+        "alternative pop",
+        "1989",
+        "rap rock",
+        "hip hop rap",
+        "alternative hip hop",
+        "experimental hip hop",
+        "white",
+        "plunderphonics",
+        "alternative/indie rock",
+        "alternative pop/rock",
+        "golden age",
+        "cut-up/dj",
+        "east coast hip hop",
+        "hardcore hip hop"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/b534aa01-d621-31ba-9278-38a500e3cdca/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/1kmyirVya5fRxdjsPFDM05",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/1kmyirVya5fRxdjsPFDM05",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b2732288f4cd4bf3a8764624a0d2",
+      "matched_artist_name": "Beastie Boys",
+      "matched_album_name": "Paul's Boutique (20th Anniversary Edition / Remastered)",
+      "matched_release_year": 1989,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "645",
+    "artist": "The Young Gods",
+    "album": "L’Eau Rouge",
+    "year": "1989",
+    "text": "Wát een plaatopener heeft L’Eau Rouge (rood water) met “La Fille de la Mort”. Het is een waltz van acht minuten en begint als een soort ruwe chanson, en wel mooi gezongen a la de Belgische Arno. Maar na een paar minuten wordt het rondweg duister met enge strijkers, wat je natuurlijk ook al had kunnen verwachten van ‘de dochter van de dood’. Om daarna weer om te slaan naar een loop van pizzicato-strijkers met heftige drums, overgaand naar chaos. Arno is ondertussen veranderd in een bronstig schreeuwende Tom Waits. Indrukwekkend nummer en totaal niet wat ik van ze verwacht had. Pas in het tweede nummer komt de industriële herrie die ik van The Young Gods ken. Ook een goed nummer. Het is een afwisselendere plaat dan ik verwacht had. “Charlotte” is ook zo’n absurde chanson. Maar gaandeweg de plaat krijg ik toch wel wat last van wat ik eerder had als ik The Young Gods probeerde: het is wel heftig in-your-face allemaal. Pfoe. Het is wel de verrassing van de batch voor me.",
+    "text_en": "What an opening track L’Eau Rouge (red water) has with \"La Fille de la Mort\". It's an eight-minute waltz that starts as a kind of raw chanson, and beautifully sung too, a la the Belgian Arno. But after a few minutes it turns downright dark with eerie strings, which of course you could already have expected from 'the daughter of death'. After which it flips again into a loop of pizzicato strings with heavy drums, morphing into chaos. Arno, meanwhile, has turned into a rutting, screaming Tom Waits. An impressive track and totally not what I expected from them. Only in the second track does the industrial racket I know from The Young Gods show up. Also a good track. It's a more varied record than I expected. \"Charlotte\" is another one of those absurd chansons. But as the record goes on I do start to feel a bit of what I had before when I tried The Young Gods: it's all quite intense, in-your-face. Phew. It is the surprise of the batch for me, though.",
+    "media": [
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/track/51BgjBNu97dx1GmSG3Kpy3",
+        "caption": null,
+        "caption_en": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=RzyjQlBIGf0",
+        "caption": null,
+        "caption_en": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=jeV7qFsMXkA",
+        "caption": null,
+        "caption_en": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "Switzerland",
+      "genres": [
+        "rock",
+        "electronic",
+        "industrial"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/f0b690ac-01cf-321c-a639-3898e464d1af/front"
+    },
+    "spotify": null
+  },
+  {
+    "number": "646",
+    "artist": "John Zorn",
+    "album": "Spy vs Spy: The Music of Ornette Coleman",
+    "year": "1989",
+    "text": "Ok, dit wordt een uitdaging. Over heftig in-your-face gesproken. Vooropgesteld: ik ben een enorme liefhebber van John Zorn, heb een hele rij cd’s van ‘m en heb zeker een concert of 20 van hem gezien, waaronder een hele rits toen hij artist in residence van North Sea Jazz was. En zo ongeveer elke keer als ik in New York was, speelde hij, of zijn consorten, wel ergens in de Lower East buurt, of in zijn eigen garage The Stone. Maar er zijn heel erg veel kanten aan Zorn. Ik hou bijv. wel van zijn wat rustige filmachtige muziek of zijn al wat uitbundigere joodse jazz, zoals met Masada of Bar Kokbha. Maar Zorn is onwaarschijnlijk productief en veelzijdig. En dat onwaarschijnlijke is niet overdreven. Hij heeft als uitvoerder en/of componist meer dan 400 albums. En dat gaat alle kanten op. Een van die kanten is knetterende piepknor-trashmetaljazz, zoals met zijn Naked City band. En dat kan ik op zich best hebben; als ik het tenminste live zie, want dan gebeurt er van alles op het podium en is het vooral ook verbazen. Op plaat is dat wat lastiger. Deze plaat valt dus ook in die categorie. Hij neemt hier de muziek van freejazz pionier Ornette Coleman onder handen. Nu zijn die albums (eind jaren 50, begin jaren 60) eigenlijk nog best te doen, heel goed zelfs, voor de liefhebber. Zorn en co gaan nog wel wat stappen verder. Het is piepknor-kakafonie op thrash-metal speed, meestal in uitbarstingen van hooguit twee minuten. Jazzhardcore miniaturen. Twee saxofonisten (Zorn rechts, Tim Berne links), twee drummers (Joey Baron en Michael Vatcher, beide legendes) en Mark Dresser op bas. Het zal er om spannen of het deze plaat is of die van Napalm Death als het meest extreme album in de lijst. Ik zou zeggen: neem mee naar het volgende familieweekend; succes gegarandeerd! (Zorn staat niet meer op Spotify dus zal je andere bronnen moeten vinden)",
+    "text_en": "Ok, this is going to be a challenge. Talk about intense in-your-face music. Let's establish upfront: I'm a huge John Zorn fan, I have a whole row of his CDs and have seen at least 20 of his concerts, including a whole bunch when he was artist in residence at North Sea Jazz. And pretty much every time I was in New York, he, or his associates, would be playing somewhere in the Lower East Side, or in his own garage The Stone. But there are so many sides to Zorn. I like, for instance, his somewhat calmer, film-like music, or his more exuberant Jewish jazz, like with Masada or Bar Kokbha. But Zorn is improbably productive and versatile. And that \"improbable\" isn't exaggerated. As a performer and/or composer he has more than 400 albums. And they go in every direction. One of those directions is crackling squeaky-honky trash-metal-jazz, like with his Naked City band. And I can handle that just fine, in principle; at least if I see it live, because then all sorts of things happen on stage and it's mostly astonishing. On record it's a bit trickier. This album falls into that category too. Here he takes on the music of free jazz pioneer Ornette Coleman. Now those albums (late fifties, early sixties) are actually still quite manageable, very good even, for the enthusiast. Zorn and co go a few steps further still. It's squeaky-honky cacophony at thrash-metal speed, mostly in outbursts of at most two minutes. Jazz-hardcore miniatures. Two saxophonists (Zorn on the right, Tim Berne on the left), two drummers (Joey Baron and Michael Vatcher, both legends) and Mark Dresser on bass. It'll be a close call whether this record or the Napalm Death one is the most extreme album on the list. I'd say: bring it along to the next family weekend; success guaranteed! (Zorn is no longer on Spotify so you'll have to find other sources)",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/playlist?list=PLYh1R_qEUCYySCKLf3Sgovb_1FYGt5aJc",
+        "caption": "Hier de playlist voor de hele plaat, voor diegenen die het aandurven. Of nieuwsgierig zijn.",
+        "caption_en": "Here's the playlist for the whole album, for those who dare. Or are curious."
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=k7rtUG3JM_g",
+        "caption": "In 1989 stond hij nog met Naked City in het oude BIMhuis. Damn. Deze is nog redelijk normaal.",
+        "caption_en": "In 1989 he was still playing with Naked City in the old BIMhuis. Damn. This one's still fairly normal."
+      }
+    ],
+    "musicbrainz": {
+      "country": "United States",
+      "genres": [
+        "jazz",
+        "avant-garde",
+        "avant-garde jazz",
+        "free jazz",
+        "contemporary jazz"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/77691ed4-949d-3487-9cec-00bd8d79fa26/front"
+    },
+    "spotify": null
+  },
+  {
+    "number": "647",
+    "artist": "The Stone Roses",
+    "album": "The Stone Roses",
+    "year": "1989",
+    "text": "Wat mij betreft is dit de beste plaat die uit de hele manchesterscene is voorgekomen, waarin dance en pop wordt vermengd. Een hoop goeie nummers: “I Wanna Be Adored”, “She Bangs The Drums”, “Waterfall”, “Made of Stone”, “I Am The Resurrection”. Allemaal prachtig. Op de CD (en Spotify) is ook de single “Fool’s Gold” in een lange 9 minuten durende, hypnotiserende versie toegevoegd. Heerlijke gitaarpartijen, goeie groove, en i.t.t. een Oasis is hier de wat typische zeurderige bitpop-zang wel goed te pruimen. Wat mij betreft kan een Oasis sowieso de vissershoedjes van de Stone Roses kussen. Paar frappante dingen ook: de muziek van “Don’t Stop” is een achteruit-versie is van het vorige nummer “Waterfall”. “Elizabeth, My Dear” is een korte variant op Simon & Garfunkel’s “Scarborough Fair”, maar dan met een tirade tegen de troon: Jammer dat ze deze plaat nooit meer hebben weten te evenaren. Second Coming uit ’94 haalt het absoluut niet.",
+    "text_en": "As far as I'm concerned, this is the best record to come out of the whole Manchester scene, blending dance and pop. A ton of great tracks: \"I Wanna Be Adored\", \"She Bangs The Drums\", \"Waterfall\", \"Made of Stone\", \"I Am The Resurrection\". All gorgeous. The CD (and Spotify) also adds the single \"Fool's Gold\" in a long, 9-minute, hypnotic version. Lovely guitar parts, good groove, and unlike an Oasis, the somewhat typical whiny Britpop vocals are actually quite easy to swallow here. As far as I'm concerned, an Oasis can kiss the fishing hats of the Stone Roses anyway. A couple of striking things too: the music of \"Don't Stop\" is a reversed version of the previous track \"Waterfall\". \"Elizabeth, My Dear\" is a short variation on Simon & Garfunkel's \"Scarborough Fair\", but with a tirade against the throne instead: Shame they were never able to match this record again. Second Coming from '94 doesn't come close.",
+    "media": [
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=7NrLBlw9WZE",
+        "caption": null,
+        "caption_en": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=wNqEAXHeE8k",
+        "caption": null,
+        "caption_en": null
+      }
+    ],
+    "musicbrainz": {
+      "country": "United Kingdom",
+      "genres": [
+        "rock",
+        "alternative rock",
+        "madchester",
+        "indie rock",
+        "uplifting",
+        "alternative",
+        "psychedelic rock",
+        "psychedelic",
+        "britpop",
+        "indie pop",
+        "jangle pop",
+        "neo-psychedelia",
+        "alternative dance",
+        "c86",
+        "rock and indie",
+        "baggy",
+        "energetic",
+        "playful",
+        "self-titled",
+        "alternative pop/rock",
+        "dance-rock",
+        "baggy / madchester"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/88b86fe0-26f5-3949-817a-8082145e704d/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/0um9FI6BLBldL5POP4D4Cw",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/0um9FI6BLBldL5POP4D4Cw",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273cf1f6466a493eb73d6d9d280",
+      "matched_artist_name": "The Stone Roses",
+      "matched_album_name": "The Stone Roses",
+      "matched_release_year": 1989,
+      "exact_year_match": true
+    }
+  },
+  {
+    "number": "648",
+    "artist": "Neneh Cherry",
+    "album": "Raw Like Sushi",
+    "year": "1989",
+    "text": "Ach ja. Neneh. Wel leuk hoor, maar deze plaat is ook wel een beetje lichtgewicht voor zo’n lijst wat mij betreft. Neemt niet weg dat ze onontkoombaar was in 1989 met haar “Buffalo Stance” en (in iets mindere mate) “Manchild”. Elk dingetje of stukje tekst zit gebakken in m’n brein. Dan heb je na de eerste twee nummers meteen wel de hits van de plaat gehad. Altijd gedacht dat ze de (echte) dochter was van freejazztrompettist Don Cherry (die beroemd werd op de platen van Ornette Coleman, zie John Zorn). Maar dat is haar stiefvader; Eagle Eye is haar halfbroer, die heeft wel Don als echte vader. Haar echte vader is Armhadu Jah, een percussionist uit Sierra Leone. Met hem bezocht ze op haar 15e West Afrika en was ze erg onder de indruk van de sterke vrouwen daar. Dat heeft ze zeker meegenomen in haar streetwise karakter. Ze werd al moeder op haar 18e en was acht maanden zwanger op onderstaand optreden op Top Of The Pops. Ik heb haar nog live op Into The Great Wide Open gezien in 2014. Toen had ze ook een behoorlijk goede plaat gemaakt: Blank Project. Die is ook wat serieuzer en volwassener dan Raw Like Sushi. Check het nummer Everything bijvoorbeeld. Het was ook een goed optreden.",
+    "text_en": "Ah well. Neneh. Nice enough, but as far as I'm concerned this record is also a bit lightweight for a list like this. That doesn't take away from the fact that she was inescapable in 1989 with her \"Buffalo Stance\" and (to a somewhat lesser extent) \"Manchild\". Every little bit or snippet of lyric is baked into my brain. So after the first two songs you've immediately had the hits of the record. Always thought she was the (real) daughter of free jazz trumpeter Don Cherry (who became famous on Ornette Coleman's records, see John Zorn). But that's her stepfather; Eagle Eye is her half-brother, who does have Don as his real father. Her real father is Armhadu Jah, a percussionist from Sierra Leone. With him she visited West Africa at 15 and was very impressed by the strong women there. She definitely carried that into her streetwise character. She already became a mother at 18 and was eight months pregnant during the performance on Top Of The Pops below. I saw her live at Into The Great Wide Open in 2014. By then she'd also made a pretty good record: Blank Project. That one's also a bit more serious and mature than Raw Like Sushi. Check the song Everything, for instance. It was a good show too.",
+    "media": [
+      {
+        "type": "spotify",
+        "url": "https://open.spotify.com/track/3Isd4jPmfDwvvcHY7Ed67M",
+        "caption": "Van Blank Project uit 2014",
+        "caption_en": "From Blank Project, 2014"
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=ToNvjTrNlL8",
+        "caption": null,
+        "caption_en": null
+      },
+      {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=OJ9VBMBS3qE",
+        "caption": "Manchild. De baby in de video is haar eigen kind",
+        "caption_en": "Manchild. The baby in the video is her own child"
+      }
+    ],
+    "musicbrainz": {
+      "country": "Sweden",
+      "genres": [
+        "electronic",
+        "pop",
+        "80s",
+        "rap",
+        "dance",
+        "hip-hop",
+        "dance-pop",
+        "urban",
+        "pop rap",
+        "alternative rap",
+        "trip hop",
+        "pop-rap"
+      ],
+      "cover_art_archive_url": "https://coverartarchive.org/release-group/daf52bf4-9abf-353e-b226-ef69e1f3e95d/front"
+    },
+    "spotify": {
+      "spotify_url": "https://open.spotify.com/album/2AyJzvREOnlnYhaBzF1Kxp",
+      "spotify_embed_url": "https://open.spotify.com/embed/album/2AyJzvREOnlnYhaBzF1Kxp",
+      "cover_art_url": "https://i.scdn.co/image/ab67616d0000b273790834ab13554b7287183c2a",
+      "matched_artist_name": "Neneh Cherry",
+      "matched_album_name": "Raw Like Sushi",
       "matched_release_year": 1989,
       "exact_year_match": true
     }
