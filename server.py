@@ -186,6 +186,7 @@ ADMIN_PAGE = """<!doctype html>
 <head><title>1001 Albums admin</title><base href="{base}/"></head>
 <body style="font-family: sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem;">
   <h1>Add a Medium post</h1>
+  <p><a href="admin/reddit-export">Reddit export tool →</a></p>
   <form method="post" action="admin/add-post">
     <input name="url" type="url" placeholder="https://edvannunen.medium.com/..." value="{url}"
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
@@ -272,6 +273,20 @@ def _admin_page(result: str, url: str = "") -> str:
 @app.get("/admin/", response_class=HTMLResponse)
 def admin_page(_: str = Depends(require_admin)):
     return _admin_page("")
+
+
+@app.get("/admin/reddit-export", response_class=HTMLResponse)
+def reddit_export_page(_: str = Depends(require_admin)):
+    """Standalone tool: paste a catalog number, get a paste-ready Reddit
+    post (header + review text + one title/link/thumbnail block per
+    YouTube clip) plus a "See also" link back to the real site. Gated
+    behind admin auth like the rest of /admin — it's a personal authoring
+    tool, not part of the public site. Same <base> injection as index()
+    since it fetches albums_enriched.json and imports js/data.js relatively.
+    """
+    page = Path("reddit_export.html").read_text(encoding="utf-8")
+    page = page.replace("<head>", f'<head>\n<base href="{BASE_PATH}/">', 1)
+    return HTMLResponse(page)
 
 
 @app.post("/admin/add-post", response_class=HTMLResponse)
