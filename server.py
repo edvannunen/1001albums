@@ -186,7 +186,7 @@ ADMIN_PAGE = """<!doctype html>
 <head><title>1001 Albums admin</title><base href="{base}/"></head>
 <body style="font-family: sans-serif; max-width: 40rem; margin: 3rem auto; padding: 0 1rem;">
   <h1>Add a Medium post</h1>
-  <p><a href="admin/reddit-export">Reddit export tool →</a></p>
+  <p><a href="admin/reddit-export">Reddit export tool →</a> · <a href="admin/bluesky-export">Bluesky export tool →</a></p>
   <form method="post" action="admin/add-post">
     <input name="url" type="url" placeholder="https://edvannunen.medium.com/..." value="{url}"
            style="width:100%; padding:0.5rem; box-sizing:border-box;" required>
@@ -275,18 +275,36 @@ def admin_page(_: str = Depends(require_admin)):
     return _admin_page("")
 
 
+def _serve_static_admin_page(filename: str) -> HTMLResponse:
+    """Shared by the export-tool routes below: read a standalone static
+    HTML file and inject the same <base> tag index() uses, since these
+    pages fetch albums_enriched.json and import js/data.js relatively.
+    """
+    page = Path(filename).read_text(encoding="utf-8")
+    page = page.replace("<head>", f'<head>\n<base href="{BASE_PATH}/">', 1)
+    return HTMLResponse(page)
+
+
 @app.get("/admin/reddit-export", response_class=HTMLResponse)
 def reddit_export_page(_: str = Depends(require_admin)):
     """Standalone tool: paste a catalog number, get a paste-ready Reddit
     post (header + review text + one title/link/thumbnail block per
-    YouTube clip) plus a "See also" link back to the real site. Gated
-    behind admin auth like the rest of /admin — it's a personal authoring
-    tool, not part of the public site. Same <base> injection as index()
-    since it fetches albums_enriched.json and imports js/data.js relatively.
+    YouTube clip, plus copy-image buttons for the cover/thumbnails) and a
+    "See also" link back to the real site. Gated behind admin auth like
+    the rest of /admin — it's a personal authoring tool, not part of the
+    public site.
     """
-    page = Path("reddit_export.html").read_text(encoding="utf-8")
-    page = page.replace("<head>", f'<head>\n<base href="{BASE_PATH}/">', 1)
-    return HTMLResponse(page)
+    return _serve_static_admin_page("reddit_export.html")
+
+
+@app.get("/admin/bluesky-export", response_class=HTMLResponse)
+def bluesky_export_page(_: str = Depends(require_admin)):
+    """Same idea as /admin/reddit-export but for Bluesky: a simpler Dutch
+    post (header + Spotify link + Dutch review text + a link to the
+    English site version + one title/link line per YouTube clip), no
+    image handling needed since this format doesn't attach any.
+    """
+    return _serve_static_admin_page("bluesky_export.html")
 
 
 @app.post("/admin/add-post", response_class=HTMLResponse)

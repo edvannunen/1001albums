@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bluesky export — 1001 Albums</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1815; --panel:#242019; --ink:#ece6d9; --accent:#0085ff; --teal:#3b7a70;
+    --border:#3a352c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Work Sans',sans-serif;
+    max-width:44rem; margin:0 auto; padding:2rem 1rem 4rem;
+  }
+  h1{font-family:'Space Mono',monospace; color:var(--accent); font-size:1.3rem; margin-bottom:0.25rem;}
+  .sub{color:#8a8371; font-size:0.85rem; margin-bottom:1.5rem;}
+  label{display:block; font-family:'Space Mono',monospace; font-size:0.8rem; color:#8a8371; margin-bottom:0.3rem;}
+  .row{display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1rem;}
+  input[type=text]{
+    background:var(--panel); border:1px solid var(--border); color:var(--ink);
+    font-family:'Space Mono',monospace; padding:0.5rem 0.6rem; border-radius:4px; font-size:0.95rem;
+  }
+  #number{width:6rem;}
+  button.primary{
+    background:var(--accent); color:#fff; border:none; padding:0.55rem 1rem;
+    border-radius:4px; font-family:'Space Mono',monospace; font-size:0.9rem; cursor:pointer; font-weight:700;
+  }
+  button.secondary{
+    background:transparent; color:var(--ink); border:1px solid var(--border); padding:0.4rem 0.75rem;
+    border-radius:4px; font-family:'Space Mono',monospace; font-size:0.8rem; cursor:pointer;
+  }
+  button:disabled{opacity:0.5; cursor:default;}
+  #status{font-size:0.85rem; color:#8a8371; min-height:1.2em; margin-bottom:0.5rem;}
+  #status.error{color:#c0392b;}
+  textarea{
+    width:100%; min-height:16rem; background:var(--panel); color:var(--ink);
+    border:1px solid var(--border); border-radius:4px; padding:0.75rem;
+    font-family:'Space Mono',monospace; font-size:0.85rem; line-height:1.5; resize:vertical;
+  }
+  .copy-row{display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;}
+  [hidden]{display:none!important;}
+</style>
+</head>
+<body>
+
+<h1>BLUESKY EXPORT</h1>
+<div class="sub">Look up a catalog number, get a paste-ready Dutch post.</div>
+
+<div class="row">
+  <div>
+    <label for="number">Catalog #</label>
+    <input type="text" id="number" placeholder="e.g. 513" autofocus>
+  </div>
+  <button class="primary" id="loadBtn">Load</button>
+</div>
+
+<div id="status"></div>
+
+<div id="result" hidden>
+  <label for="output">Post text</label>
+  <textarea id="output" readonly></textarea>
+  <div class="copy-row">
+    <button class="secondary" id="copyText">Copy text</button>
+  </div>
+</div>
+
+<script type="module">
+  import { albumSlug } from "./js/data.js";
+
+  // Hardcoded rather than derived from location.origin — this page is
+  // gated behind /admin, but the link posted to Bluesky must always point
+  // at the real public site.
+  const SITE_URL = "https://bier-en-brood.nl/1001albums";
+
+  const numberInput = document.getElementById('number');
+  const loadBtn = document.getElementById('loadBtn');
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const outputEl = document.getElementById('output');
+  const copyTextBtn = document.getElementById('copyText');
+
+  let albums = null;
+
+  function youtubeId(url){
+    const m = url.match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  // YouTube's oEmbed endpoint supports CORS and needs no API key — used
+  // client-side here purely to fetch the real video title (captions in our
+  // own data aren't always the video's actual title).
+  async function fetchYoutubeTitle(url){
+    try{
+      const res = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
+      if(!res.ok) return null;
+      const data = await res.json();
+      return data.title || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  async function copyToClipboard(text, btn){
+    try{
+      await navigator.clipboard.writeText(text);
+      flash(btn, 'Copied!');
+    }catch(e){
+      flash(btn, 'Copy failed');
+    }
+  }
+
+  function flash(btn, msg){
+    const original = btn.textContent;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+  }
+
+  async function ensureAlbums(){
+    if(albums) return albums;
+    const res = await fetch('albums_enriched.json');
+    if(!res.ok) throw new Error('Could not load albums_enriched.json');
+    albums = await res.json();
+    return albums;
+  }
+
+  async function load(){
+    const number = numberInput.value.trim();
+    if(!number) return;
+
+    statusEl.textContent = 'Loading…';
+    statusEl.classList.remove('error');
+    resultEl.hidden = true;
+
+    let list;
+    try{
+      list = await ensureAlbums();
+    }catch(e){
+      statusEl.textContent = 'Failed to load album data.';
+      statusEl.classList.add('error');
+      return;
+    }
+
+    const album = list.find(a => a.number === number);
+    if(!album){
+      statusEl.textContent = 'No album found with catalog number "' + number + '".';
+      statusEl.classList.add('error');
+      return;
+    }
+    statusEl.textContent = '';
+
+    const header = `#1001Albums ${album.number} ${album.artist} - ${album.album} (${album.year})`;
+    const spotifyUrl = album.spotify && album.spotify.spotify_url;
+    const text = album.text || '';
+    const englishLink = SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
+    const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
+
+    const titles = await Promise.all(youtubeClips.map(async m => {
+      const fetched = await fetchYoutubeTitle(m.url);
+      return fetched || m.caption || 'YouTube video';
+    }));
+
+    let body = header;
+    if(spotifyUrl) body += '\n' + spotifyUrl;
+    body += '\n\n' + text;
+    body += '\n\nEnglish version can be found here: ' + englishLink;
+
+    if(youtubeClips.length){
+      body += '\n\n-----';
+      youtubeClips.forEach((m, i) => {
+        body += '\n\n' + titles[i] + ' ' + m.url;
+      });
+    }
+
+    outputEl.value = body;
+    resultEl.hidden = false;
+  }
+
+  loadBtn.addEventListener('click', load);
+  numberInput.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') load(); });
+  copyTextBtn.addEventListener('click', (ev) => copyToClipboard(outputEl.value, ev.target));
+</script>
+</body>
+</html>
