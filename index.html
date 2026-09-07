@@ -46,6 +46,7 @@
         <li role="option" data-lang="nl"><img class="lang-flag" src="https://flagcdn.com/nl.svg" alt="">Nederlands</li>
         <li role="option" data-lang="en"><img class="lang-flag" src="https://flagcdn.com/gb.svg" alt="">English</li>
       </ul>
+      <a href="admin/login" class="auth-link" id="authLink">Login</a>
     </div>
     <img class="avatar" src="img/Platenspeler_klein.png" alt="Ed van Nunen">
   </div>
@@ -149,7 +150,27 @@
       </div>
     </div>
     <div class="modal-body">
-      <div class="review-text" id="modalText"></div>
+      <div class="review-text-wrap">
+        <div class="review-text" id="modalText"></div>
+        <button class="edit-review-btn hidden" id="editReviewBtn" aria-label="Edit review text" title="Edit review text">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"></path>
+          </svg>
+        </button>
+        <div class="review-edit hidden" id="modalTextEdit">
+          <div class="review-edit-toolbar">
+            <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+            <button type="button" data-cmd="createLink" title="Link">&#128279;</button>
+          </div>
+          <div class="review-edit-box" id="modalTextEditBox" contenteditable="true"></div>
+          <div class="review-edit-actions">
+            <button type="button" class="review-edit-save" id="modalTextSave">Save</button>
+            <button type="button" class="review-edit-cancel" id="modalTextCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
       <div class="media-list" id="modalMedia"></div>
       <div class="more-by-artist hidden" id="modalMoreByArtist">
         <div class="dash-label" data-i18n="modal_more_by_artist">Meer van deze artiest</div>

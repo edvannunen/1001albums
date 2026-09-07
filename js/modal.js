@@ -1,8 +1,9 @@
 import { state } from "./state.js";
-import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso, albumText, mediaCaption } from "./data.js";
+import { coverUrl, genreList, albumSlug, albumShareUrl, countryIso, albumTextHtml, mediaCaption } from "./data.js";
 import { getFiltered, sortAlbums } from "./filters.js";
 import { showToast } from "./toast.js";
 import { t } from "./i18n.js";
+import { isLoggedIn } from "./auth.js";
 
 function extractYouTubeId(url){
   const m = (url||"").match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
@@ -53,7 +54,9 @@ export function openModal(a){
   document.getElementById("modalArtist").textContent = a.artist;
   document.getElementById("modalAlbum").textContent = `${a.album} (${a.year})`;
   document.getElementById("modalCover").style.backgroundImage = `url('${coverUrl(a)}')`;
-  document.getElementById("modalText").textContent = albumText(a) || "";
+  document.getElementById("modalText").innerHTML = albumTextHtml(a);
+  cancelReviewEdit();
+  document.getElementById("editReviewBtn").classList.toggle("hidden", !isLoggedIn());
 
   const badges = document.getElementById("modalBadges");
   badges.innerHTML = "";
@@ -177,4 +180,78 @@ export function openModal(a){
 export function closeModal(){
   document.getElementById("modalBackdrop").classList.remove("open");
   history.replaceState(null, "", location.pathname);
+}
+
+function currentAlbum(){
+  return modalIndex !== -1 ? modalList[modalIndex] : null;
+}
+
+function cancelReviewEdit(){
+  document.getElementById("modalTextEdit").classList.add("hidden");
+  document.getElementById("modalText").classList.remove("hidden");
+}
+
+function startReviewEdit(){
+  const a = currentAlbum();
+  if(!a) return;
+  document.getElementById("modalTextEditBox").innerHTML = albumTextHtml(a);
+  document.getElementById("modalText").classList.add("hidden");
+  document.getElementById("modalTextEdit").classList.remove("hidden");
+  document.getElementById("modalTextEditBox").focus();
+}
+
+async function saveReviewEdit(){
+  const a = currentAlbum();
+  if(!a) return;
+  const saveBtn = document.getElementById("modalTextSave");
+  const html = document.getElementById("modalTextEditBox").innerHTML;
+  const original = saveBtn.textContent;
+  saveBtn.textContent = "Saving…";
+  saveBtn.disabled = true;
+  try{
+    const res = await fetch("admin/update-album-text", {
+      method: "POST",
+      body: new URLSearchParams({
+        number: a.number, artist: a.artist, album: a.album,
+        lang: state.lang, text: html,
+      }),
+    });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if(state.lang === "en") a.text_en = data.text_en;
+    else { a.text = data.text; a.text_en = data.text_en; }
+    document.getElementById("modalText").innerHTML = albumTextHtml(a);
+    cancelReviewEdit();
+    showToast("Saved");
+  }catch(e){
+    showToast("Save failed");
+  }finally{
+    saveBtn.textContent = original;
+    saveBtn.disabled = false;
+  }
+}
+
+// One-time wiring for the review-text editor's pencil/toolbar/save/cancel
+// controls — called once from app.js's wireEvents(), same pattern as every
+// other event listener in this app.
+export function initReviewEditor(){
+  document.getElementById("editReviewBtn").addEventListener("click", startReviewEdit);
+  document.getElementById("modalTextCancel").addEventListener("click", cancelReviewEdit);
+  document.getElementById("modalTextSave").addEventListener("click", saveReviewEdit);
+  document.querySelectorAll(".review-edit-toolbar button").forEach(btn=>{
+    // Without this, the button click itself steals focus from the
+    // contenteditable box first, collapsing its selection — so
+    // execCommand below would run against nothing. preventDefault on
+    // mousedown keeps focus (and the selection) in the editable box.
+    btn.addEventListener("mousedown", (e)=> e.preventDefault());
+    btn.addEventListener("click", ()=>{
+      const cmd = btn.dataset.cmd;
+      if(cmd === "createLink"){
+        const url = prompt("Link URL:");
+        if(url) document.execCommand("createLink", false, url);
+      } else {
+        document.execCommand(cmd, false, null);
+      }
+    });
+  });
 }

@@ -176,6 +176,43 @@ def update_album_text_media(conn: sqlite3.Connection, album_id: int, e: dict):
     replace_media(conn, album_id, e.get("media") or [])
 
 
+def update_album_text(conn: sqlite3.Connection, album_id: int, lang: str, new_text: str) -> bool:
+    """Directly update just one language's review text for an existing
+    album, without touching media (unlike update_album_text_media, which
+    always replaces the whole media list) — used by the site's manual
+    edit-in-place feature. lang='nl' updates `text` and nulls `text_en` if
+    the Dutch text actually changed (same invalidation rule as
+    update_album_text_media) so the caller's follow-up retranslation (or
+    translate.py's next pipeline pass) picks it back up; lang='en' updates
+    `text_en` directly with no downstream effect. Returns False if the
+    album_id doesn't exist."""
+    if lang == "nl":
+        row = conn.execute("SELECT text FROM albums WHERE id=?", (album_id,)).fetchone()
+        if row is None:
+            return False
+        text_changed = row["text"] != new_text
+        conn.execute(
+            """
+            UPDATE albums SET text=?,
+                text_en = CASE WHEN ? THEN NULL ELSE text_en END,
+                updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+            """,
+            (new_text, text_changed, album_id),
+        )
+    elif lang == "en":
+        cur = conn.execute(
+            "UPDATE albums SET text_en=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+            (new_text, album_id),
+        )
+        if cur.rowcount == 0:
+            return False
+    else:
+        raise ValueError(f"unknown lang {lang!r}")
+    conn.commit()
+    return True
+
+
 def mark_post_processed(conn: sqlite3.Connection, url: str):
     conn.execute(
         """

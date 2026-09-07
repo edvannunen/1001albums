@@ -76,13 +76,14 @@ import threading
 import unicodedata
 from pathlib import Path
 
+import anthropic
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
-from db import export_from_db, get_connection
+from db import export_from_db, find_album_id, get_connection, update_album_text
 from enrich_1001_albums import (
     HEADER_RE,
     fetch_medium_post_state,
@@ -90,6 +91,7 @@ from enrich_1001_albums import (
     sync_posts,
     sync_prefetched_post,
 )
+from translate import translate_album_content
 
 load_dotenv()
 
@@ -117,6 +119,80 @@ def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
 @app.get("/albums_enriched.json")
 def albums_json():
     return JSONResponse(export_from_db())
+
+
+@app.get("/admin/login")
+def admin_login(_: str = Depends(require_admin)):
+    """Enables the public site's edit-in-place UI. Visiting this URL
+    triggers the browser's native Basic-auth prompt (same as /admin/
+    itself) — on success it sets `admin_ui`, a plain non-sensitive cookie
+    that is ONLY a UI flag telling index.html to show the edit pencil. It
+    grants no access by itself: the real authorization boundary is (and
+    stays) Depends(require_admin) on the actual write endpoint below,
+    checked server-side on every request, same as everywhere else in this
+    app. BASE_PATH-prefixed redirect target for the same reason index()'s
+    <base> tag is — see the module docstring above."""
+    resp = RedirectResponse(url=f"{BASE_PATH}/")
+    resp.set_cookie("admin_ui", "1", max_age=60 * 60 * 24 * 30, samesite="lax")
+    return resp
+
+
+@app.get("/admin/logout")
+def admin_logout():
+    """Clears the UI-flag cookie. Can't force the browser to forget its
+    cached Basic-auth credentials (no API for that) — closing the browser
+    is the only real "full" logout, same pre-existing limitation as the
+    rest of this single-user admin area."""
+    resp = RedirectResponse(url=f"{BASE_PATH}/")
+    resp.delete_cookie("admin_ui")
+    return resp
+
+
+@app.post("/admin/update-album-text")
+def update_album_text_route(
+    number: str = Form(...),
+    artist: str = Form(...),
+    album: str = Form(...),
+    lang: str = Form(...),
+    text: str = Form(...),
+    _: str = Depends(require_admin),
+):
+    """Backs the public site's edit-in-place pencil (index.html/js/modal.js).
+    lang='nl' also retranslates immediately via translate_album_content()
+    (the same per-album primitive translate.py's pipeline pass uses) so the
+    English side doesn't go stale until the next full pipeline run — a
+    translation hiccup here doesn't fail the save itself, since the DB
+    write already committed. translate_missing() is deliberately NOT used
+    here: it batch-scans every album still missing a translation, which
+    would make a single save unpredictably slow and translate unrelated
+    albums as a side effect.
+    """
+    if lang not in ("nl", "en"):
+        raise HTTPException(status_code=400, detail="lang must be 'nl' or 'en'")
+
+    conn = get_connection()
+    try:
+        album_id = find_album_id(conn, number, artist, album)
+        if album_id is None:
+            raise HTTPException(status_code=404, detail="album not found")
+
+        update_album_text(conn, album_id, lang, text)
+
+        text_en = None
+        if lang == "nl":
+            try:
+                text_en, _captions_en = translate_album_content(
+                    anthropic.Anthropic(), artist, album, text, []
+                )
+                conn.execute("UPDATE albums SET text_en = ? WHERE id = ?", (text_en, album_id))
+                conn.commit()
+            except Exception as e:
+                print(f"Retranslation failed for {artist} - {album}: {e}")
+
+        row = conn.execute("SELECT text, text_en FROM albums WHERE id=?", (album_id,)).fetchone()
+        return JSONResponse({"ok": True, "text": row["text"], "text_en": row["text_en"]})
+    finally:
+        conn.close()
 
 
 # ---------------------------------------------------------------------------
