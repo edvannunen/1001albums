@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share export — 1001 Albums</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1815; --panel:#242019; --ink:#ece6d9; --border:#3a352c;
+    --bluesky:#0085ff; --reddit:#d1a02c; --signal:#3b7a70;
+    --accent:var(--reddit);
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Work Sans',sans-serif;
+    max-width:44rem; margin:0 auto; padding:2rem 1rem 4rem;
+  }
+  h1{font-family:'Instrument Serif',serif; font-weight:400; color:var(--accent); font-size:2.6rem; margin-bottom:0.25rem;}
+  .sub{color:#8a8371; font-size:0.85rem; margin-bottom:1.5rem;}
+  label{display:block; font-family:'Space Mono',monospace; font-size:0.8rem; color:#8a8371; margin-bottom:0.3rem;}
+  .row{display:flex; gap:0.75rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1rem;}
+  input[type=text]{
+    background:var(--panel); border:1px solid var(--border); color:var(--ink);
+    font-family:'Space Mono',monospace; padding:0.5rem 0.6rem; border-radius:4px; font-size:0.95rem;
+  }
+  #number-bluesky, #number-reddit{width:6rem;}
+  .wide-field{flex:1 1 auto;}
+  input.wide{width:100%;}
+  button.primary{
+    background:var(--accent); color:var(--bg); border:none; padding:0.55rem 1rem;
+    border-radius:4px; font-family:'Space Mono',monospace; font-size:0.9rem; cursor:pointer; font-weight:700;
+  }
+  button.primary.btn-bluesky{background:var(--bluesky);}
+  button.primary.btn-reddit{background:var(--reddit);}
+  button.primary.btn-signal{background:var(--signal); color:var(--ink);}
+  button.secondary{
+    background:transparent; color:var(--ink); border:1px solid var(--border); padding:0.4rem 0.75rem;
+    border-radius:4px; font-family:'Space Mono',monospace; font-size:0.8rem; cursor:pointer;
+  }
+  button.secondary:hover{border-color:var(--accent); color:var(--accent);}
+  button:disabled{opacity:0.5; cursor:default;}
+  .status{font-size:0.85rem; color:#8a8371; min-height:1.2em; margin-bottom:1rem;}
+  .status.error{color:#c0392b;}
+  textarea{
+    width:100%; min-height:16rem; background:var(--panel); color:var(--ink);
+    border:1px solid var(--border); border-radius:4px; padding:0.75rem;
+    font-family:'Space Mono',monospace; font-size:0.85rem; line-height:1.5; resize:vertical;
+  }
+  .copy-row{display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;}
+  h2{font-family:'Space Mono',monospace; font-size:1rem; margin:2rem 0 0.75rem;}
+  .clip{
+    background:var(--panel); border:1px solid var(--border); border-radius:6px;
+    padding:0.75rem; margin-bottom:0.75rem;
+  }
+  .clip .title{font-weight:600; margin-bottom:0.25rem;}
+  .clip a{color:var(--signal); word-break:break-all; font-size:0.85rem;}
+  .clip img{max-width:100%; border-radius:4px; margin-top:0.5rem; display:block;}
+  .clip .actions{display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;}
+  .hint{font-size:0.75rem; color:#8a8371; margin-top:0.3rem;}
+  [hidden]{display:none!important;}
+
+  .tabs{display:flex; gap:0.4rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem;}
+  .tab-btn{
+    background:transparent; border:none; border-bottom:2px solid transparent;
+    color:#8a8371; font-family:'Space Mono',monospace; font-size:0.85rem;
+    padding:0.6rem 0.9rem; cursor:pointer; font-weight:700;
+  }
+  .tab-btn[data-tab="bluesky"].active{color:var(--bluesky); border-bottom-color:var(--bluesky);}
+  .tab-btn[data-tab="reddit"].active{color:var(--reddit); border-bottom-color:var(--reddit);}
+  .tab-btn[data-tab="signal"].active{color:var(--signal); border-bottom-color:var(--signal);}
+  .tab-panel h2{color:inherit;}
+  #panel-bluesky h2, #panel-bluesky{--tab-color:var(--bluesky);}
+  #panel-reddit h2, #panel-reddit{--tab-color:var(--reddit);}
+  #panel-signal h2, #panel-signal{--tab-color:var(--signal);}
+  .tab-panel h2{color:var(--tab-color);}
+</style>
+</head>
+<body>
+
+<h1>SHARE EXPORT</h1>
+<div class="sub">Look up a catalog number, get a paste-ready post for each platform.</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="bluesky">Bluesky</button>
+  <button class="tab-btn" data-tab="reddit">Reddit</button>
+  <button class="tab-btn" data-tab="signal">Signal</button>
+</div>
+
+<div class="tab-panel" id="panel-bluesky" data-tab="bluesky">
+  <div class="row">
+    <div>
+      <label for="number-bluesky">Catalog #</label>
+      <input type="text" id="number-bluesky" placeholder="e.g. 513" autofocus>
+    </div>
+    <button class="primary btn-bluesky" id="loadBtn-bluesky">Load</button>
+  </div>
+  <div class="status" id="status-bluesky"></div>
+
+  <div id="result-bluesky" hidden>
+    <label for="output-bluesky">Post text</label>
+    <textarea id="output-bluesky" readonly></textarea>
+    <div class="copy-row">
+      <button class="secondary" id="copyText-bluesky">Copy text</button>
+    </div>
+
+    <div id="coverSection-bluesky" hidden>
+      <h2>ALBUM COVER</h2>
+      <div id="cover-bluesky"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-reddit" data-tab="reddit" hidden>
+  <div class="row">
+    <div>
+      <label for="number-reddit">Catalog #</label>
+      <input type="text" id="number-reddit" placeholder="e.g. 513">
+    </div>
+    <button class="primary btn-reddit" id="loadBtn-reddit">Load</button>
+  </div>
+  <div class="status" id="status-reddit"></div>
+
+  <div id="result-reddit" hidden>
+    <label for="output-reddit">Post text</label>
+    <textarea id="output-reddit" readonly></textarea>
+    <div class="copy-row">
+      <button class="secondary" id="copyText-reddit">Copy text</button>
+    </div>
+
+    <div id="coverSection-reddit" hidden>
+      <h2>ALBUM COVER</h2>
+      <div id="cover-reddit"></div>
+    </div>
+
+    <div id="clipsSection-reddit" hidden>
+      <h2>YOUTUBE CLIPS</h2>
+      <div id="clips-reddit"></div>
+    </div>
+
+    <div class="hint" id="imageHint-reddit" hidden>
+      A plain image URL stays a link on Reddit, it doesn't embed — use
+      "Copy image" below and paste it directly into the post (or right-click
+      an image → Copy Image) to actually attach it.
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-signal" data-tab="signal" hidden>
+  <div class="sub">Signal shares the whole Medium post, not a single album — paste the post URL.</div>
+  <div class="row">
+    <div class="wide-field">
+      <label for="mediumUrl">Medium post URL</label>
+      <input type="text" id="mediumUrl" class="wide" placeholder="https://edvannunen.medium.com/...">
+    </div>
+    <button class="primary btn-signal" id="loadSignalBtn">Load</button>
+  </div>
+  <div class="status" id="status-signal"></div>
+
+  <div id="result-signal" hidden>
+    <div id="imageSection-signal">
+      <h2>TOP IMAGE</h2>
+      <div id="image-signal"></div>
+    </div>
+
+    <label for="output-signal">Post text</label>
+    <textarea id="output-signal" readonly></textarea>
+    <div class="copy-row">
+      <button class="secondary" id="copyText-signal">Copy text</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { albumSlug, coverUrl } from "./js/data.js";
+
+  // Hardcoded rather than derived from location.origin — this page is
+  // gated behind /admin, but the links posted to each platform must always
+  // point at the real public site.
+  const SITE_URL = "https://bier-en-brood.nl/1001albums";
+
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  const numberInputBluesky = document.getElementById('number-bluesky');
+  const loadBtnBluesky = document.getElementById('loadBtn-bluesky');
+  const statusBlueskyEl = document.getElementById('status-bluesky');
+  const resultBluesky = document.getElementById('result-bluesky');
+  const outputBluesky = document.getElementById('output-bluesky');
+  const copyTextBluesky = document.getElementById('copyText-bluesky');
+  const coverSectionBluesky = document.getElementById('coverSection-bluesky');
+  const coverBluesky = document.getElementById('cover-bluesky');
+
+  const numberInputReddit = document.getElementById('number-reddit');
+  const loadBtnReddit = document.getElementById('loadBtn-reddit');
+  const statusRedditEl = document.getElementById('status-reddit');
+  const resultReddit = document.getElementById('result-reddit');
+  const outputReddit = document.getElementById('output-reddit');
+  const copyTextReddit = document.getElementById('copyText-reddit');
+  const coverSectionReddit = document.getElementById('coverSection-reddit');
+  const coverReddit = document.getElementById('cover-reddit');
+  const clipsSectionReddit = document.getElementById('clipsSection-reddit');
+  const clipsReddit = document.getElementById('clips-reddit');
+  const imageHintReddit = document.getElementById('imageHint-reddit');
+
+  const mediumUrlInput = document.getElementById('mediumUrl');
+  const loadSignalBtn = document.getElementById('loadSignalBtn');
+  const statusSignalEl = document.getElementById('status-signal');
+  const resultSignal = document.getElementById('result-signal');
+  const imageSignal = document.getElementById('image-signal');
+  const outputSignal = document.getElementById('output-signal');
+  const copyTextSignal = document.getElementById('copyText-signal');
+
+  let albums = null;
+
+  function switchTab(tab){
+    tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    tabPanels.forEach(p => p.hidden = p.dataset.tab !== tab);
+  }
+  tabButtons.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+  function youtubeId(url){
+    const m = url.match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  // YouTube's oEmbed endpoint supports CORS and needs no API key — used
+  // client-side here purely to fetch the real video title (captions in our
+  // own data aren't always the video's actual title).
+  async function fetchYoutubeTitle(url){
+    try{
+      const res = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
+      if(!res.ok) return null;
+      const data = await res.json();
+      return data.title || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  async function copyToClipboard(text, btn){
+    try{
+      await navigator.clipboard.writeText(text);
+      flash(btn, 'Copied!');
+    }catch(e){
+      flash(btn, 'Copy failed');
+    }
+  }
+
+  async function copyImage(url, btn){
+    try{
+      const res = await fetch(url);
+      const blob = await res.blob();
+      await navigator.clipboard.write([new ClipboardItem({[blob.type]: blob})]);
+      flash(btn, 'Copied!');
+    }catch(e){
+      flash(btn, 'Right-click the image instead');
+    }
+  }
+
+  function flash(btn, msg){
+    const original = btn.textContent;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+  }
+
+  async function ensureAlbums(){
+    if(albums) return albums;
+    const res = await fetch('albums_enriched.json');
+    if(!res.ok) throw new Error('Could not load albums_enriched.json');
+    albums = await res.json();
+    return albums;
+  }
+
+  function renderBluesky(album, youtubeClips, rawTitles){
+    const header = `#1001Albums ${album.number} ${album.artist} - ${album.album} (${album.year})`;
+    const spotifyUrl = album.spotify && album.spotify.spotify_url;
+    const text = album.text || '';
+    const englishLink = SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
+
+    let body = header;
+    if(spotifyUrl) body += '\n' + spotifyUrl;
+    body += '\n\n' + text;
+    body += '\n\nEnglish version can be found here: ' + englishLink;
+
+    if(youtubeClips.length){
+      body += '\n\n-----';
+      youtubeClips.forEach((m, i) => {
+        const title = rawTitles[i] || m.caption || 'YouTube video';
+        body += '\n\n' + title + ' ' + m.url;
+      });
+    }
+
+    outputBluesky.value = body;
+    resultBluesky.hidden = false;
+
+    const cover = coverUrl(album);
+    coverSectionBluesky.hidden = !cover;
+    coverBluesky.innerHTML = '';
+    if(cover){
+      const card = document.createElement('div');
+      card.className = 'clip';
+      card.innerHTML = `
+        <img src="${cover}" alt="" loading="lazy">
+        <div class="actions">
+          <button class="secondary copy-cover-image">Copy image</button>
+        </div>
+      `;
+      card.querySelector('.copy-cover-image').addEventListener('click', (ev) => copyImage(cover, ev.target));
+      coverBluesky.appendChild(card);
+    }
+  }
+
+  function renderReddit(album, youtubeClips, rawTitles){
+    // English only — these posts are for Reddit, same fallback-to-Dutch
+    // rule as the site itself (js/data.js's albumText/mediaCaption) for
+    // the rare album/caption not translated yet.
+    const text = album.text_en || album.text || '';
+    const header = `${album.number} ${album.artist} - ${album.album} (${album.year})`;
+
+    // Our own caption (Ed's own line about the clip, e.g. "Run for your
+    // Liiiiiive!") goes in front of the real video title, when there is one.
+    const labels = youtubeClips.map((m, i) => {
+      const caption = m.caption_en || m.caption || '';
+      const title = rawTitles[i] || 'YouTube video';
+      return caption ? `${caption} ${title}` : title;
+    });
+
+    let body = header + '\n\n' + text;
+    youtubeClips.forEach((m, i) => {
+      body += '\n\n' + labels[i] + ': ' + m.url;
+    });
+
+    body += '\n\nSee also: ' + SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
+
+    outputReddit.value = body;
+    resultReddit.hidden = false;
+
+    const cover = coverUrl(album);
+    coverSectionReddit.hidden = !cover;
+    coverReddit.innerHTML = '';
+    if(cover){
+      const card = document.createElement('div');
+      card.className = 'clip';
+      card.innerHTML = `
+        <img src="${cover}" alt="" loading="lazy">
+        <div class="actions">
+          <button class="secondary copy-cover-image">Copy image</button>
+        </div>
+      `;
+      card.querySelector('.copy-cover-image').addEventListener('click', (ev) => copyImage(cover, ev.target));
+      coverReddit.appendChild(card);
+    }
+
+    clipsSectionReddit.hidden = youtubeClips.length === 0;
+    imageHintReddit.hidden = !cover && youtubeClips.length === 0;
+    clipsReddit.innerHTML = '';
+    youtubeClips.forEach((m, i) => {
+      const id = youtubeId(m.url);
+      const thumb = id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+      const card = document.createElement('div');
+      card.className = 'clip';
+      card.innerHTML = `
+        <div class="title"></div>
+        <a target="_blank" rel="noopener"></a>
+        ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}
+        <div class="actions">
+          <button class="secondary copy-clip-text">Copy title + link</button>
+          ${thumb ? '<button class="secondary copy-clip-image">Copy image</button>' : ''}
+        </div>
+      `;
+      card.querySelector('.title').textContent = labels[i];
+      const link = card.querySelector('a');
+      link.textContent = m.url;
+      link.href = m.url;
+
+      card.querySelector('.copy-clip-text').addEventListener('click', (ev) => {
+        copyToClipboard(labels[i] + ': ' + m.url, ev.target);
+      });
+      const imgBtn = card.querySelector('.copy-clip-image');
+      if(imgBtn){
+        imgBtn.addEventListener('click', (ev) => copyImage(thumb, ev.target));
+      }
+      clipsReddit.appendChild(card);
+    });
+  }
+
+  async function loadAlbumByNumber(number, statusEl){
+    let list;
+    try{
+      list = await ensureAlbums();
+    }catch(e){
+      statusEl.textContent = 'Failed to load album data.';
+      statusEl.classList.add('error');
+      return null;
+    }
+
+    const album = list.find(a => a.number === number);
+    if(!album){
+      statusEl.textContent = 'No album found with catalog number "' + number + '".';
+      statusEl.classList.add('error');
+      return null;
+    }
+    statusEl.textContent = '';
+    return album;
+  }
+
+  async function loadBluesky(){
+    const number = numberInputBluesky.value.trim();
+    if(!number) return;
+
+    statusBlueskyEl.textContent = 'Loading…';
+    statusBlueskyEl.classList.remove('error');
+    resultBluesky.hidden = true;
+
+    const album = await loadAlbumByNumber(number, statusBlueskyEl);
+    if(!album) return;
+
+    const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
+    const rawTitles = await Promise.all(youtubeClips.map(m => fetchYoutubeTitle(m.url)));
+    renderBluesky(album, youtubeClips, rawTitles);
+  }
+
+  async function loadReddit(){
+    const number = numberInputReddit.value.trim();
+    if(!number) return;
+
+    statusRedditEl.textContent = 'Loading…';
+    statusRedditEl.classList.remove('error');
+    resultReddit.hidden = true;
+
+    const album = await loadAlbumByNumber(number, statusRedditEl);
+    if(!album) return;
+
+    const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
+    const rawTitles = await Promise.all(youtubeClips.map(m => fetchYoutubeTitle(m.url)));
+    renderReddit(album, youtubeClips, rawTitles);
+  }
+
+  async function loadSignal(){
+    const url = mediumUrlInput.value.trim();
+    if(!url) return;
+
+    statusSignalEl.textContent = 'Loading…';
+    statusSignalEl.classList.remove('error');
+    resultSignal.hidden = true;
+
+    let post;
+    try{
+      const res = await fetch('admin/medium-post-preview?url=' + encodeURIComponent(url));
+      if(!res.ok){
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || ('HTTP ' + res.status));
+      }
+      post = await res.json();
+    }catch(e){
+      statusSignalEl.textContent = 'Failed to load post: ' + e.message;
+      statusSignalEl.classList.add('error');
+      return;
+    }
+    statusSignalEl.textContent = '';
+
+    imageSignal.innerHTML = '';
+    if(post.image_url){
+      const card = document.createElement('div');
+      card.className = 'clip';
+      card.innerHTML = `
+        <img src="${post.image_url}" alt="" loading="lazy">
+        <div class="actions">
+          <button class="secondary copy-signal-image">Copy image</button>
+        </div>
+      `;
+      card.querySelector('.copy-signal-image').addEventListener('click', (ev) => copyImage(post.image_url, ev.target));
+      imageSignal.appendChild(card);
+    }
+
+    outputSignal.value = `${post.title}\n\n${post.intro_text}\n\n${post.url}`;
+    resultSignal.hidden = false;
+  }
+
+  loadBtnBluesky.addEventListener('click', loadBluesky);
+  numberInputBluesky.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadBluesky(); });
+  copyTextBluesky.addEventListener('click', (ev) => copyToClipboard(outputBluesky.value, ev.target));
+
+  loadBtnReddit.addEventListener('click', loadReddit);
+  numberInputReddit.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadReddit(); });
+  copyTextReddit.addEventListener('click', (ev) => copyToClipboard(outputReddit.value, ev.target));
+  loadSignalBtn.addEventListener('click', loadSignal);
+  mediumUrlInput.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadSignal(); });
+  copyTextSignal.addEventListener('click', (ev) => copyToClipboard(outputSignal.value, ev.target));
+</script>
+</body>
+</html>

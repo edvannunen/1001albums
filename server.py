@@ -83,7 +83,13 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
 from db import export_from_db, get_connection
-from enrich_1001_albums import sync_posts, sync_prefetched_post
+from enrich_1001_albums import (
+    HEADER_RE,
+    fetch_medium_post_state,
+    get_ordered_paragraphs,
+    sync_posts,
+    sync_prefetched_post,
+)
 
 load_dotenv()
 
@@ -285,26 +291,60 @@ def _serve_static_admin_page(filename: str) -> HTMLResponse:
     return HTMLResponse(page)
 
 
-@app.get("/admin/reddit-export", response_class=HTMLResponse)
-def reddit_export_page(_: str = Depends(require_admin)):
-    """Standalone tool: paste a catalog number, get a paste-ready Reddit
-    post (header + review text + one title/link/thumbnail block per
-    YouTube clip, plus copy-image buttons for the cover/thumbnails) and a
-    "See also" link back to the real site. Gated behind admin auth like
-    the rest of /admin — it's a personal authoring tool, not part of the
-    public site.
+@app.get("/admin/share-export", response_class=HTMLResponse)
+def share_export_page(_: str = Depends(require_admin)):
+    """Standalone tool: paste a catalog number, get a paste-ready post for
+    each platform, one per tab (Bluesky, Reddit, Signal). Replaces the old
+    separate /admin/bluesky-export and /admin/reddit-export routes — the
+    two shared a catalog-number lookup and YouTube-title-fetch step, now
+    done once per load() call instead of twice. Gated behind admin auth
+    like the rest of /admin — it's a personal authoring tool, not part of
+    the public site.
     """
-    return _serve_static_admin_page("reddit_export.html")
+    return _serve_static_admin_page("share_export.html")
 
 
-@app.get("/admin/bluesky-export", response_class=HTMLResponse)
-def bluesky_export_page(_: str = Depends(require_admin)):
-    """Same idea as /admin/reddit-export but for Bluesky: a simpler Dutch
-    post (header + Spotify link + Dutch review text + a link to the
-    English site version + one title/link line per YouTube clip), no
-    image handling needed since this format doesn't attach any.
+@app.get("/admin/medium-post-preview")
+def medium_post_preview(url: str, _: str = Depends(require_admin)):
+    """Backs the Signal tab of share_export.html. Signal shares are keyed by
+    a whole Medium post, not a single catalog number (a post covers 6-7
+    albums), so this returns the post's title, its intro paragraph(s) (the
+    text before the first per-album header), and its own top/collage image
+    — reusing fetch_medium_post_state()/get_ordered_paragraphs() from the
+    real scrape stage rather than a second fetch path. Note: this direct
+    fetch can hit the same Cloudflare datacenter-IP challenge documented for
+    /admin/add-post; no relay fallback here yet since it hasn't come up.
     """
-    return _serve_static_admin_page("bluesky_export.html")
+    try:
+        state = fetch_medium_post_state(url)
+        paragraphs = get_ordered_paragraphs(state)
+    except (StopIteration, KeyError, ValueError) as e:
+        raise HTTPException(status_code=422, detail=f"Could not parse Medium post: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not fetch Medium post: {e}")
+
+    title = paragraphs[0].get("text", "") if paragraphs else ""
+    intro_parts = []
+    image_url = None
+    for p in paragraphs[1:]:
+        ptype = p.get("type")
+        text = p.get("text", "")
+        if ptype == "P":
+            if HEADER_RE.match(text):
+                break  # first per-album header — preamble is over
+            if text:
+                intro_parts.append(text)
+        elif ptype == "IMG" and image_url is None:
+            image_id = (p.get("metadata") or {}).get("id")
+            if image_id:
+                image_url = f"https://miro.medium.com/v2/resize:fit:1400/{image_id}"
+
+    return JSONResponse({
+        "title": title,
+        "intro_text": " ".join(intro_parts).strip(),
+        "image_url": image_url,
+        "url": url,
+    })
 
 
 @app.post("/admin/add-post", response_class=HTMLResponse)
