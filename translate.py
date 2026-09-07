@@ -25,6 +25,12 @@ translate, alter, or "correct" the artist name or album title, even where \
 they appear inline within the review text or captions — reproduce them \
 character-for-character exactly as given.
 
+The text may contain simple HTML formatting tags (<i>, <b>, <a href="...">) \
+around parts of it, e.g. an italicized song title or a link. Preserve these \
+exactly: keep each tag wrapped around the translated version of whatever \
+text it originally covered, and never add, remove, or alter a tag or its \
+href value.
+
 Respond only via the tool call. Do not add commentary, notes, or anything \
 not present in the source text."""
 
