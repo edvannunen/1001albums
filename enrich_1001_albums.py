@@ -361,6 +361,41 @@ def parse_medium_post(state: dict) -> list:
     return entries
 
 
+def extract_post_preview(state: dict) -> dict:
+    """Backs the Signal tab of share_export.html. Signal shares are keyed by
+    a whole Medium post, not a single catalog number (a post covers 6-7
+    albums), so this returns the post's title, its intro paragraph(s) (the
+    text before the first per-album header), and its own top/collage image
+    — reusing get_ordered_paragraphs() from the real scrape stage rather
+    than a second parse path. Shared between server.py's direct
+    /admin/medium-post-preview route and relay_medium_preview.py's local
+    fallback for when Medium/Cloudflare challenges the server's own IP (see
+    that script's docstring), so both stay in sync automatically.
+    """
+    paragraphs = get_ordered_paragraphs(state)
+    title = paragraphs[0].get("text", "") if paragraphs else ""
+    intro_parts = []
+    image_url = None
+    for p in paragraphs[1:]:
+        ptype = p.get("type")
+        text = p.get("text", "")
+        if ptype == "P":
+            if HEADER_RE.match(text):
+                break  # first per-album header — preamble is over
+            if text:
+                intro_parts.append(text)
+        elif ptype == "IMG" and image_url is None:
+            image_id = (p.get("metadata") or {}).get("id")
+            if image_id:
+                image_url = f"https://miro.medium.com/v2/resize:fit:1400/{image_id}"
+
+    return {
+        "title": title,
+        "intro_text": " ".join(intro_parts).strip(),
+        "image_url": image_url,
+    }
+
+
 def scrape_medium_posts(post_urls: list) -> tuple[list, list]:
     """Scrape a list of Medium post URLs. Returns (entries, failures) — each
     entry is tagged with its source post ("medium_post_url") so it can be

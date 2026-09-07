@@ -85,9 +85,8 @@ from fastapi.staticfiles import StaticFiles
 
 from db import export_from_db, find_album_id, get_connection, update_album_text
 from enrich_1001_albums import (
-    HEADER_RE,
+    extract_post_preview,
     fetch_medium_post_state,
-    get_ordered_paragraphs,
     sync_posts,
     sync_prefetched_post,
 )
@@ -382,45 +381,21 @@ def share_export_page(_: str = Depends(require_admin)):
 
 @app.get("/admin/medium-post-preview")
 def medium_post_preview(url: str, _: str = Depends(require_admin)):
-    """Backs the Signal tab of share_export.html. Signal shares are keyed by
-    a whole Medium post, not a single catalog number (a post covers 6-7
-    albums), so this returns the post's title, its intro paragraph(s) (the
-    text before the first per-album header), and its own top/collage image
-    — reusing fetch_medium_post_state()/get_ordered_paragraphs() from the
-    real scrape stage rather than a second fetch path. Note: this direct
-    fetch can hit the same Cloudflare datacenter-IP challenge documented for
-    /admin/add-post; no relay fallback here yet since it hasn't come up.
+    """Backs the Signal tab of share_export.html — see extract_post_preview()
+    for what it returns and why. This direct fetch can hit the same
+    Cloudflare datacenter-IP challenge documented for /admin/add-post; when
+    that happens, run relay_medium_preview.py locally instead (see its
+    docstring) rather than through this route.
     """
     try:
         state = fetch_medium_post_state(url)
-        paragraphs = get_ordered_paragraphs(state)
+        preview = extract_post_preview(state)
     except (StopIteration, KeyError, ValueError) as e:
         raise HTTPException(status_code=422, detail=f"Could not parse Medium post: {e}")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Could not fetch Medium post: {e}")
 
-    title = paragraphs[0].get("text", "") if paragraphs else ""
-    intro_parts = []
-    image_url = None
-    for p in paragraphs[1:]:
-        ptype = p.get("type")
-        text = p.get("text", "")
-        if ptype == "P":
-            if HEADER_RE.match(text):
-                break  # first per-album header — preamble is over
-            if text:
-                intro_parts.append(text)
-        elif ptype == "IMG" and image_url is None:
-            image_id = (p.get("metadata") or {}).get("id")
-            if image_id:
-                image_url = f"https://miro.medium.com/v2/resize:fit:1400/{image_id}"
-
-    return JSONResponse({
-        "title": title,
-        "intro_text": " ".join(intro_parts).strip(),
-        "image_url": image_url,
-        "url": url,
-    })
+    return JSONResponse({**preview, "url": url})
 
 
 @app.post("/admin/add-post", response_class=HTMLResponse)
