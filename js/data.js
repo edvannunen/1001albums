@@ -70,18 +70,25 @@ export function mediaCaption(m){
 // started letting it hold small, real HTML (bold/italic/links) instead —
 // rather than migrate ~621 existing rows, detect which shape a given value
 // already is: if it looks like it contains a real tag, it was produced by
-// the rich-text editor and is rendered as-is; otherwise it's legacy plain
+// the rich-text editor (or the scraper's own apply_markups(), see
+// enrich_1001_albums.py) and is rendered as-is; otherwise it's legacy plain
 // text, HTML-escaped and with newlines turned into <br> so it still renders
-// correctly via innerHTML.
+// correctly via innerHTML. Exported standalone (not tied to an album/state)
+// so share_export.html's admin tool can reuse the exact same detection for
+// its own NL/EN choice per tab, instead of duplicating this heuristic.
 const HTML_TAG_RE = /<[a-z][\s\S]*>/i;
 
-function escapeHtml(s){
+export function escapeHtml(s){
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function albumTextHtml(a){
-  const raw = albumText(a) || "";
+export function htmlizeText(raw){
+  raw = raw || "";
   return HTML_TAG_RE.test(raw) ? raw : escapeHtml(raw).replace(/\n/g, "<br>");
+}
+
+export function albumTextHtml(a){
+  return htmlizeText(albumText(a));
 }
 
 // Country badge flag lookup — keyed on the exact strings seen in

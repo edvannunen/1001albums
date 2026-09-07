@@ -48,6 +48,15 @@
     border:1px solid var(--border); border-radius:4px; padding:0.75rem;
     font-family:'Space Mono',monospace; font-size:0.85rem; line-height:1.5; resize:vertical;
   }
+  .output-preview{
+    width:100%; min-height:16rem; background:var(--panel); color:var(--ink);
+    border:1px solid var(--border); border-radius:4px; padding:0.75rem;
+    font-family:'Work Sans',sans-serif; font-size:0.9rem; line-height:1.6;
+    overflow-wrap:anywhere; white-space:pre-wrap;
+  }
+  .output-preview i{font-style:italic;}
+  .output-preview b{font-weight:700;}
+  .output-preview a{color:var(--signal);}
   .copy-row{display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;}
   h2{font-family:'Space Mono',monospace; font-size:1rem; margin:2rem 0 0.75rem;}
   .clip{
@@ -99,8 +108,8 @@
   <div class="status" id="status-bluesky"></div>
 
   <div id="result-bluesky" hidden>
-    <label for="output-bluesky">Post text</label>
-    <textarea id="output-bluesky" readonly></textarea>
+    <label>Post text</label>
+    <div class="output-preview" id="output-bluesky"></div>
     <div class="copy-row">
       <button class="secondary" id="copyText-bluesky">Copy text</button>
     </div>
@@ -123,8 +132,8 @@
   <div class="status" id="status-reddit"></div>
 
   <div id="result-reddit" hidden>
-    <label for="output-reddit">Post text</label>
-    <textarea id="output-reddit" readonly></textarea>
+    <label>Post text</label>
+    <div class="output-preview" id="output-reddit"></div>
     <div class="copy-row">
       <button class="secondary" id="copyText-reddit">Copy text</button>
     </div>
@@ -173,7 +182,7 @@
 </div>
 
 <script type="module">
-  import { albumSlug, coverUrl } from "./js/data.js";
+  import { albumSlug, coverUrl, htmlizeText, escapeHtml } from "./js/data.js";
 
   // Hardcoded rather than derived from location.origin — this page is
   // gated behind /admin, but the links posted to each platform must always
@@ -213,6 +222,38 @@
   const copyTextSignal = document.getElementById('copyText-signal');
 
   let albums = null;
+  // Plain-text renditions of the currently-loaded Bluesky/Signal post and
+  // the raw HTML + plain-text fallback for Reddit's — populated by
+  // renderBluesky()/renderReddit(), read by the "Copy text" handlers below.
+  let blueskyPlainText = '';
+  let redditBodyHtml = '';
+  let redditPlainText = '';
+
+  // The Bluesky/Reddit "Post text" boxes below render real formatting
+  // (bold/italic/links — see the edit-in-place feature and
+  // enrich_1001_albums.py's apply_markups()) so Ed can see what he's
+  // copying. Bluesky has no rich-text paste support at all, so its "Copy
+  // text" button copies a plain-text rendition — pasting raw tags there
+  // would show literal "<i>...</i>". Reddit's rich-text editor DOES accept
+  // pasted HTML and converts it to its own formatting, so its button copies
+  // real HTML instead (see copyRichToClipboard below). Either way, the
+  // plain-text rendition is derived from the same HTML the box displays:
+  // <br> becomes a real newline, a link expands to "text (url)" so it isn't
+  // silently lost, then remaining tags are stripped and entities unescaped
+  // via the browser's own
+  // innerHTML->textContent round-trip — a no-op for the plain-text albums
+  // that never had any markup to begin with.
+  function plainTextFromHtml(str){
+    if(!str) return str;
+    const withBreaks = str.replace(/<br\s*\/?>/gi, "\n");
+    const withLinksExpanded = withBreaks.replace(
+      /<a\s+[^>]*href=["']([^"']*)["'][^>]*>(.*?)<\/a>/gi,
+      (_, href, inner) => `${inner} (${href})`
+    );
+    const div = document.createElement('div');
+    div.innerHTML = withLinksExpanded;
+    return div.textContent;
+  }
 
   function switchTab(tab){
     tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -248,6 +289,27 @@
     }
   }
 
+  // Reddit's rich-text compose editor accepts pasted HTML and converts it
+  // to its own formatting (bold/italic/links) — so unlike Bluesky (plain
+  // text only), Reddit's copy button writes both an HTML and a plain-text
+  // representation to the clipboard, and the paste target picks whichever
+  // it understands.
+  async function copyRichToClipboard(html, plainText, btn){
+    try{
+      if(navigator.clipboard.write && window.ClipboardItem){
+        await navigator.clipboard.write([new ClipboardItem({
+          'text/html': new Blob([html], {type: 'text/html'}),
+          'text/plain': new Blob([plainText], {type: 'text/plain'}),
+        })]);
+      } else {
+        await navigator.clipboard.writeText(plainText);
+      }
+      flash(btn, 'Copied!');
+    }catch(e){
+      flash(btn, 'Copy failed');
+    }
+  }
+
   async function copyImage(url, btn){
     try{
       const res = await fetch(url);
@@ -275,25 +337,26 @@
   }
 
   function renderBluesky(album, youtubeClips, rawTitles){
-    const header = `#1001Albums ${album.number} ${album.artist} - ${album.album} (${album.year})`;
+    const header = escapeHtml(`#1001Albums ${album.number} ${album.artist} - ${album.album} (${album.year})`);
     const spotifyUrl = album.spotify && album.spotify.spotify_url;
-    const text = album.text || '';
+    const text = htmlizeText(album.text) || '';
     const englishLink = SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
 
-    let body = header;
-    if(spotifyUrl) body += '\n' + spotifyUrl;
-    body += '\n\n' + text;
-    body += '\n\nEnglish version can be found here: ' + englishLink;
+    let bodyHtml = header;
+    if(spotifyUrl) bodyHtml += '<br>' + escapeHtml(spotifyUrl);
+    bodyHtml += '<br><br>' + text;
+    bodyHtml += '<br><br>English version can be found here: ' + escapeHtml(englishLink);
 
     if(youtubeClips.length){
-      body += '\n\n-----';
+      bodyHtml += '<br><br>-----';
       youtubeClips.forEach((m, i) => {
         const title = rawTitles[i] || m.caption || 'YouTube video';
-        body += '\n\n' + title + ' ' + m.url;
+        bodyHtml += '<br><br>' + escapeHtml(title) + ' ' + escapeHtml(m.url);
       });
     }
 
-    outputBluesky.value = body;
+    outputBluesky.innerHTML = bodyHtml;
+    blueskyPlainText = plainTextFromHtml(bodyHtml);
     resultBluesky.hidden = false;
 
     const cover = coverUrl(album);
@@ -317,8 +380,8 @@
     // English only — these posts are for Reddit, same fallback-to-Dutch
     // rule as the site itself (js/data.js's albumText/mediaCaption) for
     // the rare album/caption not translated yet.
-    const text = album.text_en || album.text || '';
-    const header = `${album.number} ${album.artist} - ${album.album} (${album.year})`;
+    const text = htmlizeText(album.text_en || album.text) || '';
+    const header = escapeHtml(`${album.number} ${album.artist} - ${album.album} (${album.year})`);
 
     // Our own caption (Ed's own line about the clip, e.g. "Run for your
     // Liiiiiive!") goes in front of the real video title, when there is one.
@@ -328,14 +391,16 @@
       return caption ? `${caption} ${title}` : title;
     });
 
-    let body = header + '\n\n' + text;
+    let bodyHtml = header + '<br><br>' + text;
     youtubeClips.forEach((m, i) => {
-      body += '\n\n' + labels[i] + ': ' + m.url;
+      bodyHtml += '<br><br>' + escapeHtml(labels[i]) + ': ' + escapeHtml(m.url);
     });
 
-    body += '\n\nSee also: ' + SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
+    bodyHtml += '<br><br>See also: ' + escapeHtml(SITE_URL + '/?album=' + albumSlug(album) + '&lang=en');
 
-    outputReddit.value = body;
+    outputReddit.innerHTML = bodyHtml;
+    redditBodyHtml = bodyHtml;
+    redditPlainText = plainTextFromHtml(bodyHtml);
     resultReddit.hidden = false;
 
     const cover = coverUrl(album);
@@ -482,11 +547,11 @@
 
   loadBtnBluesky.addEventListener('click', loadBluesky);
   numberInputBluesky.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadBluesky(); });
-  copyTextBluesky.addEventListener('click', (ev) => copyToClipboard(outputBluesky.value, ev.target));
+  copyTextBluesky.addEventListener('click', (ev) => copyToClipboard(blueskyPlainText, ev.target));
 
   loadBtnReddit.addEventListener('click', loadReddit);
   numberInputReddit.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadReddit(); });
-  copyTextReddit.addEventListener('click', (ev) => copyToClipboard(outputReddit.value, ev.target));
+  copyTextReddit.addEventListener('click', (ev) => copyRichToClipboard(redditBodyHtml, redditPlainText, ev.target));
   loadSignalBtn.addEventListener('click', loadSignal);
   mediumUrlInput.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadSignal(); });
   copyTextSignal.addEventListener('click', (ev) => copyToClipboard(outputSignal.value, ev.target));
