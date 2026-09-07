@@ -2,9 +2,18 @@ import { state, PAGE_SIZE } from "./state.js";
 import { loadData, findAlbumByParam } from "./data.js";
 import { getFiltered, setFilter, clearFilter, clearAllFilters, renderFilterChips } from "./filters.js";
 import { renderGrid, renderTable, renderPagination } from "./grid.js";
-import { openModal, closeModal, showModalPrev, showModalNext, shareCurrentAlbum } from "./modal.js";
+import { openModal, closeModal, showModalPrev, showModalNext, shareCurrentAlbum, initReviewEditor } from "./modal.js";
 import { renderDashboard, resizeGenreBubbles, replayProgressAnimation } from "./charts.js";
 import { setLang, applyStaticStrings } from "./i18n.js";
+import { isLoggedIn } from "./auth.js";
+
+function updateAuthUI(){
+  const loggedIn = isLoggedIn();
+  document.body.classList.toggle("is-admin", loggedIn);
+  const link = document.getElementById("authLink");
+  link.textContent = loggedIn ? "Logout" : "Login";
+  link.href = loggedIn ? "admin/logout" : "admin/login";
+}
 
 function updateLangFlagIcon(){
   document.getElementById("langCurrentFlag").src =
@@ -123,6 +132,11 @@ function wireEvents(){
   });
 
   document.addEventListener("keydown", (e)=>{
+    // Typing in the review-text editor (or any contenteditable/input) should
+    // never be hijacked by the modal's own shortcuts — Escape/arrows are for
+    // navigating the modal, not for editing text inside it.
+    if(document.activeElement && document.activeElement.isContentEditable) return;
+
     if(e.key === "Escape"){
       closeModal();
       document.getElementById("infoBackdrop").classList.remove("open");
@@ -134,6 +148,8 @@ function wireEvents(){
 
   window.addEventListener("resize", ()=> resizeGenreBubbles(render));
   document.querySelector(".knob").addEventListener("click", replayProgressAnimation);
+
+  initReviewEditor();
 }
 
 async function init(){
@@ -142,6 +158,7 @@ async function init(){
   setLang(langParam === "en" || langParam === "nl" ? langParam : state.lang);
   updateLangFlagIcon();
   applyStaticStrings();
+  updateAuthUI();
 
   wireEvents();
   await loadData();

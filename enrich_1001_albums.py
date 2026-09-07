@@ -37,6 +37,7 @@ Spotify: create an app at https://developer.spotify.com/dashboard
 MusicBrainz: no key needed, just a descriptive User-Agent (set in .env).
 """
 
+import html
 import json
 import os
 import re
@@ -234,6 +235,54 @@ def classify_media_url(url: str) -> str:
     return "other"
 
 
+def apply_markups(text: str, markups: list, start: int = 0, end: int | None = None) -> str:
+    """Convert a slice of a Medium paragraph's plain text into small HTML
+    using its `markups` array (EM -> <i>, STRONG -> <b>, A -> <a href>) so
+    formatting already present on Medium (song titles in italics, inline
+    links) survives into the review text instead of being silently
+    discarded, as it always was before. Matches exactly the tag vocabulary
+    the site's own rich-text edit-in-place editor produces (js/modal.js),
+    so the frontend's albumTextHtml() renders it correctly with no extra
+    handling needed on that end. Any markup type besides EM/STRONG/A
+    (Medium has a few more, e.g. code blocks) passes through as plain text.
+
+    `start`/`end` slice into `text` first — used for the older, pre-~2020
+    fused header+text paragraph format (see HEADER_RE), where only the
+    trailing part after the header is kept as the review text: markups
+    that fall entirely within the stripped header are dropped, ones
+    straddling the cut are clipped rather than shifted out of range.
+    """
+    if end is None:
+        end = len(text)
+    text = text[start:end]
+    if not markups:
+        return html.escape(text)
+
+    clipped = []
+    for m in markups:
+        m_start = max(m["start"], start) - start
+        m_end = min(m["end"], end) - start
+        if m_end > m_start:
+            clipped.append({"type": m["type"], "start": m_start, "end": m_end, "href": m.get("href")})
+    if not clipped:
+        return html.escape(text)
+
+    cuts = sorted({0, len(text)} | {m["start"] for m in clipped} | {m["end"] for m in clipped})
+    out = []
+    for seg_start, seg_end in zip(cuts, cuts[1:]):
+        active = [m for m in clipped if m["start"] <= seg_start and m["end"] >= seg_end]
+        segment = html.escape(text[seg_start:seg_end])
+        if any(m["type"] == "EM" for m in active):
+            segment = f"<i>{segment}</i>"
+        if any(m["type"] == "STRONG" for m in active):
+            segment = f"<b>{segment}</b>"
+        for m in active:
+            if m["type"] == "A" and m["href"]:
+                segment = f'<a href="{html.escape(m["href"], quote=True)}">{segment}</a>'
+        out.append(segment)
+    return "".join(out)
+
+
 def parse_medium_post(state: dict) -> list:
     """
     Walk a Medium post's paragraph list and group into album entries.
@@ -266,11 +315,12 @@ def parse_medium_post(state: dict) -> list:
                     "artist": match.group(2),
                     "album": match.group(3),
                     "year": match.group(4),
-                    "text": match.group(5).strip(),
+                    "text": apply_markups(text, p.get("markups") or [], match.start(5)).strip(),
                     "media": [],
                 }
             elif current is not None:
-                current["text"] = (current["text"] + " " + text).strip()
+                appended = apply_markups(text, p.get("markups") or [])
+                current["text"] = (current["text"] + " " + appended).strip()
             continue
 
         if current is None:

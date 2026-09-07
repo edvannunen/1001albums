@@ -66,6 +66,24 @@ export function mediaCaption(m){
   return (state.lang === "en" && m.caption_en) ? m.caption_en : m.caption;
 }
 
+// Every review was plain text until the edit-in-place feature (js/modal.js)
+// started letting it hold small, real HTML (bold/italic/links) instead —
+// rather than migrate ~621 existing rows, detect which shape a given value
+// already is: if it looks like it contains a real tag, it was produced by
+// the rich-text editor and is rendered as-is; otherwise it's legacy plain
+// text, HTML-escaped and with newlines turned into <br> so it still renders
+// correctly via innerHTML.
+const HTML_TAG_RE = /<[a-z][\s\S]*>/i;
+
+function escapeHtml(s){
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export function albumTextHtml(a){
+  const raw = albumText(a) || "";
+  return HTML_TAG_RE.test(raw) ? raw : escapeHtml(raw).replace(/\n/g, "<br>");
+}
+
 // Country badge flag lookup — keyed on the exact strings seen in
 // musicbrainz.country across the current dataset (checked 2026-07), not a
 // general country-name-to-ISO library. MusicBrainz's artist `area` is
