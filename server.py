@@ -50,7 +50,7 @@ locally, a harmless no-op-equivalent for a root-served app.
     sync_posts() (from enrich_1001_albums.py) for just that one URL —
     scrape, merge into the DB, Spotify/MusicBrainz enrichment only for
     genuinely new albums. Create calls /admin/draft-post-preview, which
-    generates a title/content draft from data/1001_albums_2018_edition_list.csv
+    generates a title/content draft from reference/1001_albums_2018_edition_list.csv
     (the book's full track list) for the next unscraped batch — no Medium
     API involved (this account has no publishing integration token), just
     text for Ed to paste into a new Medium story himself.
@@ -317,7 +317,14 @@ def admin_page(_: str = Depends(require_admin)):
 # for Ed to paste into a new Medium story himself — same "format it, don't
 # automate the platform" shape as the Signal/Reddit/Bluesky share tools.
 
-REFERENCE_LIST_PATH = Path("data/1001_albums_2018_edition_list.csv")
+# Deliberately NOT under data/ — Coolify mounts a persistent volume there
+# for the SQLite DB (see the Coolify Hosting Playbook), which shadows
+# whatever was baked into that path at build time. A first production
+# deploy of this feature 500'd for exactly that reason: the file existed in
+# the git repo and the built image, but the mounted volume hid it at
+# runtime, so Path("data/...").open() raised FileNotFoundError. reference/
+# isn't volume-mounted, so it survives.
+REFERENCE_LIST_PATH = Path("reference/1001_albums_2018_edition_list.csv")
 
 
 @lru_cache(maxsize=1)

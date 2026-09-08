@@ -448,11 +448,18 @@ live on the site, no need to duplicate it in the data.
   Medium; it only generates title/content text for Ed to paste into a new
   Medium story himself, same shape as the Signal/Reddit/Bluesky share
   tools. Backed by a new `/admin/draft-post-preview` endpoint (`server.py`)
-  and `data/1001_albums_2018_edition_list.csv` (renamed from the original
-  `.txt` — same semicolon-delimited `Nr;Artiest;Album;Jaar` content, just a
-  more honest extension), which is the full 1001-book list including
-  albums not yet scraped — distinct from the `albums` DB table, which only
-  has what's actually been imported from a published post. Start album #
+  and `reference/1001_albums_2018_edition_list.csv` (renamed from the
+  original `data/1001 albums 2018 edition list.txt` — same
+  semicolon-delimited `Nr;Artiest;Album;Jaar` content, just a more honest
+  extension), which is the full 1001-book list including albums not yet
+  scraped — distinct from the `albums` DB table, which only has what's
+  actually been imported from a published post. **Deliberately lives under
+  `reference/`, not `data/`** — a first production deploy 500'd because
+  Coolify's persistent volume for the SQLite DB is mounted at `/app/data`,
+  which shadows anything else baked into that path at build time; the CSV
+  existed in the git repo and image but was invisible at runtime once the
+  volume mounted over it. `reference/` isn't volume-mounted, so it
+  survives. Start album #
   defaults to `MAX(catalog_number)+1`; Medium post # defaults to one past
   the highest number found by regexing every stored `medium_post_url` for
   `1001-albums?-(\d+)` (every post since #7 embeds its own number in the
