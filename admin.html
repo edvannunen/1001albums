@@ -286,6 +286,14 @@
     <section class="admin-view" id="view-signal" data-view="signal">
       <h1 class="view-title">Share medium on Signal</h1>
       <div class="view-sub">Signal shares the whole Medium post, not a single album — paste the post URL.</div>
+      <div class="note">
+        <strong>Medium scraping can fail on production.</strong> Cloudflare
+        sometimes challenges this server's own (datacenter) IP as a bot, and
+        Load below will fail with an error. If that happens, run
+        <code>python relay_medium_preview.py &lt;medium-post-url&gt;</code>
+        locally instead — your home IP isn't challenged — and copy the
+        printed title/text/image URL from the terminal by hand.
+      </div>
       <div class="row">
         <div class="wide-field">
           <label for="mediumUrl">Medium post URL</label>
