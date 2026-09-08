@@ -74,8 +74,8 @@ export function mediaCaption(m){
 // enrich_1001_albums.py) and is rendered as-is; otherwise it's legacy plain
 // text, HTML-escaped and with newlines turned into <br> so it still renders
 // correctly via innerHTML. Exported standalone (not tied to an album/state)
-// so share_export.html's admin tool can reuse the exact same detection for
-// its own NL/EN choice per tab, instead of duplicating this heuristic.
+// so admin.html's share tools can reuse the exact same detection for
+// their own NL/EN choice per section, instead of duplicating this heuristic.
 const HTML_TAG_RE = /<[a-z][\s\S]*>/i;
 
 export function escapeHtml(s){

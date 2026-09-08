@@ -362,7 +362,7 @@ def parse_medium_post(state: dict) -> list:
 
 
 def extract_post_preview(state: dict) -> dict:
-    """Backs the Signal tab of share_export.html. Signal shares are keyed by
+    """Backs the Signal section of admin.html. Signal shares are keyed by
     a whole Medium post, not a single catalog number (a post covers 6-7
     albums), so this returns the post's title, its intro paragraph(s) (the
     text before the first per-album header), and its own top/collage image
@@ -567,6 +567,11 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         "spotify_url": best["external_urls"]["spotify"],
         "spotify_embed_url": f"https://open.spotify.com/embed/album/{best['id']}",
         "cover_art_url": best["images"][0]["url"] if best.get("images") else None,
+        # Full size list (typically 640/300/64px), not just the largest —
+        # the admin Create page's cover-download feature picks the ~300px
+        # one instead of the full-res 640px, see server.py's
+        # _pick_cover_image(). Additive key, ignored by existing callers.
+        "images": best.get("images", []),
         "matched_artist_name": ", ".join(
             ar.get("name", "") for ar in best.get("artists", [])
         ),

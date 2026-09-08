@@ -1,11 +1,11 @@
 """
-Local fallback for the Signal tab's post preview (share_export.html ->
+Local fallback for the Signal section's post preview (admin.html ->
 /admin/medium-post-preview) when Medium's Cloudflare bot-check is
 challenging requests from the Coolify VPS's own (datacenter) IP — same
-intermittent issue documented for /admin/add-post in CLAUDE.md, now also
+intermittent issue documented for the Import section in CLAUDE.md, now also
 confirmed hitting this route (2026-09-07).
 
-Unlike /admin/add-post, this route makes no database write — it's a pure
+Unlike the Import section's scrape, this route makes no database write — it's a pure
 read/compute step for display in Ed's own browser, so there's no need to
 relay anything back to production at all. Just fetch and extract locally
 (same fetch_medium_post_state()/extract_post_preview() the server route

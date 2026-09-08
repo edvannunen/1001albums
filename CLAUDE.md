@@ -116,7 +116,7 @@ live on the site, no need to duplicate it in the data.
 
 ## Known open items / things to verify
 
-- **`/admin/add-post`'s direct Medium fetch can get Cloudflare-challenged
+- **The admin Import page's direct Medium fetch can get Cloudflare-challenged
   from production — confirmed 2026-08-18.** Not a fixed IP ban: the
   response was a real Cloudflare JS challenge (`cf-mitigated: challenge`,
   body is the "Just a moment..." page), and posts #75/#76 had genuinely
@@ -132,10 +132,15 @@ live on the site, no need to duplicate it in the data.
   then POSTs the already-fetched Apollo state to a new
   `/admin/add-post-relay` endpoint (`server.py`), which skips the network
   fetch and does everything else `sync_posts()` normally does (merge,
-  Spotify/MusicBrainz enrichment for new albums, translation). The
-  `/admin/add-post` web form is untouched and still tries the direct
-  fetch first, since it's free and sometimes still works — reach for the
-  relay script specifically when that form's error message shows up.
+  Spotify/MusicBrainz enrichment for new albums, translation). The admin
+  page's "Scrape & add" button (`admin.html`, formerly a server-templated
+  page, now the combined `/admin/` admin UI's Import section — see
+  2026-09-08 below) is untouched and still tries the direct fetch first,
+  since it's free and sometimes still works — reach for the relay script
+  specifically when that button's error message shows up. Locally
+  (`window.IS_LOCAL`), the same section also shows a second "Scrape
+  locally & push to production" button that does the same relay over
+  HTTP instead of the CLI script.
 - **`?format=json` is dead — Medium/Cloudflare now ignores that query
   param entirely** (confirmed 2026-07: `CF-Cache-Status: HIT` on every
   request regardless of cache-busting params; a plain server-rendered HTML
@@ -412,6 +417,55 @@ live on the site, no need to duplicate it in the data.
   complete. If redesigning, keep the numbered-catalog motif since the
   content is a genuinely numbered sequence (matches the book's own
   numbering).
+- **Admin UI merged into one page — `admin.html` — 2026-09-08.** Used to
+  be two separate things: `/admin/` was a server-templated Python string
+  (`ADMIN_PAGE` in `server.py`) for adding a Medium post, and
+  `/admin/share-export` was a standalone `share_export.html` with its own
+  tab bar for the Signal/Reddit/Bluesky share tools. Both are gone;
+  `admin.html` is now the single static file `/admin/` serves (via
+  `_serve_static_admin_page`, same pattern the old `share_export.html`
+  route used), with a sidebar menu instead of tabs: Create medium post
+  (placeholder — not built yet), Import medium post, and the three share
+  tools. Restyled to the main dashboard's own palette/fonts instead of
+  `share_export.html`'s old per-platform brand colors (Bluesky blue,
+  Signal teal-as-brand-color) — everything is mustard now, teal is only
+  used the way the main site already uses it (link color). The old
+  no-JS-fallback plain `<form method=post>` for adding a post (and its
+  backing `/admin/add-post`/`/admin/relay-to-prod` POST routes) is gone
+  too — `admin.html` is fully JS-driven like `share_export.html` always
+  was, talking to the existing `/admin/add-post-stream` and
+  `/admin/relay-to-prod-stream` SSE endpoints (unchanged) instead.
+  `window.IS_LOCAL`, injected by `_serve_static_admin_page` based on
+  whether `BASE_PATH` is set, is what the page's JS uses to decide
+  whether to show the local-only "Scrape locally & push to production"
+  button — no separate endpoint needed for that check.
+- **Create medium post built — 2026-09-08, no Medium publishing API
+  available.** Checked first: this account's Medium Settings has no
+  "Integration tokens" option under Security and apps at all, so the old
+  `api.medium.com/v1/users/{id}/posts` draft-creation endpoint (which does
+  support `publishStatus: "draft"`) isn't reachable — Medium has
+  discontinued issuing new tokens. So this can't push a real draft into
+  Medium; it only generates title/content text for Ed to paste into a new
+  Medium story himself, same shape as the Signal/Reddit/Bluesky share
+  tools. Backed by a new `/admin/draft-post-preview` endpoint (`server.py`)
+  and `data/1001_albums_2018_edition_list.csv` (renamed from the original
+  `.txt` — same semicolon-delimited `Nr;Artiest;Album;Jaar` content, just a
+  more honest extension), which is the full 1001-book list including
+  albums not yet scraped — distinct from the `albums` DB table, which only
+  has what's actually been imported from a published post. Start album #
+  defaults to `MAX(catalog_number)+1`; Medium post # defaults to one past
+  the highest number found by regexing every stored `medium_post_url` for
+  `1001-albums?-(\d+)` (every post since #7 embeds its own number in the
+  URL slug this way, e.g. `.../streetwise-1001-albums-78-642-648-1989-
+  <hash>` → 78) — both are editable before generating. The title always
+  starts with a literal `"..."` — Ed writes the real creative prefix by
+  hand afterwards, this only generates the mechanical part (`1001 Albums
+  #N (start–end, year)`), with year compressed per his own shorthand: one
+  year stays plain, two compress to `1988/'89`, three or more to
+  `2014-'18`. Content renders real bold (`<b>`) in the preview and copies
+  via the same dual HTML+plain-text clipboard trick the Reddit tool uses
+  (`copyRichToClipboard`), so pasting into Medium's own contenteditable
+  editor keeps the bold instead of showing literal asterisks.
 
 ## Next steps, roughly in order
 
