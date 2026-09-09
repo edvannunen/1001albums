@@ -157,6 +157,7 @@
     padding:0.75rem; margin-bottom:0.75rem;
   }
   .clip .title{font-weight:600; margin-bottom:0.25rem;}
+  .clip .caption{font-weight:400; color:var(--ink-dim); margin-bottom:0.25rem;}
   .clip a{color:var(--teal); word-break:break-all; font-size:0.85rem;}
   .clip img{max-width:100%; border-radius:4px; margin-top:0.5rem; display:block;}
   .clip .actions{display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;}
@@ -341,6 +342,11 @@
           <div id="cover-reddit"></div>
         </div>
 
+        <div id="imagesSection-reddit" hidden>
+          <h2 class="section-label">Post images</h2>
+          <div id="images-reddit"></div>
+        </div>
+
         <div id="clipsSection-reddit" hidden>
           <h2 class="section-label">Youtube clips</h2>
           <div id="clips-reddit"></div>
@@ -380,6 +386,11 @@
         <div id="coverSection-bluesky" hidden>
           <h2 class="section-label">Album cover</h2>
           <div id="cover-bluesky"></div>
+        </div>
+
+        <div id="imagesSection-bluesky" hidden>
+          <h2 class="section-label">Post images</h2>
+          <div id="images-bluesky"></div>
         </div>
       </div>
     </section>
@@ -660,6 +671,8 @@
   const copyTextBluesky = document.getElementById('copyText-bluesky');
   const coverSectionBluesky = document.getElementById('coverSection-bluesky');
   const coverBluesky = document.getElementById('cover-bluesky');
+  const imagesSectionBluesky = document.getElementById('imagesSection-bluesky');
+  const imagesBluesky = document.getElementById('images-bluesky');
   const flashback500Bluesky = document.getElementById('flashback500-bluesky');
 
   const numberInputReddit = document.getElementById('number-reddit');
@@ -670,6 +683,8 @@
   const copyTextReddit = document.getElementById('copyText-reddit');
   const coverSectionReddit = document.getElementById('coverSection-reddit');
   const coverReddit = document.getElementById('cover-reddit');
+  const imagesSectionReddit = document.getElementById('imagesSection-reddit');
+  const imagesReddit = document.getElementById('images-reddit');
   const clipsSectionReddit = document.getElementById('clipsSection-reddit');
   const clipsReddit = document.getElementById('clips-reddit');
   const imageHintReddit = document.getElementById('imageHint-reddit');
@@ -791,7 +806,32 @@
     return albums;
   }
 
-  function renderBluesky(album, youtubeClips, rawTitles){
+  // Older posts illustrate the album with a plain Medium-hosted image
+  // instead of a YouTube/Spotify embed (see media type "image" in
+  // albums_enriched.json) — neither platform embeds a bare image URL from
+  // post text, so these render the same way the album cover does: a
+  // preview plus a "Copy image" button for Ed to attach by hand.
+  function renderImages(container, section, imageClips, resolveCaption){
+    section.hidden = imageClips.length === 0;
+    container.innerHTML = '';
+    imageClips.forEach((m) => {
+      const caption = resolveCaption(m);
+      const card = document.createElement('div');
+      card.className = 'clip';
+      card.innerHTML = `
+        ${caption ? '<div class="caption"></div>' : ''}
+        <img src="${m.url}" alt="" loading="lazy">
+        <div class="actions">
+          <button class="secondary copy-post-image">Copy image</button>
+        </div>
+      `;
+      if(caption) card.querySelector('.caption').textContent = caption;
+      card.querySelector('.copy-post-image').addEventListener('click', (ev) => copyImage(m.url, ev.target));
+      container.appendChild(card);
+    });
+  }
+
+  function renderBluesky(album, youtubeClips, rawTitles, imageClips){
     const flashbackPrefix = flashback500Bluesky.checked ? 'Flashback 500: ' : '';
     const header = escapeHtml(`#1001Albums ${flashbackPrefix}${album.number} ${album.artist} - ${album.album} (${album.year})`);
     const spotifyUrl = album.spotify && album.spotify.spotify_url;
@@ -830,14 +870,17 @@
       card.querySelector('.copy-cover-image').addEventListener('click', (ev) => copyImage(cover, ev.target));
       coverBluesky.appendChild(card);
     }
+
+    renderImages(imagesBluesky, imagesSectionBluesky, imageClips, m => m.caption || '');
   }
 
-  function renderReddit(album, youtubeClips, rawTitles){
+  function renderReddit(album, youtubeClips, rawTitles, imageClips){
     // English only — these posts are for Reddit, same fallback-to-Dutch
     // rule as the site itself (js/data.js's albumText/mediaCaption) for
     // the rare album/caption not translated yet.
     const text = htmlizeText(album.text_en || album.text) || '';
     const header = escapeHtml(`${album.number} ${album.artist} - ${album.album} (${album.year})`);
+    const spotifyUrl = album.spotify && album.spotify.spotify_url;
 
     // Our own caption (Ed's own line about the clip, e.g. "Run for your
     // Liiiiiive!") goes in front of the real video title, when there is one.
@@ -852,6 +895,7 @@
       bodyHtml += '<br><br>' + escapeHtml(labels[i]) + ': ' + escapeHtml(m.url);
     });
 
+    if(spotifyUrl) bodyHtml += '<br><br>Album on Spotify: ' + escapeHtml(spotifyUrl);
     bodyHtml += '<br><br>See also: ' + escapeHtml(SITE_URL + '/?album=' + albumSlug(album) + '&lang=en');
 
     outputReddit.innerHTML = bodyHtml;
@@ -875,8 +919,10 @@
       coverReddit.appendChild(card);
     }
 
+    renderImages(imagesReddit, imagesSectionReddit, imageClips, m => m.caption_en || m.caption || '');
+
     clipsSectionReddit.hidden = youtubeClips.length === 0;
-    imageHintReddit.hidden = !cover && youtubeClips.length === 0;
+    imageHintReddit.hidden = !cover && youtubeClips.length === 0 && imageClips.length === 0;
     clipsReddit.innerHTML = '';
     youtubeClips.forEach((m, i) => {
       const id = youtubeId(m.url);
@@ -940,8 +986,9 @@
     if(!album) return;
 
     const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
+    const imageClips = (album.media || []).filter(m => m.type === 'image');
     const rawTitles = await Promise.all(youtubeClips.map(m => fetchYoutubeTitle(m.url)));
-    renderBluesky(album, youtubeClips, rawTitles);
+    renderBluesky(album, youtubeClips, rawTitles, imageClips);
   }
 
   async function loadReddit(){
@@ -956,8 +1003,9 @@
     if(!album) return;
 
     const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
+    const imageClips = (album.media || []).filter(m => m.type === 'image');
     const rawTitles = await Promise.all(youtubeClips.map(m => fetchYoutubeTitle(m.url)));
-    renderReddit(album, youtubeClips, rawTitles);
+    renderReddit(album, youtubeClips, rawTitles, imageClips);
   }
 
   async function loadSignal(){
