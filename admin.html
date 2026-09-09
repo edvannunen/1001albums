@@ -848,8 +848,8 @@
       youtubeClips.forEach((m, i) => {
         const caption = m.caption || '';
         const title = rawTitles[i] || 'YouTube video';
-        const label = caption ? `${caption} ${title}` : title;
-        bodyHtml += '<br><br>' + escapeHtml(label) + ' ' + escapeHtml(m.url);
+        const secondLine = caption ? `${escapeHtml(caption)}: ${escapeHtml(m.url)}` : escapeHtml(m.url);
+        bodyHtml += '<br><br>' + escapeHtml(title) + '<br>' + secondLine;
       });
     }
 
