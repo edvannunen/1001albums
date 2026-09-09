@@ -846,8 +846,10 @@
     if(youtubeClips.length){
       bodyHtml += '<br><br>-----';
       youtubeClips.forEach((m, i) => {
-        const title = rawTitles[i] || m.caption || 'YouTube video';
-        bodyHtml += '<br><br>' + escapeHtml(title) + ' ' + escapeHtml(m.url);
+        const caption = m.caption || '';
+        const title = rawTitles[i] || 'YouTube video';
+        const label = caption ? `${caption} ${title}` : title;
+        bodyHtml += '<br><br>' + escapeHtml(label) + ' ' + escapeHtml(m.url);
       });
     }
 
