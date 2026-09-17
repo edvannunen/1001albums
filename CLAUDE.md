@@ -116,6 +116,41 @@ live on the site, no need to duplicate it in the data.
 
 ## Known open items / things to verify
 
+- **Blockquote paragraphs (`BQ` type) were silently dropped by the scraper
+  entirely — found and fixed 2026-09-17.** `parse_medium_post()`'s paragraph
+  loop only matched `P`/`IMG`/`IFRAME`/`MIXTAPE_EMBED`; a Medium blockquote
+  (the quote-formatting toolbar button, used for pulled lyrics/quotes within
+  a review) is its own type, `BQ`, and fell through every branch with no
+  error — its text just never made it into the entry at all. Found via Ed
+  spotting a missing lyric quote on #647 (The Stone Roses). Fixed by adding
+  a `TYPE_BQ` branch that appends the quote as its own `<blockquote>...
+  </blockquote>` block (through `apply_markups()` same as everything else,
+  so inline `<i>`/`<b>`/`<a>` formatting inside a quote still works); added
+  matching CSS (`.review-text blockquote`, mustard left border + italic) and
+  taught `translate.py`'s system prompt about the new tag (preserve it, and
+  leave an already-English lyric quote inside one untranslated rather than
+  translating it into Dutch-then-back). A scan of every post (the 77 in
+  `medium_post_urls.txt` **plus** `medium_posts` table entries newer than
+  that file — #75-78 and two others were added later via `/admin` and were
+  never appended back to the txt file, so checking only the txt file misses
+  them) found exactly 7 affected reviews, all now fixed by re-scraping
+  locally and pushing the resulting `text`/`text_en` to production directly
+  via SQL (mirrors the playbook's single-row-correction recipe — no
+  Spotify/MusicBrainz calls needed since all 7 albums already existed, only
+  text changed): #135 Frank Zappa/Mothers of Invention – *We're Only In It
+  For The Money*, #393 Ian Dury – *New Boots and Panties!!*, #441 Marianne
+  Faithfull – *Broken English*, #476 Steve Winwood – *Arc of a Diver*, #603
+  Laibach – *Opus Dei*, #611 The Pogues – *If I Should Fall From Grace With
+  God*, #647 The Stone Roses – *The Stone Roses*. **The code fix itself
+  (`enrich_1001_albums.py`, `css/styles.css`, `translate.py`) was NOT yet
+  pushed to master as of this writing** — Ed asked to hold off and review
+  first — so it's only applied to the local dev DB and, as a direct data
+  patch, to production's DB; the blockquotes render with unstyled default
+  browser `<blockquote>` styling on production until the CSS actually
+  ships. Don't re-scan for this again once the code is pushed and a normal
+  full pipeline re-run has happened — the incremental re-run design means
+  every post gets its text refreshed and picks up any `BQ` paragraphs
+  automatically from then on.
 - **The admin Import page's direct Medium fetch can get Cloudflare-challenged
   from production — confirmed 2026-08-18.** Not a fixed IP ban: the
   response was a real Cloudflare JS challenge (`cf-mitigated: challenge`,

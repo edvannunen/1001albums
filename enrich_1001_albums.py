@@ -189,11 +189,18 @@ def get_ordered_paragraphs(state: dict) -> list:
 #        (`mixtapeMetadata.href`). Observed for plain hyperlinks (e.g. a
 #        linked news article), not for the album embeds themselves, but its
 #        href is directly usable.
+#   BQ   = blockquote (Medium's quote-formatting toolbar button, used for
+#        pulled lyrics/quotes within a review). Found missing entirely from
+#        the site for #647 (The Stone Roses) — it didn't match P/IMG/IFRAME/
+#        MIXTAPE_EMBED either, so it fell through every branch silently and
+#        its text was just dropped, not stored anywhere. Rendered as its own
+#        <blockquote> block appended to the entry's text.
 TYPE_TITLE = ("H3", "H4")
 TYPE_P = "P"
 TYPE_IMG = "IMG"
 TYPE_IFRAME = "IFRAME"
 TYPE_MIXTAPE = "MIXTAPE_EMBED"
+TYPE_BQ = "BQ"
 
 # Separator must be an actual dash character (– or —), not a plain hyphen —
 # band/album names routinely contain hyphens (e.g. "The Go-Betweens"), which
@@ -354,6 +361,11 @@ def parse_medium_post(state: dict) -> list:
                     "url": url,
                     "caption": text or None,
                 })
+
+        elif ptype == TYPE_BQ:
+            quoted = apply_markups(text, p.get("markups") or [])
+            if quoted:
+                current["text"] = (current["text"] + f"<blockquote>{quoted}</blockquote>").strip()
 
     if current:
         entries.append(current)

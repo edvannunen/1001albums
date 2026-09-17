@@ -555,6 +555,10 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 .modal-body{padding:20px 28px;}
 .modal-body .review-text{line-height:1.6;font-size:1.0rem;margin-bottom:20px;overflow-wrap:anywhere;}
 .modal-body .review-text a{color:var(--teal);}
+.modal-body .review-text blockquote{
+  margin:14px 0;padding:2px 0 2px 16px;border-left:2px solid var(--mustard);
+  font-style:italic;color:var(--ink-dim);
+}
 .review-text-wrap{position:relative;}
 .edit-review-btn{
   position:absolute;top:0;right:0;
