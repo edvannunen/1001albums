@@ -25,8 +25,6 @@ caption_en, reset by replace_media() inside update_album_text_media) that
 got nulled along the way.
 """
 
-import anthropic
-
 from db import get_connection, find_album_id, update_album_text_media, export_from_db
 from enrich_1001_albums import fetch_medium_post_state, parse_medium_post, OUTPUT_FILE
 from translate import translate_missing
@@ -97,7 +95,7 @@ def main():
           f"{skipped_not_found} not found in DB.")
 
     print("\nRetranslating anything text_en/caption_en just nulled...")
-    translate_missing(conn, anthropic.Anthropic())
+    translate_missing(conn)
 
     albums_out = export_from_db(conn)
     Path(OUTPUT_FILE).write_text(json.dumps(albums_out, indent=2, ensure_ascii=False), encoding="utf-8")

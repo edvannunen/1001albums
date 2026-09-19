@@ -86,7 +86,6 @@ import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
-import anthropic
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
@@ -192,9 +191,7 @@ def update_album_text_route(
         text_en = None
         if lang == "nl":
             try:
-                text_en, _captions_en = translate_album_content(
-                    anthropic.Anthropic(), artist, album, text, []
-                )
+                text_en, _captions_en = translate_album_content(artist, album, text, [])
                 conn.execute("UPDATE albums SET text_en = ? WHERE id = ?", (text_en, album_id))
                 conn.commit()
             except Exception as e:

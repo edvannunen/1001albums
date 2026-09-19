@@ -52,7 +52,6 @@ from dotenv import load_dotenv
 from db import get_connection, find_album_id, insert_album, update_album_text_media, \
     mark_post_processed, mark_post_failed, export_from_db
 from translate import translate_missing
-import anthropic
 
 load_dotenv()
 
@@ -827,7 +826,7 @@ def sync_scraped_entries(scraped: list, failures: list, post_urls: list, conn, o
     conn.commit()
 
     _emit(on_progress, "=== Stage 4: translating new/changed text to English ===")
-    translate_missing(conn, anthropic.Anthropic(), on_progress=on_progress)
+    translate_missing(conn, on_progress=on_progress)
 
     return {
         "scraped": len(scraped),
