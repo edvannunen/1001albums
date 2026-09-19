@@ -143,6 +143,7 @@
   .output-preview b{font-weight:700;}
   .output-preview a{color:var(--teal);}
   .copy-row{display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;}
+  .album-links{display:flex; gap:1.25rem; margin-bottom:0.75rem; font-size:0.85rem;}
   h2.section-label{
     font-family:'Space Mono',monospace; font-size:0.9rem; color:var(--mustard);
     margin:2rem 0 0.75rem; text-transform:uppercase; letter-spacing:0.04em;
@@ -331,6 +332,10 @@
       <div class="status" id="status-reddit"></div>
 
       <div id="result-reddit" hidden>
+        <div class="album-links">
+          <a id="albumLinkNl-reddit" href="#" target="_blank" rel="noopener">View Dutch album page ↗</a>
+          <a id="albumLinkEn-reddit" href="#" target="_blank" rel="noopener">View English album page ↗</a>
+        </div>
         <label>Post text</label>
         <div class="output-preview" id="output-reddit"></div>
         <div class="copy-row">
@@ -377,6 +382,10 @@
       <div class="status" id="status-bluesky"></div>
 
       <div id="result-bluesky" hidden>
+        <div class="album-links">
+          <a id="albumLinkNl-bluesky" href="#" target="_blank" rel="noopener">View Dutch album page ↗</a>
+          <a id="albumLinkEn-bluesky" href="#" target="_blank" rel="noopener">View English album page ↗</a>
+        </div>
         <label>Post text</label>
         <div class="output-preview" id="output-bluesky"></div>
         <div class="copy-row">
@@ -674,6 +683,8 @@
   const imagesSectionBluesky = document.getElementById('imagesSection-bluesky');
   const imagesBluesky = document.getElementById('images-bluesky');
   const flashback500Bluesky = document.getElementById('flashback500-bluesky');
+  const albumLinkNlBluesky = document.getElementById('albumLinkNl-bluesky');
+  const albumLinkEnBluesky = document.getElementById('albumLinkEn-bluesky');
 
   const numberInputReddit = document.getElementById('number-reddit');
   const loadBtnReddit = document.getElementById('loadBtn-reddit');
@@ -688,6 +699,8 @@
   const clipsSectionReddit = document.getElementById('clipsSection-reddit');
   const clipsReddit = document.getElementById('clips-reddit');
   const imageHintReddit = document.getElementById('imageHint-reddit');
+  const albumLinkNlReddit = document.getElementById('albumLinkNl-reddit');
+  const albumLinkEnReddit = document.getElementById('albumLinkEn-reddit');
 
   const mediumUrlInput = document.getElementById('mediumUrl');
   const loadSignalBtn = document.getElementById('loadSignalBtn');
@@ -837,6 +850,8 @@
     const spotifyUrl = album.spotify && album.spotify.spotify_url;
     const text = htmlizeText(album.text) || '';
     const englishLink = SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
+    albumLinkNlBluesky.href = SITE_URL + '/?album=' + albumSlug(album) + '&lang=nl';
+    albumLinkEnBluesky.href = englishLink;
 
     let bodyHtml = header;
     if(spotifyUrl) bodyHtml += '<br>' + escapeHtml(spotifyUrl);
@@ -883,6 +898,8 @@
     const text = htmlizeText(album.text_en || album.text) || '';
     const header = escapeHtml(`${album.number} ${album.artist} - ${album.album} (${album.year})`);
     const spotifyUrl = album.spotify && album.spotify.spotify_url;
+    albumLinkNlReddit.href = SITE_URL + '/?album=' + albumSlug(album) + '&lang=nl';
+    albumLinkEnReddit.href = SITE_URL + '/?album=' + albumSlug(album) + '&lang=en';
 
     // Our own caption (Ed's own line about the clip, e.g. "Run for your
     // Liiiiiive!") goes in front of the real video title, when there is one.

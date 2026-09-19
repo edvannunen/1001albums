@@ -107,14 +107,37 @@ def translate_album_content(artist: str, album: str, text: str, captions: list[s
     """One Gemini API call per album: translates the review text and every
     caption together. Returns (text_en, captions_en) — captions_en is the
     same length/order as the input `captions` list."""
-    captions_block = (
-        "\n".join(f"{i}. {c}" for i, c in enumerate(captions)) if captions else "(none)"
-    )
+    # Explicit START/END delimiters, not just "N. text" — a caption that
+    # itself contains embedded newlines (confirmed: Spotify embed captions
+    # are "Title\nListen to ... on Spotify.\nopen.spotify.com" all in one
+    # caption string) was getting misread as multiple list items and split
+    # into extra captions_en entries. Combined with the exact-length
+    # responseSchema below as a hard backstop.
+    if captions:
+        captions_block = "\n".join(
+            f"--- CAPTION {i} START ---\n{c}\n--- CAPTION {i} END ---" for i, c in enumerate(captions)
+        )
+    else:
+        captions_block = "(none)"
     user_message = (
         f"Artist: {artist}\nAlbum: {album}\n\n"
         f"Review text:\n{text}\n\n"
-        f"Captions:\n{captions_block}"
+        f"Captions (each CAPTION N block, however many lines it contains, is exactly one caption "
+        f"— translate it as a single unit and return exactly {len(captions)} entries in captions_en, "
+        f"in order):\n{captions_block}"
     )
+
+    response_schema = {
+        **RESPONSE_SCHEMA,
+        "properties": {
+            **RESPONSE_SCHEMA["properties"],
+            "captions_en": {
+                **RESPONSE_SCHEMA["properties"]["captions_en"],
+                "minItems": len(captions),
+                "maxItems": len(captions),
+            },
+        },
+    }
 
     for attempt in range(MAX_RETRIES + 1):
         response = requests.post(
@@ -125,7 +148,7 @@ def translate_album_content(artist: str, album: str, text: str, captions: list[s
                 "contents": [{"role": "user", "parts": [{"text": user_message}]}],
                 "generationConfig": {
                     "responseMimeType": "application/json",
-                    "responseSchema": RESPONSE_SCHEMA,
+                    "responseSchema": response_schema,
                 },
             },
             timeout=60,
