@@ -116,6 +116,40 @@ live on the site, no need to duplicate it in the data.
 
 ## Known open items / things to verify
 
+- **`medium_post_url` backfilled for pre-migration albums — done 2026-09-21,
+  without re-scraping Medium.** Added the field to `db.export_from_db()`'s
+  JSON output (previously stored in the DB but never exposed) so the admin
+  Reddit/Bluesky share tools (`admin.html`) could append a link back to the
+  original post — surfaced that only 182/648 albums actually had it set.
+  Root cause: the field has existed in `schema.sql` since the very first
+  commit, but the old flat-JSON store this project migrated from
+  (`migrate_json_to_sqlite.py`) never recorded it at all (confirmed by
+  reading that file's content from git history right before the migration
+  commit — no `medium_post_url` key in any of the 621 entries) — every
+  album that existed at migration time got `NULL`, populated only for
+  albums touched since (new inserts, or the rare existing album that
+  happened to get individually re-scraped for something else, e.g. the
+  blockquote fix above). Recovered the rest **purely by parsing the 84
+  processed posts' own URL slugs** (`title-1001-albums-#-start-end-year`)
+  against catalog numbers already in the DB — no network fetch needed.
+  Slug numbers aren't fully reliable alone: a handful of posts have a
+  garbled end number (`57-56`, `310-308`, `560-666` instead of `560-566`)
+  or, in one case (post 41), a garbled *start* that put it out of
+  chronological order. Resolved by walking posts in true chronological
+  order and, wherever two adjacent posts' declared ranges conflict or a
+  declared end is reversed, trusting the later post's start and
+  recomputing the earlier post's end from it (Ed's call — the end number is
+  the one that's typo'd almost every time), plus elimination for the two
+  posts whose slug carries no usable numbers at all (post 1's "1001-995" is
+  a joke, not a real range; post 6's slug has none). Applied to both DBs
+  via the same single-row-correction SQL recipe as prior one-off fixes (see
+  the Coolify playbook) — production turned out to have a *wider* gap than
+  local (several clusters whose text had been hand-patched to prod before
+  without also carrying `medium_post_url`), closed using the values already
+  resolved locally rather than re-deriving them. Only **#27 (Everly
+  Brothers) and #28 (Jimmy Smith)** remain `NULL` on both DBs — a genuine
+  gap between two posts with no overlap or typo pattern to exploit, left
+  unresolved rather than guessed.
 - **Blockquote paragraphs (`BQ` type) were silently dropped by the scraper
   entirely — found and fixed 2026-09-17.** `parse_medium_post()`'s paragraph
   loop only matched `P`/`IMG`/`IFRAME`/`MIXTAPE_EMBED`; a Medium blockquote
