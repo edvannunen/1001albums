@@ -870,6 +870,7 @@
     if(spotifyUrl) bodyHtml += '<br>' + escapeHtml(spotifyUrl);
     bodyHtml += '<br><br>' + text;
     bodyHtml += '<br><br>English version can be found here: ' + escapeHtml(englishLink);
+    if(album.medium_post_url) bodyHtml += '<br><br>Original Medium post: ' + escapeHtml(album.medium_post_url);
 
     if(youtubeClips.length){
       bodyHtml += '<br><br>-----';
@@ -929,6 +930,7 @@
 
     if(spotifyUrl) bodyHtml += '<br><br>Album on Spotify: ' + escapeHtml(spotifyUrl);
     bodyHtml += '<br><br>See also: ' + escapeHtml(SITE_URL + '/?album=' + albumSlug(album) + '&lang=en');
+    if(album.medium_post_url) bodyHtml += '<br>Original Medium post: ' + escapeHtml(album.medium_post_url);
 
     outputReddit.innerHTML = bodyHtml;
     redditBodyHtml = bodyHtml;

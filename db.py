@@ -303,6 +303,7 @@ def export_from_db(conn: sqlite3.Connection | None = None) -> list:
             "year": str(a["year"]),
             "text": a["text"],
             "text_en": a["text_en"],
+            "medium_post_url": a["medium_post_url"],
             "media": media_by_album.get(a["id"], []),
             "musicbrainz": musicbrainz,
             "spotify": spotify,
