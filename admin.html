@@ -416,6 +416,19 @@
   const SITE_URL = "https://bier-en-brood.nl/1001albums";
 
   // ---------------------------------------------------------------------
+  // Tiny cookie helpers — used to remember the last catalog # looked up
+  // per share tool, so reopening Reddit/Bluesky prefills it instead of
+  // starting blank every time.
+  // ---------------------------------------------------------------------
+  function setCookie(name, value){
+    document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;max-age=31536000;SameSite=Lax';
+  }
+  function getCookie(name){
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  // ---------------------------------------------------------------------
   // Sidebar navigation — one section visible at a time, deep-linkable via
   // location.hash so a bookmark/refresh can land straight on e.g. #reddit.
   // ---------------------------------------------------------------------
@@ -1003,6 +1016,7 @@
 
     const album = await loadAlbumByNumber(number, statusBlueskyEl);
     if(!album) return;
+    setCookie('lastAlbumNumberBluesky', number);
 
     const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
     const imageClips = (album.media || []).filter(m => m.type === 'image');
@@ -1020,6 +1034,7 @@
 
     const album = await loadAlbumByNumber(number, statusRedditEl);
     if(!album) return;
+    setCookie('lastAlbumNumberReddit', number);
 
     const youtubeClips = (album.media || []).filter(m => m.type === 'youtube');
     const imageClips = (album.media || []).filter(m => m.type === 'image');
@@ -1071,10 +1086,12 @@
   loadBtnBluesky.addEventListener('click', loadBluesky);
   numberInputBluesky.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadBluesky(); });
   copyTextBluesky.addEventListener('click', (ev) => copyToClipboard(blueskyPlainText, ev.target));
+  numberInputBluesky.value = getCookie('lastAlbumNumberBluesky') || '';
 
   loadBtnReddit.addEventListener('click', loadReddit);
   numberInputReddit.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadReddit(); });
   copyTextReddit.addEventListener('click', (ev) => copyRichToClipboard(redditBodyHtml, redditPlainText, ev.target));
+  numberInputReddit.value = getCookie('lastAlbumNumberReddit') || '';
 
   loadSignalBtn.addEventListener('click', loadSignal);
   mediumUrlInput.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') loadSignal(); });
