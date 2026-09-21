@@ -15,8 +15,8 @@ CREATE TABLE albums (
   text_en                       TEXT,   -- English translation of `text`, filled in by
                                          -- translate.py; NULL until translated
   medium_post_url               TEXT,   -- backfilled 2026-09-21 for pre-migration albums by
-                                         -- parsing post URL slugs (see CLAUDE.md); NULL only
-                                         -- for #27/#28, a genuine unresolved gap
+                                         -- parsing post URL slugs (see CLAUDE.md); every album
+                                         -- now has this set
   spotify_url                   TEXT,
   spotify_embed_url             TEXT,
   spotify_cover_art_url         TEXT,

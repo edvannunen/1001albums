@@ -146,10 +146,13 @@ live on the site, no need to duplicate it in the data.
   the Coolify playbook) — production turned out to have a *wider* gap than
   local (several clusters whose text had been hand-patched to prod before
   without also carrying `medium_post_url`), closed using the values already
-  resolved locally rather than re-deriving them. Only **#27 (Everly
-  Brothers) and #28 (Jimmy Smith)** remain `NULL` on both DBs — a genuine
-  gap between two posts with no overlap or typo pattern to exploit, left
-  unresolved rather than guessed.
+  resolved locally rather than re-deriving them. The only pair the slug
+  method couldn't place — **#27 (Everly Brothers) and #28 (Jimmy Smith)** —
+  turned out to genuinely belong to post 4 (`.../1001-albums-4-21-26-...`)
+  despite its own slug declaring "21-26": Ed confirmed by hand that the
+  post's actual title/range is wrong and it really covers through #28.
+  Fixed directly (both DBs) once confirmed. All 648 albums now have
+  `medium_post_url` set.
 - **Blockquote paragraphs (`BQ` type) were silently dropped by the scraper
   entirely — found and fixed 2026-09-17.** `parse_medium_post()`'s paragraph
   loop only matched `P`/`IMG`/`IFRAME`/`MIXTAPE_EMBED`; a Medium blockquote
