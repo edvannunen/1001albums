@@ -47,6 +47,7 @@ import difflib
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 import requests
+from curl_cffi import requests as cffi_requests
 from dotenv import load_dotenv
 
 from db import get_connection, find_album_id, insert_album, update_album_text_media, \
@@ -135,8 +136,13 @@ def fetch_medium_post_state(post_url: str) -> dict:
     Spotify) to their real, playable URL for every post regardless of age —
     unlike the old `thumbnailUrl`/`externalSrc` fields, which only worked for
     recently-created posts and left older posts' embeds unresolvable.
+
+    Fetched via curl_cffi with Chrome TLS impersonation, not plain `requests`:
+    as of 2026-10 Cloudflare challenges `requests`' TLS fingerprint even from
+    a residential IP, regardless of User-Agent (403, `cf-mitigated:
+    challenge`), while a Chrome-fingerprinted handshake passes cleanly.
     """
-    resp = requests.get(post_url, headers={"User-Agent": USER_AGENT}, timeout=15)
+    resp = cffi_requests.get(post_url, impersonate="chrome", timeout=20)
     resp.raise_for_status()
     resp.encoding = "utf-8"  # Content-Type declares utf-8; pin it rather than
     # trust requests' encoding sniffing, which mangled apostrophes/quotes in

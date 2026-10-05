@@ -213,6 +213,11 @@ live on the site, no need to duplicate it in the data.
   (`window.IS_LOCAL`), the same section also shows a second "Scrape
   locally & push to production" button that does the same relay over
   HTTP instead of the CLI script.
+  **Update 2026-10-05:** the challenge then started hitting Ed's residential
+  IP too — Cloudflare was fingerprinting plain `requests`' TLS handshake, not
+  just the IP/User-Agent. `fetch_medium_post_state()` now uses `curl_cffi`
+  with `impersonate="chrome"`, which passes cleanly from home (untested
+  whether that alone also unblocks the production server's datacenter IP).
 - **`?format=json` is dead — Medium/Cloudflare now ignores that query
   param entirely** (confirmed 2026-07: `CF-Cache-Status: HIT` on every
   request regardless of cache-busting params; a plain server-rendered HTML
