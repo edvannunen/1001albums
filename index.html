@@ -143,6 +143,16 @@
             <button class="modal-nav-btn" id="modalNavPrev" data-i18n-aria="modal_prev_aria" aria-label="Vorig album">&#10094;</button>
             <button class="modal-nav-btn" id="modalNavNext" data-i18n-aria="modal_next_aria" aria-label="Volgend album">&#10095;</button>
           </div>
+          <div class="lang-switch lang-switch-modal">
+            <button class="lang-current" aria-haspopup="listbox" aria-expanded="false" data-i18n-aria="lang_switch_aria" aria-label="Taal wijzigen">
+              <img class="lang-flag" src="https://flagcdn.com/nl.svg" alt="">
+              <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="lang-menu hidden" role="listbox">
+              <li role="option" data-lang="nl"><img class="lang-flag" src="https://flagcdn.com/nl.svg" alt="">Nederlands</li>
+              <li role="option" data-lang="en"><img class="lang-flag" src="https://flagcdn.com/gb.svg" alt="">English</li>
+            </ul>
+          </div>
         </div>
         <h2 id="modalArtist"></h2>
         <div class="modal-album" id="modalAlbum"></div>

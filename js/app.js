@@ -15,16 +15,25 @@ function updateAuthUI(){
   link.href = loggedIn ? "admin/logout" : "admin/login";
 }
 
+// There's more than one language switch (page header + album modal) — they
+// all share these handlers and always show the same, page-wide language.
 function updateLangFlagIcon(){
-  document.getElementById("langCurrentFlag").src =
-    state.lang === "en" ? "https://flagcdn.com/gb.svg" : "https://flagcdn.com/nl.svg";
+  const src = state.lang === "en" ? "https://flagcdn.com/gb.svg" : "https://flagcdn.com/nl.svg";
+  document.querySelectorAll(".lang-current .lang-flag").forEach(img => { img.src = src; });
+}
+
+function closeLangMenus(except){
+  document.querySelectorAll(".lang-switch").forEach(sw=>{
+    if(sw === except) return;
+    sw.querySelector(".lang-menu").classList.add("hidden");
+    sw.querySelector(".lang-current").setAttribute("aria-expanded", "false");
+  });
 }
 
 function selectLang(lang){
   setLang(lang);
   updateLangFlagIcon();
-  document.getElementById("langMenu").classList.add("hidden");
-  document.getElementById("langCurrent").setAttribute("aria-expanded", "false");
+  closeLangMenus();
   applyStaticStrings();
 
   const params = new URLSearchParams(location.search);
@@ -104,21 +113,22 @@ function wireEvents(){
   document.getElementById("modalNavNext").addEventListener("click", showModalNext);
   document.getElementById("modalShare").addEventListener("click", shareCurrentAlbum);
 
-  document.getElementById("langCurrent").addEventListener("click", (e)=>{
-    e.stopPropagation();
-    const menu = document.getElementById("langMenu");
-    const willOpen = menu.classList.contains("hidden");
-    menu.classList.toggle("hidden", !willOpen);
-    document.getElementById("langCurrent").setAttribute("aria-expanded", String(willOpen));
-  });
-  document.querySelectorAll("#langMenu li").forEach(li=>{
-    li.addEventListener("click", ()=> selectLang(li.dataset.lang));
+  document.querySelectorAll(".lang-switch").forEach(sw=>{
+    const btn = sw.querySelector(".lang-current");
+    const menu = sw.querySelector(".lang-menu");
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      closeLangMenus(sw);
+      const willOpen = menu.classList.contains("hidden");
+      menu.classList.toggle("hidden", !willOpen);
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+    menu.querySelectorAll("li").forEach(li=>{
+      li.addEventListener("click", ()=> selectLang(li.dataset.lang));
+    });
   });
   document.addEventListener("click", (e)=>{
-    if(!document.getElementById("langSwitch").contains(e.target)){
-      document.getElementById("langMenu").classList.add("hidden");
-      document.getElementById("langCurrent").setAttribute("aria-expanded", "false");
-    }
+    if(!e.target.closest(".lang-switch")) closeLangMenus();
   });
 
   document.getElementById("infoBtn").addEventListener("click", ()=>{

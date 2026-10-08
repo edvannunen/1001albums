@@ -542,6 +542,7 @@ td.artist-cell:hover{color:var(--mustard);text-decoration:underline;}
 }
 .modal-nav-btn:hover:not(:disabled){background:var(--mustard);color:var(--bg);}
 .modal-nav-btn:disabled{opacity:0.3;cursor:default;}
+.lang-switch-modal .lang-current{margin-top:0;height:28px;padding:0 8px;}
 .modal-title-block h2{margin:4px 0 2px;font-size:1.6rem;}
 .modal-title-block .modal-album{color:var(--ink-dim);font-style:italic;margin-bottom:8px;}
 .modal-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
