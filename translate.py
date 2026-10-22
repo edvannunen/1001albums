@@ -99,17 +99,25 @@ RESPONSE_SCHEMA = {
 # enrich_1001_albums.py. A 429 (daily free-tier quota) is NOT retried here —
 # that's a quota exhaustion, not a transient blip, and callers (e.g.
 # retranslate_range.py) handle it by stopping the whole run cleanly instead.
-# Backoff is exponential (5, 10, 20, 40, 80, 160s — ~5 min total): the
-# original linear 5/10/15/20s (~50s) still lost a whole post's translation
-# stage to one longer overload spell (post #80, 2026-10-22).
+# Backoff is exponential, capped per wait (5, 10, 20, 40, 45, 45s — ~3 min
+# total): the original linear 5/10/15/20s (~50s) still lost a whole post's
+# translation stage to one longer overload spell (post #80, 2026-10-22). The
+# cap matters: relay_add_post.py's read timeout is 120s between SSE messages,
+# and each retry emits a progress line, so one wait + one request (timeout
+# 60s) must fit inside that — an uncapped 160s wait killed the relay.
 MAX_RETRIES = 6
 RETRY_BACKOFF = 5
+MAX_RETRY_WAIT = 45
 
 
-def translate_album_content(artist: str, album: str, text: str, captions: list[str]) -> tuple[str, list[str]]:
+def translate_album_content(
+    artist: str, album: str, text: str, captions: list[str], on_progress=None
+) -> tuple[str, list[str]]:
     """One Gemini API call per album: translates the review text and every
     caption together. Returns (text_en, captions_en) — captions_en is the
-    same length/order as the input `captions` list."""
+    same length/order as the input `captions` list. `on_progress`, if given,
+    is told about each 503 retry, which keeps the admin relay's SSE stream
+    from going silent long enough to time out."""
     # Explicit START/END delimiters, not just "N. text" — a caption that
     # itself contains embedded newlines (confirmed: Spotify embed captions
     # are "Title\nListen to ... on Spotify.\nopen.spotify.com" all in one
@@ -157,7 +165,10 @@ def translate_album_content(artist: str, album: str, text: str, captions: list[s
             timeout=60,
         )
         if response.status_code == 503 and attempt < MAX_RETRIES:
-            time.sleep(RETRY_BACKOFF * 2 ** attempt)
+            wait = min(RETRY_BACKOFF * 2 ** attempt, MAX_RETRY_WAIT)
+            if on_progress:
+                on_progress(f"    Gemini 503 (overloaded), retry {attempt + 1}/{MAX_RETRIES} in {wait}s")
+            time.sleep(wait)
             continue
         break
     response.raise_for_status()
@@ -194,7 +205,9 @@ def translate_missing(conn: sqlite3.Connection, verbose: bool = True, on_progres
         caption_rows = [m for m in media_rows if m["caption"] is not None]
         captions = [m["caption"] for m in caption_rows]
 
-        text_en, captions_en = translate_album_content(a["artist"], a["album"], a["text"], captions)
+        text_en, captions_en = translate_album_content(
+            a["artist"], a["album"], a["text"], captions, on_progress=on_progress
+        )
 
         conn.execute("UPDATE albums SET text_en = ? WHERE id = ?", (text_en, a["id"]))
         for m, caption_en in zip(caption_rows, captions_en):
