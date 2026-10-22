@@ -99,7 +99,10 @@ RESPONSE_SCHEMA = {
 # enrich_1001_albums.py. A 429 (daily free-tier quota) is NOT retried here —
 # that's a quota exhaustion, not a transient blip, and callers (e.g.
 # retranslate_range.py) handle it by stopping the whole run cleanly instead.
-MAX_RETRIES = 4
+# Backoff is exponential (5, 10, 20, 40, 80, 160s — ~5 min total): the
+# original linear 5/10/15/20s (~50s) still lost a whole post's translation
+# stage to one longer overload spell (post #80, 2026-10-22).
+MAX_RETRIES = 6
 RETRY_BACKOFF = 5
 
 
@@ -154,7 +157,7 @@ def translate_album_content(artist: str, album: str, text: str, captions: list[s
             timeout=60,
         )
         if response.status_code == 503 and attempt < MAX_RETRIES:
-            time.sleep(RETRY_BACKOFF * (attempt + 1))
+            time.sleep(RETRY_BACKOFF * 2 ** attempt)
             continue
         break
     response.raise_for_status()

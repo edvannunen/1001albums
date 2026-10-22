@@ -482,6 +482,16 @@ def strip_reissue_suffix(name: str) -> str:
 ALBUM_SIM_THRESHOLD = 0.65
 
 
+def is_title_prefix_match(candidate: str, album: str) -> bool:
+    """True if the candidate name is the catalogued title plus extra trailing
+    material after a word boundary — e.g. Fugazi's "Repeater" is only on
+    Spotify as "Repeater + 3 Songs" (album_sim 0.615, wrongly rejected by
+    ALBUM_SIM_THRESHOLD alone). Only used to rescue the `confident` flag, not
+    in scoring, so a plain exact-title candidate still outranks it."""
+    c, a = candidate.lower().strip(), album.lower().strip()
+    return c.startswith(a) and len(c) > len(a) and not c[len(a)].isalnum()
+
+
 def get_spotify_token() -> str:
     auth = base64.b64encode(
         f"{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}".encode()
@@ -596,7 +606,8 @@ def spotify_search_album(token: str, artist: str, album: str, year: str) -> dict
         "matched_release_year": year_of(best),
         "exact_year_match": year_of(best) == target_year,
         "album_similarity": round(best_album_sim, 3),
-        "confident": best_album_sim >= ALBUM_SIM_THRESHOLD,
+        "confident": best_album_sim >= ALBUM_SIM_THRESHOLD
+        or (best_artist_sim >= 0.8 and is_title_prefix_match(best.get("name", ""), album)),
     }
 
 
