@@ -75,6 +75,8 @@ Auth: HTTP Basic, single shared username/password from .env
 """
 
 import csv
+import hashlib
+import hmac
 import html
 import json
 import os
@@ -82,6 +84,7 @@ import queue
 import re
 import secrets
 import threading
+import time
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
@@ -110,20 +113,71 @@ ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
 BASE_PATH = os.environ.get("BASE_PATH", "")  # e.g. "/1001albums" in Coolify
 
 app = FastAPI()
-security = HTTPBasic()
+# auto_error=False so a request carrying a valid session cookie (below) but
+# no Basic header isn't rejected before require_admin gets to check it.
+security = HTTPBasic(auto_error=False)
+
+# Browsers only cache Basic-auth credentials until they're closed, so on its
+# own Basic auth meant re-typing the password every browser session. A
+# successful Basic login now also sets `admin_session`, an HMAC-signed
+# expiry timestamp keyed on ADMIN_PASSWORD (changing the password
+# invalidates every outstanding cookie). HttpOnly + SameSite=Lax, so it
+# isn't readable from JS and isn't sent on cross-site POSTs.
+SESSION_COOKIE = "admin_session"
+SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
 
-def require_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
-    # compare_digest avoids leaking match-length via response timing
-    valid_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
-    valid_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
-    if not (valid_username and valid_password):
-        raise HTTPException(
-            status_code=401,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
+def _sign_session(expires: int) -> str:
+    mac = hmac.new(ADMIN_PASSWORD.encode(), str(expires).encode(), hashlib.sha256)
+    return f"{expires}.{mac.hexdigest()}"
+
+
+def _valid_session(token: str | None) -> bool:
+    if not token or "." not in token:
+        return False
+    expires, _, _sig = token.partition(".")
+    if not expires.isdigit() or int(expires) < time.time():
+        return False
+    return secrets.compare_digest(token, _sign_session(int(expires)))
+
+
+def require_admin(
+    request: Request, credentials: HTTPBasicCredentials | None = Depends(security)
+) -> str:
+    if credentials is not None:
+        # compare_digest avoids leaking match-length via response timing
+        valid_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
+        valid_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+        if valid_username and valid_password:
+            if not _valid_session(request.cookies.get(SESSION_COOKIE)):
+                request.state.issue_admin_session = True
+            return credentials.username
+    elif _valid_session(request.cookies.get(SESSION_COOKIE)):
+        return ADMIN_USERNAME
+    raise HTTPException(
+        status_code=401,
+        detail="Incorrect username or password",
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+@app.middleware("http")
+async def issue_admin_session(request: Request, call_next):
+    """Sets the session cookie after require_admin flags a fresh Basic login.
+    Done here rather than via a dependency `Response` param because most
+    admin routes return their own Response objects (HTML, SSE streams),
+    which FastAPI doesn't merge dependency-set headers into."""
+    response = await call_next(request)
+    if getattr(request.state, "issue_admin_session", False):
+        response.set_cookie(
+            SESSION_COOKIE,
+            _sign_session(int(time.time()) + SESSION_MAX_AGE),
+            max_age=SESSION_MAX_AGE,
+            httponly=True,
+            secure=bool(BASE_PATH),  # https in production; plain http locally
+            samesite="lax",
         )
-    return credentials.username
+    return response
 
 
 @app.get("/albums_enriched.json")
@@ -149,12 +203,13 @@ def admin_login(_: str = Depends(require_admin)):
 
 @app.get("/admin/logout")
 def admin_logout():
-    """Clears the UI-flag cookie. Can't force the browser to forget its
-    cached Basic-auth credentials (no API for that) — closing the browser
-    is the only real "full" logout, same pre-existing limitation as the
-    rest of this single-user admin area."""
+    """Clears the UI-flag and session cookies. Can't force the browser to
+    forget its cached Basic-auth credentials (no API for that) — closing
+    the browser is still needed for a "full" logout within the current
+    browser session."""
     resp = RedirectResponse(url=f"{BASE_PATH}/")
     resp.delete_cookie("admin_ui")
+    resp.delete_cookie(SESSION_COOKIE)
     return resp
 
 
